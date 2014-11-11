@@ -1,13 +1,13 @@
-/*  
+/*
    INDELible V1.03
     "A comprehensive and flexible simulator of molecular sequence evolution"
     Copyright (C) 2009 William Fletcher
 
     If using this software please cite the following reference:
 
-    Fletcher, W. and Yang, Z. 2009. 
-	"INDELible: a flexible simulator of biological sequence evolution." 
-	Mol. Biol. and Evol. (in press). 
+    Fletcher, W. and Yang, Z. 2009.
+	"INDELible: a flexible simulator of biological sequence evolution."
+	Mol. Biol. and Evol. (in press).
 
     If you need to contact me with any queries, questions, problems or (god-forbid) bugs
     then please go to http://abacus.gene.ucl.ac.uk/software/indelible/bug.php
@@ -40,7 +40,7 @@ using namespace std;
 
 
 
-/*  
+/*
   //script to calculate discrete M3 values for M4 to M13
 
 	 5  gamma         2:    alpha, beta
@@ -63,7 +63,7 @@ using namespace std;
 	// code below is to do with codon models discrete rates... used by scipting function to set up M3
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-				
+
 const int NSnneutral=1;
 const int NSpselection=2;
 const int NSdiscrete=3;
@@ -96,7 +96,7 @@ void error2 (char * message)
 					#define FPN(file) fputc('\n', file)
 				#define F0 stdout
 
-	
+
 				double LnGamma (double alpha);
 				double IncompleteGamma (double x, double alpha, double ln_gamma_alpha);
 
@@ -112,7 +112,7 @@ void error2 (char * message)
 				   char *siteID;    /* used if ncatG>1 */
 				   double *siterates, omega_fix;   /* rates for gamma or omega for site or branch-site models */
 				   double *omegaBS, *QfactorBS;     /* omega IDs for branch-site models */
-				}  com;			
+				}  com;
 
 
 
@@ -120,8 +120,8 @@ double CDFNormal (double x)
 {
 //  Hill ID  (1973)  The normal integral.  Applied Statistics, 22:424-427.
 //    Algorithm AS 66.
-//    adapted by Z. Yang, March 1994.  Hill's routine is quite bad, and I 
-//    haven't consulted 
+//    adapted by Z. Yang, March 1994.  Hill's routine is quite bad, and I
+//    haven't consulted
 //      Adams AG  (1969)  Algorithm 39.  Areas under the normal curve.
 //      Computer J. 12: 197-198.
 
@@ -130,12 +130,12 @@ double CDFNormal (double x)
 
     if (x<0) {  invers=1;  x*=-1; }
     if (x>limit)  return (invers?0:1);
-    if (x<1.28)  
+    if (x<1.28)
        p = .5 - x * (    .398942280444 - .399903438504 * y
                    /(y + 5.75885480458 - 29.8213557808
 		   /(y + 2.62433121679 + 48.6959930692
 		   /(y + 5.92885724438))));
-    else 
+    else
        p = 0.398942280385 * exp(-y) /
            (x - 3.8052e-8 + 1.00000615302 /
            (x + 3.98064794e-4 + 1.98615381364 /
@@ -149,11 +149,11 @@ double CDFNormal (double x)
 
 				double LnGamma (double alpha)
 				{
-				// returns ln(gamma(alpha)) for alpha>0, accurate to 10 decimal places.  
+				// returns ln(gamma(alpha)) for alpha>0, accurate to 10 decimal places.
 				// Stirling's formula is used for the central polynomial part of the procedure.
 				// Pike MC & Hill ID (1966) Algorithm 291: Logarithm of the gamma function.
 				// Communications of the Association for Computing Machinery, 9:684
-				
+
 				   double x=alpha, f=0, z;
 
 				   if (x<7) {
@@ -162,15 +162,15 @@ double CDFNormal (double x)
 					  x=z;   f=-log(f);
 				   }
 				   z = 1/(x*x);
-				   return  f + (x-0.5)*log(x) - x + .918938533204673 
+				   return  f + (x-0.5)*log(x) - x + .918938533204673
 					  + (((-.000595238095238*z+.000793650793651)*z-.002777777777778)*z
-						   +.083333333333333)/x;  
+						   +.083333333333333)/x;
 				}
 
 
 double LnGammaFunction (double alpha)
 {
-/* returns ln(gamma(alpha)) for alpha>0, accurate to 10 decimal places.  
+/* returns ln(gamma(alpha)) for alpha>0, accurate to 10 decimal places.
    Stirling's formula is used for the central polynomial part of the procedure.
    Pike MC & Hill ID (1966) Algorithm 291: Logarithm of the gamma function.
    Communications of the Association for Computing Machinery, 9:684
@@ -183,9 +183,9 @@ double LnGammaFunction (double alpha)
        x=z;   f=-log(f);
    }
    z = 1/(x*x);
-   return  f + (x-0.5)*log(x) - x + .918938533204673 
+   return  f + (x-0.5)*log(x) - x + .918938533204673
           + (((-.000595238095238*z+.000793650793651)*z-.002777777777778)*z
-               +.083333333333333)/x;  
+               +.083333333333333)/x;
 }
 
 
@@ -193,7 +193,7 @@ double LnGammaFunction (double alpha)
 
 				double IncompleteGamma (double x, double alpha, double ln_gamma_alpha)
 				{
-				/* returns the incomplete gamma ratio I(x,alpha) where x is the upper 
+				/* returns the incomplete gamma ratio I(x,alpha) where x is the upper
 					   limit of the integration and alpha is the shape parameter.
 				   returns (-1) if in error
 				   ln_gamma_alpha = ln(Gamma(alpha)), is almost redundant.
@@ -211,7 +211,7 @@ double LnGammaFunction (double alpha)
 				   if (x==0) return (0);
 				   if (x<0 || p<=0) return (-1);
 
-				   factor=exp(p*log(x)-x-g);   
+				   factor=exp(p*log(x)-x-g);
 				   if (x>1 && x>=p) goto l30;
 				   /* (1) series expansion */
 				   gin=1;  term=1;  rn=p;
@@ -262,7 +262,7 @@ double LnGammaFunction (double alpha)
 				   Newer methods:
 					 Wichura MJ (1988) Algorithm AS 241: the percentage points of the
 					   normal distribution.  37: 477-484.
-					 Beasley JD & Springer SG  (1977).  Algorithm AS 111: the percentage 
+					 Beasley JD & Springer SG  (1977).  Algorithm AS 111: the percentage
 					   points of the normal distribution.  26: 118-121.
 
 				*/
@@ -274,7 +274,7 @@ double LnGammaFunction (double alpha)
 				   p1 = (p<0.5 ? p : 1-p);
 				   if (p1<1e-20) return (-9999);
 
-				   y = sqrt (log(1/(p1*p1)));   
+				   y = sqrt (log(1/(p1*p1)));
 				   z = y + ((((y*a4+a3)*y+a2)*y+a1)*y+a0) / ((((y*b4+b3)*y+b2)*y+b1)*y+b0);
 				   return (p<0.5 ? -z : z);
 				}
@@ -285,7 +285,7 @@ double LnGammaFunction (double alpha)
 				/* returns z so that Prob{x<z}=prob where x is Chi2 distributed with df=v
 				   returns -1 if in error.   0.000002<prob<0.999998
 				   RATNEST FORTRAN by
-					   Best DJ & Roberts DE (1975) The percentage points of the 
+					   Best DJ & Roberts DE (1975) The percentage points of the
 					   Chi2 distribution.  Applied Statistics 24: 385-388.  (AS91)
 				   Converted into C by Ziheng Yang, Oct. 1993.
 				*/
@@ -310,8 +310,8 @@ double LnGammaFunction (double alpha)
 				   ch-=(1-exp(a+g+.5*ch+c*aa)*p2/p1)/t;
 				   if (fabs(q/ch-1)-.01 <= 0) goto l4;
 				   else                       goto l2;
-  
-				l3: 
+
+				l3:
 				   x=PointNormal (p);
 				   p1=0.222222/v;   ch=v*pow((x*sqrt(p1)+1-p1), 3.0);
 				   if (ch>2.2*v+6)  ch=-2*(log(1-p)-c*log(.5*ch)+g);
@@ -321,7 +321,7 @@ double LnGammaFunction (double alpha)
 					  return (-1);
 				   }
 				   p2=p-t;
-				   t=p2*exp(xx*aa+g+p1-c*log(ch));   
+				   t=p2*exp(xx*aa+g+p1-c*log(ch));
 				   b=t/ch;  a=0.5*t-b*c;
 
 				   s1=(210+a*(140+a*(105+a*(84+a*(70+60*a))))) / 420;
@@ -345,7 +345,7 @@ double PDFBeta(double x, double p, double q)
 */
    double y, small=1e-20;
 
-   if(x<small || x>1-small) 
+   if(x<small || x>1-small)
       error2("bad x in PDFbeta");
 
    y = (p-1)*log(x) + (q-1)*log(1-x);
@@ -356,7 +356,7 @@ double PDFBeta(double x, double p, double q)
 
 double CDFBeta(double x, double pin, double qin, double lnbeta)
 {
-/* Returns distribution function of the standard form of the beta distribution, 
+/* Returns distribution function of the standard form of the beta distribution,
    that is, the incomplete beta ratio I_x(p,q).
 
    lnbeta is log of the complete beta function; provide it if known,
@@ -375,9 +375,9 @@ double CDFBeta(double x, double pin, double qin, double lnbeta)
 
    if(x<small)        return 0;
    else if(x>1-small) return 1;
-   if(pin<=0 || qin<=0)  { 
-      printf("p=%.4f q=%.4f: parameter outside range in CDFBeta",pin,qin); 
-      return (-1); 
+   if(pin<=0 || qin<=0)  {
+      printf("p=%.4f q=%.4f: parameter outside range in CDFBeta",pin,qin);
+      return (-1);
    }
 
    if (eps == 0) {/* initialize machine constants ONCE */
@@ -471,10 +471,10 @@ double InverseCDFBeta(double prob, double p, double q, double lnbeta)
    Remark AS R19 and Algorithm AS 109, Applied Statistics, 26(1), 111-114.
    Remark AS R83 (v.39, 309-310) and correction (v.40(1) p.236).
 
-   My own implementation of the algorithm did not bracket the variable well.  
-   This version is Adpated from the pbeta and qbeta routines from 
-   "R : A Computer Language for Statistical Data Analysis".  It fails for 
-   extreme values of p and q as well, although it seems better than my 
+   My own implementation of the algorithm did not bracket the variable well.
+   This version is Adpated from the pbeta and qbeta routines from
+   "R : A Computer Language for Statistical Data Analysis".  It fails for
+   extreme values of p and q as well, although it seems better than my
    previous version.
    Ziheng Yang, May 2001
 */
@@ -538,7 +538,7 @@ double InverseCDFBeta(double prob, double p, double q, double lnbeta)
    adj = 1.;
 
 
-   
+
 /* Changes made by Ziheng to fix a bug in qbeta()
    qbeta(0.25, 0.143891, 0.05) = 3e-308   wrong (correct value is 0.457227)
 */
@@ -571,13 +571,13 @@ double InverseCDFBeta(double prob, double p, double q, double lnbeta)
          }
          g /= 3.;
       }
-      if (fabs(tx-xinbta)<fpu) 
+      if (fabs(tx-xinbta)<fpu)
          goto L_converged;
       xinbta = tx;
       yprev = y;
    }
-//   if(!PAML_RELEASE) 
-//    printf("\nInverseCDFBeta(%.2f, %.5f, %.5f) = %.6e\t%d rounds\n", 
+//   if(!PAML_RELEASE)
+//    printf("\nInverseCDFBeta(%.2f, %.5f, %.5f) = %.6e\t%d rounds\n",
 //     prob,p,q, (swap_tail ? 1. - xinbta : xinbta), niterations);
 
    L_converged:
@@ -591,14 +591,14 @@ double InverseCDFBeta(double prob, double p, double q, double lnbeta)
 
 double LineSearch (double(*fun)(double x),double *f,double *x0,double xb[2],double step, double e)
 {
-/* linear search using quadratic interpolation 
+/* linear search using quadratic interpolation
 
    From Wolfe M. A.  1978.  Numerical methods for unconstrained
    optimization: An introduction.  Van Nostrand Reinhold Company, New York.
    pp. 62-73.
    step is used to find the bracket (a1,a2,a3)
 
-   This is the same routine as LineSearch2(), but I have not got time 
+   This is the same routine as LineSearch2(), but I have not got time
    to test and improve it properly.  Ziheng note, September, 2002
 */
    int ii=0, maxround=100, i;
@@ -611,13 +611,13 @@ double LineSearch (double(*fun)(double x),double *f,double *x0,double xb[2],doub
 
    if(step<=0) return(*x0);
    a0=a1=a2=a3=f0=f1=f2=f3=-1;
-   if(*x0<xb[0]||*x0>xb[1]) 
+   if(*x0<xb[0]||*x0>xb[1])
       error2("err LineSearch: x0 out of range");
    f2=f0=fun(a2=a0=*x0);
    step1=min2(step,(a0-xb[0])/4);
    step1=max2(step1,e);
    for(i=0,a1=a0,f1=f0; ; i++) {
-      a1-=(step1*=factor); 
+      a1-=(step1*=factor);
       if(a1>xb[0]) {
          f1=fun(a1);
          if(f1>f2)  break;
@@ -639,11 +639,11 @@ double LineSearch (double(*fun)(double x),double *f,double *x0,double xb[2],doub
    if(i==0) { /* *x0 is the best point during the previous search */
       step1=min2(step,(xb[1]-a0)/4);
       for(i=0,a3=a2,f3=f2; ; i++) {
-         a3+=(step1*=factor); 
+         a3+=(step1*=factor);
          if(a3<xb[1]) {
             f3=fun(a3);
             if(f3>f2)  break;
-            else 
+            else
                { a1=a2; f1=f2; a2=a3; f2=f3; }
          }
          else {
@@ -742,7 +742,7 @@ double diff_InverseCDF(double x);
 
 double diff_InverseCDF(double x)
 {
-// This is the difference between the given p and the CDF(x), the 
+// This is the difference between the given p and the CDF(x), the
 // objective function to be minimized.
 
    double px=(*cdf_InverseCDF)(x,par_InverseCDF);
@@ -773,19 +773,19 @@ double InverseCDF(double(*cdf)(double x,double par[]),
 int matout (FILE *fout, double x[], int n, int m)
 {
    int i,j;
-   for (i=0,FPN(fout); i<n; i++,FPN(fout)) 
+   for (i=0,FPN(fout); i<n; i++,FPN(fout))
       FOR(j,m) fprintf(fout," %11.6f", x[i*m+j]);
    return (0);
 }
 
 double CDFdN_dS(double x,double p[])
 {
-/* This calculates the CDF of the continuous dN/dS distribution over sites, 
+/* This calculates the CDF of the continuous dN/dS distribution over sites,
    to be used as argument to the routine InverseCDF().  When the distribution
    has spikes, the spikes are ignored in this routine, and the scaling
    is done outside this routine, for example, in DiscreteNSsites().
-   All parameters (par) for the w distribution are passed to this routine, 
-   although some (p0 for the spike at 0) are not used in this routine.  
+   All parameters (par) for the w distribution are passed to this routine,
+   although some (p0 for the spike at 0) are not used in this routine.
    Parameters are arranged in the following order:
 
       NSgamma (2):       alpha, beta
@@ -806,7 +806,7 @@ double CDFdN_dS(double x,double p[])
 
    switch(com.NSsites) {
    case(NSgamma):  cdf=CDFGamma(x,p[0],p[1]);   break;
-   case(NS2gamma): 
+   case(NS2gamma):
       cdf=p[0] *CDFGamma(x,p[1],p[2])+(1-p[0])*CDFGamma(x,p[3],p[3]);  break;
    case(NSbeta):   cdf=CDFBeta(x,p[0],p[1],0);  break;
    case(NSbetaw):  cdf=CDFBeta(x,p[1],p[2],0);  break;
@@ -880,11 +880,11 @@ int DiscreteNSsites(vector<double> &params, int &ncatG, int &NSsites, vector<dou
 {
 /* This discretizes the continuous distribution for dN/dS ratios among sites
    and calculates freqK[] and rK[], using the median method.
-   par[] contains all paras in the w distribution.  par[0] is the 
-   proportion of beta if (NSsites==betaw), or the proportion of w=0 if 
+   par[] contains all paras in the w distribution.  par[0] is the
+   proportion of beta if (NSsites==betaw), or the proportion of w=0 if
    (NSsites=NS02normal).
    This routine uses NSsites, ncatG, freqK, rK.
-   betaw has ncatG-1 site classes in the beta distribution, and 02normal 
+   betaw has ncatG-1 site classes in the beta distribution, and 02normal
    has ncatG-1 site classes in the mixed normal distribution.
    See the function CDFdN_dS() for definitions of parameters.
 */
@@ -901,7 +901,7 @@ for( gv=1; gv<params.size(); gv++) cout<<" WEWE "<<par[gv]<<endl;
 cout<<ncatG<<" EWEWE "<<NSsites<<endl;
 	int status=0, j,off, K=ncatG-(NSsites==NSbetaw || NSsites==NS02normal);
 
-double xb[2]={1e-7,99};  // bounds for omega.  
+double xb[2]={1e-7,99};  // bounds for omega.
    int K1=6, K2=4, UseK1K2=0;
    double p01=0, p,w0, lnbeta;
 
@@ -913,7 +913,7 @@ double xb[2]={1e-7,99};  // bounds for omega.
       K2=max2(K2,K/3);  K1=K-K2;  UseK1K2=1;
       p01=CDFdN_dS(1.,par);
 
-      // printf("\nK:%3d%3d\t p01=%9.5f\n",K1,K2,p01); 
+      // printf("\nK:%3d%3d\t p01=%9.5f\n",K1,K2,p01);
       FOR(j,K) {
          if(j<K1) { p=p01*(j*2.+1)/(2.*K1); w0=p; }
          else     { p=p01+(1-p01)*((j-K1)*2.+1)/(2.*K2); w0=1.01+(j-K1)/K2; }
@@ -923,10 +923,10 @@ double xb[2]={1e-7,99};  // bounds for omega.
    }
 #endif
 
-   if(!UseK1K2) { // this is currently used 
+   if(!UseK1K2) { // this is currently used
    cout<<"B"<<endl;
       if(NSsites==NSbeta || NSsites==NSbetaw) {
-         off=(NSsites==NSbetaw);  // par[0] is proportion for beta for M8 
+         off=(NSsites==NSbetaw);  // par[0] is proportion for beta for M8
          lnbeta=LnGamma(par[off])+LnGamma(par[off+1])-LnGamma(par[off]+par[off+1]);
          for(j=0; j<K; j++) {
             p=(j*2.+1)/(2.*K);
@@ -959,7 +959,7 @@ double xb[2]={1e-7,99};  // bounds for omega.
    }
 
    if(NSsites>=NSgamma){
-      if(!status && NSsites==NSbeta) 
+      if(!status && NSsites==NSbeta)
          for(j=1;j<ncatG;j++) if(rK[j]+1e-7<rK[j-1]) status=1;
 
       if(status) {
@@ -973,9 +973,9 @@ double xb[2]={1e-7,99};  // bounds for omega.
    output.clear();
    cout<<"WOWOWOWOW "<<ncatG<<endl;
 
-   for(int jk=0; jk<ncatG; jk++) 
+   for(int jk=0; jk<ncatG; jk++)
    {output.push_back(rK[jk]); cout<<rK[jk]<<" WEGFQEGEG"<<endl;}
-   
+
    return(0);
 }*/
 
@@ -986,18 +986,18 @@ double xb[2]={1e-7,99};  // bounds for omega.
 
 int DiscreteNSsites(double par[], int ngamcat, int model, vector<double> &output, vector<double> &freqs)
 {
-/* 
+/*
 Yang, Z., Nielsen, R., Goldman, N. and Pedersen, A-M. K. (2000) Codon-Substitution Models for Heterogeneous Selection Pressure at Amino Acid Sites. Genetics 155: 431-439 (May 2000)
 
-  
-  
+
+
    This discretizes the continuous distribution for dN/dS ratios among sites
    and calculates freqK[] and rK[], using the median method.
-   par[] contains all paras in the w distribution.  par[0] is the 
-   proportion of beta if (com.NSsites==betaw), or the proportion of w=0 if 
+   par[] contains all paras in the w distribution.  par[0] is the
+   proportion of beta if (com.NSsites==betaw), or the proportion of w=0 if
    (com.NSsites=NS02normal).
    This routine uses com.NSsites, com.ncatG, com.freqK, com.rK.
-   betaw has com.ncatG-1 site classes in the beta distribution, and 02normal 
+   betaw has com.ncatG-1 site classes in the beta distribution, and 02normal
    has com.ncatG-1 site classes in the mixed normal distribution.
    See the function CDFdN_dS() for definitions of parameters.
 */
@@ -1060,7 +1060,7 @@ Yang, Z., Nielsen, R., Goldman, N. and Pedersen, A-M. K. (2000) Codon-Substituti
    }
 
    if(com.NSsites>=NSgamma){
-      if(!status && com.NSsites==NSbeta) 
+      if(!status && com.NSsites==NSbeta)
          for(j=1;j<com.ncatG;j++) if(com.rK[j]+1e-7<com.rK[j-1]) status=1;
 
       if(status) {
@@ -1072,7 +1072,7 @@ Yang, Z., Nielsen, R., Goldman, N. and Pedersen, A-M. K. (2000) Codon-Substituti
    }
 
    for(int i=0; i<ngamcat; i++) output.push_back(com.rK[i]);
- 
+
    for(int pp=0; pp<ngamcat; pp++) freqs.push_back(com.freqK[pp]);
 
    return(0);
@@ -1082,7 +1082,7 @@ Yang, Z., Nielsen, R., Goldman, N. and Pedersen, A-M. K. (2000) Codon-Substituti
 
 
 
-/*  
+/*
   //script to calculate discrete M3 values for M4 to M13
 
 	 5  gamma         2:    alpha, beta
@@ -1108,7 +1108,7 @@ bool itis(string test, string check)
 	{
 		char c1=test[p];
 		bool minitest=false;
-		
+
 		for(int y=0; y<check.size(); y++)
 		{
 			char c2=check[y];
@@ -1142,8 +1142,8 @@ if(modelnumber==4)
 						omega=(yf-1)/mysize;  //omega is 0, 1/3, 2/3. 1
 						//cout<<yf<<" "<<"2 "<<endl;
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-						
-							
+
+
 						//cout<<yf<<" "<<"3"<<endl;
 						sum+=myparams.at(yf);
 						//cout<<yf<<" "<<"4"<<endl;
@@ -1156,19 +1156,19 @@ if(modelnumber==4)
 						//cout<<"BLAH"<<endl;
 						omega=mysize; //omega is 3
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-						
-									
+
+
 						cumfreqs.push_back(1-sum);
 						//cout<<"BLAH "<<1-sum<<" "<<omega<<endl;
 
 					}
 					else cout<<"Error in sum of category frequencies in codon model 4"<<endl;
-				
+
 					double S=0; for(int y1=0; y1<cumfreqs.size(); y1++) S+=(scalefactors.at(y1)*cumfreqs.at(y1));
 					for(int yf0=0; yf0<Qvecs.size(); yf0++)   {d(Qvecs.at(yf0),S); getJvec(S,name,myrates,Qvecs.at(yf0),Jvec,basefreqs); Jvecs.push_back(Jvec); }
 
 				}
-				else 
+				else
 				{
 
 					if(modelnumber==12 || modelnumber==8)
@@ -1177,8 +1177,8 @@ if(modelnumber==4)
 						{
 							omega=0;
 							Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-							
-					 					
+
+
 							cumfreqs.push_back(myparams.at(1));
 							for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back((1-myparams.at(1))/double(ngamcat));
 						}
@@ -1186,24 +1186,24 @@ if(modelnumber==4)
 						{
 							omega=myparams.at(4);
 							Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-							
-							 					
+
+
 							cumfreqs.push_back(1-myparams.at(1));
 							for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back(myparams.at(1)/double(ngamcat));
 						}
 					}
 					else cumfreqs.assign(ngamcat,1/double(ngamcat));
- 
+
 					//for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back(1/ngamcat);
-						
+
 					vector<double> output;
 
 					//double *mypar; mypar=new double[myparams.size()];
-					
+
 					double mypar[10]={0,0,0,0,0,0,0,0,0,0};
 
 					//mypar[0]=0;
-					for(int iu=1; iu<myparams.size(); iu++) {mypar[iu-1]=myparams.at(iu); }  
+					for(int iu=1; iu<myparams.size(); iu++) {mypar[iu-1]=myparams.at(iu); }
 
 					// this function of Ziheng's calculates the discrete rates for different site classes from the model parameters
 
@@ -1213,7 +1213,7 @@ if(modelnumber==4)
 					{
 						omega=output.at(i);
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-											
+
 					}
 
 					double S=0; for(int y1=0; y1<cumfreqs.size(); y1++) S+=(scalefactors.at(y1)*cumfreqs.at(y1));
@@ -1224,9 +1224,9 @@ if(modelnumber==4)
 */
 
 
-	
 
-/*  
+
+/*
   //script to calculate discrete M3 values for M4 to M13
 
 	 5  gamma         2:    alpha, beta
@@ -1312,7 +1312,7 @@ while(true)
 	params.assign(mysize,0);
 
 	for(int pi=0; pi<mysize; pi++)
-	{ 
+	{
 		// get input
 		double temp;
 		string readin;
@@ -1326,59 +1326,59 @@ while(true)
 		string check="0123456789.";
 
 		if( modelnumber==11 && pi==3) check+="-";
-	
+
 		if(  (modelnumber==12 || modelnumber==13) && pi==2) check+="-";
 
 		if(!itis(readin,check))
 		{
 			if(  (modelnumber==12 || modelnumber==13) && pi==2) cout<<endl<<"      ERROR: this parameter must be a real number. Allowed characters are:"<<endl<<"      -.0123456789"<<endl;
-				
+
 			else if( modelnumber==11 && pi==3) cout<<endl<<"      ERROR: this parameter must be a real number. Allowed characters are:"<<endl<<"      -.0123456789"<<endl;
-	
+
 			else  cout<<endl<<"      ERROR: this parameter must be a decimal number. Allowed characters are:"<<endl<<"      .0123456789"<<endl;
 
 			cout<<"     Try again."<<endl<<endl;  pi--; continue;
 		}
 		else temp=atof(readin.c_str());
-			
-		
+
+
 		// check value is not incorrect
 		if(modelnumber==5 || modelnumber==7) { if(temp==0) {cout<<endl<<"      ERROR: this parameter must be greater than zero. Try again."<<endl<<endl; pi--; continue;}}
-		
+
 		else
 		{
 			if(  (modelnumber==12 || modelnumber==13) && pi==2) {}  //mu_2
-				
+
 			else if( modelnumber==11 && pi==3) {}  // mu
 
-			else if( modelnumber==8 && pi==3) {}  // omega 
-	
+			else if( modelnumber==8 && pi==3) {}  // omega
+
 			else
 			{
 
 				if(pi==0) {if(temp>1) {cout<<endl<<"      ERROR: proportion p0 must be between 0 and 1.  You entered "<<temp<<endl<<"      Try again."<<endl<<endl; pi--; continue;}}
 
-				else if(pi==1) 
+				else if(pi==1)
 				{
 					if(modelnumber==12 || modelnumber==13)
 					{
 						if(temp>1) {cout<<endl<<"      ERROR: proportion p1 must be between 0 and 1.  You entered "<<temp<<endl<<"      Try again."<<endl<<endl; pi--; continue;}
-						
+
 						if(temp+params.at(0)>1) {cout<<endl<<"      ERROR: sum of proportions p0 and p1 must be between 0 and 1.\n    You entered "<<temp+params.at(0)<<endl<<"      Try again."<<endl<<endl; pi--; continue;}
 					}
 					else if(temp==0) {cout<<endl<<"      ERROR: this parameter must be greater than zero. Try again."<<endl<<endl; pi--; continue;}
 
 				}
 				else if(temp==0) {cout<<endl<<"      ERROR: this parameter must be greater than zero. Try again."<<endl<<endl; pi--; continue;}
-			}			
+			}
 
 		}
 
-		
+
 		params.at(pi)=temp;
 
 	}
-		
+
 	int ngamcat;  test="";
 
 	cout<<endl<<endl;
@@ -1398,16 +1398,16 @@ while(true)
 		}
 		else cout<<endl<<"    That is not an integer! "<<endl;
 	}
-	
-	
-	
+
+
+
 	cout<<endl<<endl<<"******************************************************"<<endl<<endl;
-	
+
 
 
 	vector<double> output2, cumfreqs, freqs2;
-	for(int iu=0; iu<params.size(); iu++) {mypar[iu]=params.at(iu); }  
-	
+	for(int iu=0; iu<params.size(); iu++) {mypar[iu]=params.at(iu); }
+
 	DiscreteNSsites(mypar, ngamcat, modelnumber, output2, freqs2);
 
 	vector<string> output,freqs; for(int tg=0; tg<ngamcat; tg++)
@@ -1422,14 +1422,14 @@ while(true)
 						if(modelnumber==12)
 						{
 							vector<double> temp=output; output.clear(); output.push_back(0); for(int y=0; y<temp.size(); y++) output.push_back(temp.at(y));
-					 					
+
 							cumfreqs.push_back(params.at(0));
 							for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back((1-params.at(0))/double(ngamcat));
 						}
 						else
 						{
 							vector<double> temp=output; output.clear(); output.push_back(params.at(3)); for(int y=0; y<temp.size(); y++) output.push_back(temp.at(y));
-						 					
+
 							cumfreqs.push_back(1-params.at(0));
 							for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back(params.at(0)/double(ngamcat));
 						}
@@ -1446,40 +1446,40 @@ while(true)
 
 	of1<<"  [submodel]\tkappa  // use your own value for kappa here!"<<endl;
 
-	of1<<"\t\t"; for(int s=0; s<freqs.size(); s++) 
+	of1<<"\t\t"; for(int s=0; s<freqs.size(); s++)
 	{
-		string s1=output.at(s), s2=freqs.at(s); 
+		string s1=output.at(s), s2=freqs.at(s);
 		if(s==freqs.size()-1) s2="";
-		int diff=s1.size()-s2.size();  
+		int diff=s1.size()-s2.size();
 
-		of1<<s2<<" "; 
+		of1<<s2<<" ";
 
 		if(diff>0) for(int fd=0; fd<diff; fd++) of1<<" ";
 	}
 	of1<<"  // proportions"<<endl;
 
-	of1<<"\t\t"; for(int t=0; t<output.size(); t++) 
+	of1<<"\t\t"; for(int t=0; t<output.size(); t++)
 	{
-		string s1=output.at(t), s2=freqs.at(t); 
-		
-		int diff=s2.size()-s1.size();  
+		string s1=output.at(t), s2=freqs.at(t);
 
-		of1<<s1<<" "; 
+		int diff=s2.size()-s1.size();
+
+		of1<<s1<<" ";
 
 		if(diff>0) for(int fd=0; fd<diff; fd++) of1<<" ";
 	}
 	of1<<"  // omega values"<<endl;
-	
 
-	
-	
+
+
+
 
 //	cout<<"              "kappa"<<endl;
 	of1<<endl<<endl<<"/*********************************************/"<<endl<<endl;
 
 
 
-	
+
 	}
 
 
@@ -1500,7 +1500,7 @@ while(true)
 
 
 
-				
+
 
 	return 0;
 }

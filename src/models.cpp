@@ -1,14 +1,14 @@
-/* 
+/*
    INDELible V1.03
     "A comprehensive and flexible simulator of molecular sequence evolution"
     Copyright (C) 2009 William Fletcher
 
     If using this software please cite the following reference:
 
-    Fletcher, W. and Yang, Z. 2009. 
-	"INDELible: a flexible simulator of biological sequence evolution." 
-	Mol. Biol. and Evol. (in press). 
- 
+    Fletcher, W. and Yang, Z. 2009.
+	"INDELible: a flexible simulator of biological sequence evolution."
+	Mol. Biol. and Evol. (in press).
+
     If you need to contact me with any queries, questions, problems or (god-forbid) bugs
     then please go to http://abacus.gene.ucl.ac.uk/software/indelible/bug.php
 
@@ -25,7 +25,7 @@
     Please visit http://www.gnu.org/licenses/ for a full copy of the license.
 */
 
-             
+
 
 #include <sstream>
 #include <string>
@@ -37,7 +37,7 @@
 
 using namespace std;
 
-#pragma warning(disable:4786)	
+#pragma warning(disable:4786)
 
 
 vector<vector<double> > totalusermodels;
@@ -62,7 +62,7 @@ public:
 	{
 		//these settings chosen to cause a crash when indel model parameters not specified.
 		type=r=M=-1;
-		meansize=q=a=b=-1;		
+		meansize=q=a=b=-1;
 	}
 };
 
@@ -75,7 +75,7 @@ int chooseoldzipf(int M, double a, vector<double> &z) {int u; do {u=oldZipf(a);}
 
 	int choosenewNB(int r, double q, vector<double> &z) {return randnegbin(r,q);}
 	int chooseoldNB(int r, double q, vector<double> &z) {return oldrandnegbin(r,q);}
-		
+
 	int userrandomsize(int x, double y, vector<double> &usermodel)
 	{
 		double myrand=mtrand1();
@@ -145,9 +145,9 @@ const char GeneticCodeTable[24][65]={
 	"",
 	// 20 - deleted
 	"",
-	// 21 - The Trematode Mitochondrial Code 
+	// 21 - The Trematode Mitochondrial Code
 	"FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNNKSSSSVVVVAAAADDEEGGGG",
-	// 22 - The Scenedesmus obliquus mitochondrial Code 
+	// 22 - The Scenedesmus obliquus mitochondrial Code
 	"FFLLSS*SYY*LCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
 	// 23 - The Thraustochytrium Mitochondrial Code
 	"FF*LSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
@@ -155,7 +155,7 @@ const char GeneticCodeTable[24][65]={
 
 vector<int> allowedcodes(int gencode)
 {
-	vector<int> allowedlist;  
+	vector<int> allowedlist;
 
 	if(gencode==2 || gencode==6 || gencode ==14 || gencode==22 || gencode==23) allowedlist.push_back(gencode);
 
@@ -173,7 +173,7 @@ vector<int> getstops(int geneticcode)
 {
 	// finds the stops in genetic codes listed above
 
-	vector<int> stops; 
+	vector<int> stops;
 
 	for(int i=0; i<64; i++) if(GeneticCodeTable[geneticcode][i]=='*') stops.push_back(i);
 
@@ -210,7 +210,7 @@ public:
 
 	// parameters for indel model
 	double q1,  q2,  Hx0,  s,  Himax;
-	
+
 	double insD;
 	int insI;
 	vector<double> insV;
@@ -220,11 +220,11 @@ public:
 	vector<double> delV;
 
 	double delmeansize;		// used in formula for total deletion rate
-	
+
 	// pointer for indel size generation
-	int (*delrandomsize)(int, double, vector<double>&) ;  
-	int (*insrandomsize)(int, double, vector<double>&) ;   
-	
+	int (*delrandomsize)(int, double, vector<double>&) ;
+	int (*insrandomsize)(int, double, vector<double>&) ;
+
 	// test function pointers
 	int (*pf)();
 	int (*pf2)(double, int);
@@ -237,7 +237,7 @@ public:
 
 	bool copiedmodel;			// whether the model is copied - defunct?
 	bool codonratestrue;		// whether model has different codon position specific relative rates
-	
+
 //	vector<double> insertrates;
 //	vector<double> deleterates;
 
@@ -248,10 +248,10 @@ public:
 
 	int modelpos;				// position in totalmodels
 	int type;					// nucleotide=1, aminoacid=2, codon=3
-	int error;				
+	int error;
 	int rootlength;				// ?
 	double alpha;				// alpha for gamma models
-	double pinv;			
+	double pinv;
 	int ngamcat;				// number of gamma categories for discrete gamma
 
 	double codonrates[3];		// relative substitution rates for codon positions
@@ -262,7 +262,7 @@ public:
 
 	int medianORmean;			// 1 = use medians, 0 = use means, to represent categories in discrete gamma rate variation
 
-	vector<double> cumfreqs;	// cumulative frequencies for discrete gamma, or codon sites models	
+	vector<double> cumfreqs;	// cumulative frequencies for discrete gamma, or codon sites models
 	vector<double> Rrates;		// relative rates for discrete gamma categories
 	vector<double> myomegas;	// different omegas for different site classes.
 
@@ -284,36 +284,36 @@ public:
 	vector<vector<vector<double> > > Qvecs;	///////   collection of Qvecs from different site classes
 
 	model(int mymodelpos, int &mytype, string &myname, int &mymodelnumber, int &mygeneticcode,
-	bool &mycopiedmodel, double &myinsertrate, double &mydeleterate, double &myalpha, double &mypinv, 
-	int &myngamcat, double mycodonrates[], vector<double> &mybasefreqs, vector<double> &myrootbasefreqs, 
+	bool &mycopiedmodel, double &myinsertrate, double &mydeleterate, double &myalpha, double &mypinv,
+	int &myngamcat, double mycodonrates[], vector<double> &mybasefreqs, vector<double> &myrootbasefreqs,
 	vector<double> &myinsertfreqs, vector<double> &myparams, vector<double> &aamodel, indelmodel &insertmodel,
 	indelmodel &deletemodel)
 	{
-		
-	
+
+
 		// set deletion model
 		delmeansize=deletemodel.meansize;
 
-		if(deletemodel.type == 0 || deletemodel.type == 3 || deletemodel.type == 12 ) 
+		if(deletemodel.type == 0 || deletemodel.type == 3 || deletemodel.type == 12 )
 		{
 			delV=deletemodel.usermodel;
 			delrandomsize=&userrandomsize;
 		}
-		else if(deletemodel.type == 2 || deletemodel.type == 13) 
+		else if(deletemodel.type == 2 || deletemodel.type == 13)
 		{
 			//Zipfian model
 
-			delI=deletemodel.M;   
+			delI=deletemodel.M;
 			delD=deletemodel.a;
-			
-			if(deletemodel.type==2) 
+
+			if(deletemodel.type==2)
 			{
 				double v=1, q=delD;
-	
+
 				q1=1-q; q2=1/q1;
-	
+
 				Hx0 = H(0.5,q1,q2,v) - exp( log(v) * (-q) );
-	
+
 				s = 1 - H1( H(1.5,q1,q2,v) -exp( log(v+1) * (-q) )  ,q1,q2,v );
 
 				Himax = H( imax + 0.5 ,q1,q2,v);
@@ -322,11 +322,11 @@ public:
 			}
 			else					delrandomsize=&chooseoldzipf;
 		}
-		else if(deletemodel.type == 1 || deletemodel.type == 11) 
+		else if(deletemodel.type == 1 || deletemodel.type == 11)
 		{
 			// Negative Binomial or Geometric
 
-			delI=deletemodel.r; 
+			delI=deletemodel.r;
 			delD=deletemodel.q;
 
 			if(deletemodel.type==1) delrandomsize=&choosenewNB;
@@ -335,27 +335,27 @@ public:
 
 
 		// set insertion model
-		if(insertmodel.type == 0 || insertmodel.type == 3 || insertmodel.type == 12 ) 
+		if(insertmodel.type == 0 || insertmodel.type == 3 || insertmodel.type == 12 )
 		{
 			insV=insertmodel.usermodel;
 
 			insrandomsize=&userrandomsize;
 		}
-		else if(insertmodel.type == 2 || insertmodel.type == 13) 
+		else if(insertmodel.type == 2 || insertmodel.type == 13)
 		{
 			//Zipfian model
 
-			insI=insertmodel.M; 
+			insI=insertmodel.M;
 			insD=insertmodel.a;
 
-			if(insertmodel.type==2) 
+			if(insertmodel.type==2)
 			{
 				double v=1, q=insD;
-	
+
 				q1=1-q; q2=1/q1;
-	
+
 				Hx0 = H(0.5,q1,q2,v) - exp( log(v) * (-q) );
-	
+
 				s = 1 - H1( H(1.5,q1,q2,v) -exp( log(v+1) * (-q) )  ,q1,q2,v );
 
 				Himax = H( imax + 0.5 ,q1,q2,v);
@@ -364,11 +364,11 @@ public:
 			}
 			else					insrandomsize=&chooseoldzipf;
 		}
-		else if(insertmodel.type == 1 || insertmodel.type == 11) 
+		else if(insertmodel.type == 1 || insertmodel.type == 11)
 		{
 			// Negative Binomial or Geometric
 
-			insI=insertmodel.r; 
+			insI=insertmodel.r;
 			insD=insertmodel.q;
 
 			if(insertmodel.type==1) insrandomsize=&choosenewNB;
@@ -377,7 +377,7 @@ public:
 
 
 
-						
+
 
 		continuousgamma=false;
 		numberofsiteclasses=1;
@@ -402,11 +402,11 @@ public:
 		ngamcat=myngamcat;
 
 		medianORmean=0;
-	
+
 		if(type!=3)
 		{
 			// set up discrete gamma and/or pinv --> actual rates are picked in SetSiteRates in main skeleton file.
-			if(alpha>0) 
+			if(alpha>0)
 			{
 				if(ngamcat==0) {Rrates.push_back(1); cumfreqs.push_back(1);  continuousgamma=true;  }
 				else
@@ -418,7 +418,7 @@ public:
 			{
 				if(pinv>0) {Rrates.push_back(0); Rrates.push_back(1/(1-pinv));  cumfreqs.push_back(pinv); cumfreqs.push_back(1); }
 				else {Rrates.push_back(1); cumfreqs.push_back(1); }
-			} 
+			}
 
 			numberofsiteclasses=Rrates.size();
 		}
@@ -434,14 +434,14 @@ public:
 		if(type==1 && !copiedmodel)
 		{
 			// for DNA
-			if(mybasefreqs.empty()) 
+			if(mybasefreqs.empty())
 			{
 				// if base frequencies are empty
-				if(modelnumber%2==1 && modelnumber<16 ) //&& !copiedmodel)  
+				if(modelnumber%2==1 && modelnumber<16 ) //&& !copiedmodel)
 				{
 					//when they shouldn't be give a warning
 					stringstream med; med<<modelnumber; string modelnumberX=med.str();
-					controlerrorprint2("[MODEL]",name,"basefreqs","A model with unequal base frequencies was chosen: model "+modelnumberX+"\nbut you have not specified base frequencies.  They will be equal.",""); 
+					controlerrorprint2("[MODEL]",name,"basefreqs","A model with unequal base frequencies was chosen: model "+modelnumberX+"\nbut you have not specified base frequencies.  They will be equal.","");
 				}
 				// make equal frequencies either way
 				makeequalfreqs(type,basefreqs);
@@ -449,78 +449,78 @@ public:
 			else
 			{
 				// if base frequencies are given
-				if(modelnumber%2==0 && modelnumber<16 ) // && !copiedmodel)  
+				if(modelnumber%2==0 && modelnumber<16 ) // && !copiedmodel)
 				{
 					// on a model that wants equal frequencies
 					// force frequencies to be equal and give warning
 					makeequalfreqs(type,basefreqs);
 					stringstream med; med<<modelnumber; string modelnumberX=med.str();
-					controlerrorprint2("[MODEL]",name,"basefreqs","A model with equal base frequencies was chosen: model "+modelnumberX+"\nbut you have specified base frequencies.  They will be set equal.",""); 
+					controlerrorprint2("[MODEL]",name,"basefreqs","A model with equal base frequencies was chosen: model "+modelnumberX+"\nbut you have specified base frequencies.  They will be set equal.","");
 				}
 				// otherwise set frequencies as given
-				else basefreqs=mybasefreqs;  
+				else basefreqs=mybasefreqs;
 			}
-			
-			
+
+
 		}
 
-		if(type==2 && !mybasefreqs.empty()) basefreqs=mybasefreqs;  // this will force +F models		
+		if(type==2 && !mybasefreqs.empty()) basefreqs=mybasefreqs;  // this will force +F models
 
-		
-		if(type==3) 
+
+		if(type==3)
 		{
 			if(mybasefreqs.empty()) makeequalfreqs(type,basefreqs);			// fequal frequencies
 
 			else if(mybasefreqs.size()==4) basefreqs=fx(mybasefreqs,1);		// f1x4 frequencies
-			
+
 			else if(mybasefreqs.size()==12) basefreqs=fx(mybasefreqs,3);	// f3x4 frequencies
-			
+
 			else if(mybasefreqs.size()==64) 								// fcodon frequencies
 			{
-				basefreqs=mybasefreqs;			
+				basefreqs=mybasefreqs;
 
 				testmyfreqs(basefreqs,"[basefreq]");
 			}
 			else cout<<"INTERNAL ERROR 463"<<endl;
 
 		}
-			
 
-		
-		
+
+
+
 		// these make the correct Q matrix for a given type and model number
-				
+
 		// make Qvec and Jvec for nucleotide models
-		if(type==1) 
+		if(type==1)
 		{
 
 		//	for(int y=0; y<Rrates.size(); y++)
-		//	{ 
+		//	{
 				Qvec=getDNA(name,myparams,basefreqs, modelnumber);   Qvecs.push_back(Qvec);
-				getJvec(0, /*Rrates.at(y)*/name,myrates,Qvec,Jvec,basefreqs); 
-				
+				getJvec(0, /*Rrates.at(y)*/name,myrates,Qvec,Jvec,basefreqs);
+
 				if(Rrates.size()!=0) Jvecs.assign(Rrates.size(),Jvec); else Jvecs.push_back(Jvec);
 
 		//	}
 		}
 
 		// make Qvec and Jvec for amino acid models
-		if(type==2) 
+		if(type==2)
 		{
 		//	for(int y=0; y<Rrates.size(); y++)
-		//	{ 
+		//	{
 				Qvec=getAA( name,myparams,basefreqs, modelnumber, aamodel); Qvecs.push_back(Qvec);
-				
-				getJvec(0,name,myrates,Qvec,Jvec,basefreqs); 
-				
+
+				getJvec(0,name,myrates,Qvec,Jvec,basefreqs);
+
 				if(Rrates.size()!=0) Jvecs.assign(Rrates.size(),Jvec); else Jvecs.push_back(Jvec);
-				
+
 		//	}
 		}
 
-		if(type==3) 
+		if(type==3)
 		{
-			
+
 			/*
 			(*) Codon models for variable dN/dS ratios among sites
 				(com.nrate includes kappa & omega) (see also CDFdN_dS)
@@ -545,7 +545,7 @@ public:
 			   15  M8a:beta&w>=1 4:    p0, p_beta, q_beta, w>=1 estimated
 
 
-			   */		
+			   */
 
 			// CODON MODELS - numbered 0 to 15
 
@@ -558,23 +558,23 @@ public:
 			// 14 and 15 are the empirical codon models ECM : Kosiol, C., Holmes, I. and Goldman, N. (2007) An Empirical Codon Model for Protein Sequence Evolution.  Molecular Biology and Evolution 24(7): 1464-1479.
 
 
-			if(modelnumber==14) 
+			if(modelnumber==14)
 			{
 				Qvec=getECMr();
-				d(Qvec,scalefactors.at(0)); 
-				Qvecs.push_back(Qvec); 
-				getJvec(0,name,myrates,Qvec,Jvec,basefreqs); 
-				Jvecs.push_back(Jvec); 
+				d(Qvec,scalefactors.at(0));
+				Qvecs.push_back(Qvec);
+				getJvec(0,name,myrates,Qvec,Jvec,basefreqs);
+				Jvecs.push_back(Jvec);
 				cumfreqs.push_back(1);
 			}
-			else if(modelnumber==15) 
+			else if(modelnumber==15)
 			{
 				Qvec=getECMu();
 				d(Qvec,scalefactors.at(0));
-				Qvecs.push_back(Qvec); 
-				getJvec(0,name,myrates,Qvec,Jvec,basefreqs); 
-				Jvecs.push_back(Jvec); 
-				cumfreqs.push_back(1); 
+				Qvecs.push_back(Qvec);
+				getJvec(0,name,myrates,Qvec,Jvec,basefreqs);
+				Jvecs.push_back(Jvec);
+				cumfreqs.push_back(1);
 			}
 			else
 			{
@@ -588,15 +588,15 @@ public:
 				{
 					myparams.push_back(1); myparams.push_back(1);
 					controlerrorprint2("[MODEL]",name,"","No kappa/omega have been defined so they have been set equal to 1.","");
-				
+
 				}
 				double kappa=myparams.at(0);
 				double omega;
 
-				if(modelnumber==0) 
+				if(modelnumber==0)
 				{
-					// (Goldman and Yang, 1994)  
-					
+					// (Goldman and Yang, 1994)
+
 					cumfreqs.push_back(1);
 					omega=myparams.at(1);  myomegas.push_back(omega);
 					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega);
@@ -604,9 +604,9 @@ public:
 					Qvecs.push_back(Qvec);
 
 					getJvec(0,name,myrates,Qvec,Jvec,basefreqs);
-					Jvecs.push_back(Jvec); 
+					Jvecs.push_back(Jvec);
 				}
-		
+
 				else if(modelnumber==1)
 				{
 					//cout<<myparams.at(1)<<" 1 1 "<<endl;
@@ -614,7 +614,7 @@ public:
 
 					cumfreqs.push_back(p0);
 					omega=myparams.at(2);   myomegas.push_back(omega);
-					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);					
+					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
 
 					//cout<<1-myparams.at(1)<<" 1 2 "<<endl;
 					cumfreqs.push_back(p1);
@@ -623,15 +623,15 @@ public:
 
 					//double S=(p0*scalefactors.at(0))+(p1*scalefactors.at(1));
 
-					double S=0; for(int y1=0; y1<cumfreqs.size(); y1++) 
+					double S=0; for(int y1=0; y1<cumfreqs.size(); y1++)
 					{
 						//ccout<<endl<<scalefactors.at(y1)<<"  "<<cumfreqs.at(y1)<<"  "<<scalefactors.at(y1)*cumfreqs.at(y1)<<endl;
-					
+
 						S+=(scalefactors.at(y1)*cumfreqs.at(y1));
 					}
-					
-					d(Qvecs.at(0),S); getJvec(S,name,myrates,Qvecs.at(0),Jvec,basefreqs); Jvecs.push_back(Jvec); 					
-					d(Qvecs.at(1),S); getJvec(S,name,myrates,Qvecs.at(1),Jvec,basefreqs); Jvecs.push_back(Jvec); 					
+
+					d(Qvecs.at(0),S); getJvec(S,name,myrates,Qvecs.at(0),Jvec,basefreqs); Jvecs.push_back(Jvec);
+					d(Qvecs.at(1),S); getJvec(S,name,myrates,Qvecs.at(1),Jvec,basefreqs); Jvecs.push_back(Jvec);
 
 				}
 				else if(modelnumber==2)
@@ -644,55 +644,55 @@ public:
 
 					double p0=myparams.at(1), p1=myparams.at(2), p2=1-p0-p1;
 					cumfreqs.push_back(p0);
-					omega=myparams.at(3); //cout<<p0<<"  "<<omega<<endl; 
+					omega=myparams.at(3); //cout<<p0<<"  "<<omega<<endl;
 					myomegas.push_back(omega);
-					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);					
+					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
 
 					cumfreqs.push_back(p1);
 					omega=1;  //cout<<p1<<"  "<<omega<<endl;
  				    myomegas.push_back(omega);
-					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);					
+					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
 
 					cumfreqs.push_back(p2);
 					omega=myparams.at(4); // cout<<p2<<"  "<<omega<<endl;
 				    myomegas.push_back(omega);
 					Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-					
+
 					double S=0; for(int y1=0; y1<cumfreqs.size(); y1++) S+=(scalefactors.at(y1)*cumfreqs.at(y1));
 
-					//for(int t1=0; t1<Qvecs.size(); t1++) {getJvec(S,name,myrates,Qvecs.at(t1),Jvec,basefreqs); Jvecs.push_back(Jvec); 	}	
-					d(Qvecs.at(0),S); getJvec(S,name,myrates,Qvecs.at(0),Jvec,basefreqs); Jvecs.push_back(Jvec); 
-					d(Qvecs.at(1),S); getJvec(S,name,myrates,Qvecs.at(1),Jvec,basefreqs); Jvecs.push_back(Jvec); 
-					d(Qvecs.at(2),S); getJvec(S,name,myrates,Qvecs.at(2),Jvec,basefreqs); Jvecs.push_back(Jvec); 
+					//for(int t1=0; t1<Qvecs.size(); t1++) {getJvec(S,name,myrates,Qvecs.at(t1),Jvec,basefreqs); Jvecs.push_back(Jvec); 	}
+					d(Qvecs.at(0),S); getJvec(S,name,myrates,Qvecs.at(0),Jvec,basefreqs); Jvecs.push_back(Jvec);
+					d(Qvecs.at(1),S); getJvec(S,name,myrates,Qvecs.at(1),Jvec,basefreqs); Jvecs.push_back(Jvec);
+					d(Qvecs.at(2),S); getJvec(S,name,myrates,Qvecs.at(2),Jvec,basefreqs); Jvecs.push_back(Jvec);
 
 				}
 				else if(modelnumber==3)
 				{
 
-					int mybit=myparams.size()/2; 
+					int mybit=myparams.size()/2;
 					double sum=0;
-					for(int yf=1; yf<mybit; yf++)   
+					for(int yf=1; yf<mybit; yf++)
 					{
 						//cout<<yf<<" "<<"1"<<endl;
 						omega=myparams.at(yf+mybit-1);   myomegas.push_back(omega);
 						//cout<<yf<<" "<<"2 "<<myparams.at(yf+mybit-1)<<endl;
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-						
-										
+
+
 						//cout<<yf<<" "<<"3"<<endl;
 						sum+=myparams.at(yf);
 						//cout<<yf<<" "<<"4"<<endl;
 						cumfreqs.push_back(myparams.at(yf));
 						//cout<<yf<<" "<<"5 "<<myparams.at(yf)<<endl;
 					}
-	
+
 					if(sum<=1)
 					{
 						//cout<<"BLAH"<<endl;
 						omega=myparams.at(2*mybit-1);   myomegas.push_back(omega);
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-						
-					 					
+
+
 						cumfreqs.push_back(1-sum);
 						//cout<<"BLAH "<<1-sum<<" "<<omega<<endl;
 					}
@@ -719,8 +719,8 @@ public:
 						omega=(yf-1)/mysize;  //omega is 0, 1/3, 2/3. 1
 						//cout<<yf<<" "<<"2 "<<endl;
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-						
-							
+
+
 						//cout<<yf<<" "<<"3"<<endl;
 						sum+=myparams.at(yf);
 						//cout<<yf<<" "<<"4"<<endl;
@@ -733,19 +733,19 @@ public:
 						//cout<<"BLAH"<<endl;
 						omega=mysize; //omega is 3
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-						
-									
+
+
 						cumfreqs.push_back(1-sum);
 						//cout<<"BLAH "<<1-sum<<" "<<omega<<endl;
 
 					}
 					else cout<<"Error in sum of category frequencies in codon model 4"<<endl;
-				
+
 					double S=0; for(int y1=0; y1<cumfreqs.size(); y1++) S+=(scalefactors.at(y1)*cumfreqs.at(y1));
 					for(int yf0=0; yf0<Qvecs.size(); yf0++)   {d(Qvecs.at(yf0),S); getJvec(S,name,myrates,Qvecs.at(yf0),Jvec,basefreqs); Jvecs.push_back(Jvec); }
 
 				}
-				else 
+				else
 				{
 					if(modelnumber==12 || modelnumber==8)
 					{
@@ -753,8 +753,8 @@ public:
 						{
 							omega=0;
 							Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-							
-					 					
+
+
 							cumfreqs.push_back(myparams.at(1));
 							for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back((1-myparams.at(1))/double(ngamcat));
 						}
@@ -762,24 +762,24 @@ public:
 						{
 							omega=myparams.at(4);
 							Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-							
-							 					
+
+
 							cumfreqs.push_back(1-myparams.at(1));
 							for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back(myparams.at(1)/double(ngamcat));
 						}
 					}
 					else cumfreqs.assign(ngamcat,1/double(ngamcat));
- 
+
 					//for(int hfd=0; hfd<ngamcat; hfd++) cumfreqs.push_back(1/ngamcat);
-						
+
 					vector<double> output;
 
 					//double *mypar; mypar=new double[myparams.size()];
-					
+
 					double mypar[10]={0,0,0,0,0,0,0,0,0,0};
 
 					//mypar[0]=0;
-					for(int iu=1; iu<myparams.size(); iu++) {mypar[iu-1]=myparams.at(iu); }  
+					for(int iu=1; iu<myparams.size(); iu++) {mypar[iu-1]=myparams.at(iu); }
 
 					// this function of Ziheng's calculates the discrete rates for different site classes from the model parameters
 
@@ -789,7 +789,7 @@ public:
 					{
 						omega=output.at(i);
 						Qvec=getCOD(name,basefreqs, modelnumber,kappa,omega); Qvecs.push_back(Qvec);
-											
+
 					}
 
 					double S=0; for(int y1=0; y1<cumfreqs.size(); y1++) S+=(scalefactors.at(y1)*cumfreqs.at(y1));
@@ -807,24 +807,24 @@ public:
 			numberofsiteclasses=cumfreqs.size();
 
 			for(int gfv=1; gfv<numberofsiteclasses; gfv++) cumfreqs.at(gfv)+=cumfreqs.at(gfv-1);
-				
+
 			for(int f=0; f<numberofsiteclasses; f++) Rrates.push_back(1);
 
 		}//end of type==3 bracket
 
-		// the Qvec/Jvec must be generated before the root/insert freqs are set in case the base frequencies come from 
+		// the Qvec/Jvec must be generated before the root/insert freqs are set in case the base frequencies come from
 		// the model like in empirical sub models (codon/protein) or when using the UNREST model for DNA.
 
 		if(myrootbasefreqs.empty()) rootbasefreqs=basefreqs; else {rootbasefreqs=myrootbasefreqs; if(type==3) testmyfreqs(rootbasefreqs,"[rootbasefreq]"); }
-		
+
 		if(myinsertfreqs.empty()) insertfreqs=basefreqs; else {insertfreqs=myinsertfreqs; if(type==3) testmyfreqs(insertfreqs,"[ibasefreq]"); }
-	
+
 
 	}
 /////////////////////////////////////
 void changeQandJ(int numcats)
 {
-	Jvecs.assign(numcats,Jvec);	
+	Jvecs.assign(numcats,Jvec);
 	Rrates.assign(numcats,1);
 	Qvecs.assign(numcats,Qvec);
 	myratesvec.assign(numcats,myrates);
@@ -840,29 +840,29 @@ private:
 
 void testmyfreqs(vector<double> &basefreqs, string mycommand)
 {
-	// this will point an error if there is a non-zero base frequency 
+	// this will point an error if there is a non-zero base frequency
 	// for a stop codon depending on the genetic code used.
 	// It will not give an error when a zero is put by accident
 	// for a frequency not representing a stop codon.
-								
+
 	int wow=querystops(geneticcode, basefreqs);
 
-	if(wow!=-1) 
+	if(wow!=-1)
 	{
-		stringstream fs,fg1; fs<<wow; fg1<<geneticcode;  string fv=fs.str(), fg=fg1.str(); 
-		stringstream fs1; fs1<<basefreqs.at(wow);  string fv1=fs1.str(); 
-		controlerrorprint2("[MODEL]", name, mycommand, "Base frequencies are incorrect. For genetic code chosen: "+fg+"\nThe "+fv+"th stationary frequency should be zero not "+fv1+"\notherwise you might have stop codons in the middle of a sequence.",""); 
+		stringstream fs,fg1; fs<<wow; fg1<<geneticcode;  string fv=fs.str(), fg=fg1.str();
+		stringstream fs1; fs1<<basefreqs.at(wow);  string fv1=fs1.str();
+		controlerrorprint2("[MODEL]", name, mycommand, "Base frequencies are incorrect. For genetic code chosen: "+fg+"\nThe "+fv+"th stationary frequency should be zero not "+fv1+"\notherwise you might have stop codons in the middle of a sequence.","");
 
 		error=-1;
 	}
 }
 /////////////////////////////////////
-	void d(vector<vector<double> > &Q, double S) 
+	void d(vector<vector<double> > &Q, double S)
 	{
 		// multiply scale factor over Q matrix.
 
-		int i,j,s; 
-		if(type==2) s=20; else if(type==3) s=64; else s=4; 
+		int i,j,s;
+		if(type==2) s=20; else if(type==3) s=64; else s=4;
 
 		for(i=0; i<s; i++)  for(j=0; j<s; j++)  ( (Q.at(i)).at(j) )/=S;
 	}
@@ -904,15 +904,15 @@ return newbasefreqs;
 
 			if(type==1)		for(int it=0; it<4; it++) tbasefreqs.push_back(0.25);
 		else if(type==2)	for(int it=0; it<20; it++) tbasefreqs.push_back(0.05);
-		else if(type==3) 
+		else if(type==3)
 		{
 			// for CODON the genetic code and the relevant stop codons must be considered.
 			vector<int> stops=getstops(geneticcode);
 
 			double y=stops.size();
 			double x=1/(64-y);
-			
-			for(int it=0; it<64; it++) {tbasefreqs.push_back(x);} //tbasefreqs.assign(64,0); ?? 
+
+			for(int it=0; it<64; it++) {tbasefreqs.push_back(x);} //tbasefreqs.assign(64,0); ??
 
 			enforcestops(geneticcode,tbasefreqs);
 		}
@@ -935,13 +935,13 @@ return newbasefreqs;
 		if(Qsize!=Qrowsize || Qsize!=basesize || Qrowsize!=basesize)
 		{controlerrorprint2("[MODEL]",name,"getJvec","mis-match in Q matrix and base frequency size",""); error=-1;}
 
-		// set rates from diagonal of matrix 
+		// set rates from diagonal of matrix
 		myrates.clear();
 		for (i=0; i<basesize; i++) {myrates.push_back((-1)*(Qvec.at(i)).at(i)); } //cout<<myrates.at(i)<<"\t"; } cout<<endl;
 
 		//create Jump matrix
 		for (i=0; i<basesize; i++)
-		{		
+		{
 			for (j=0; j<basesize; j++)
 			{
 				if(i!=j && myrates.at(i)!=0) (Jvec.at(i)).at(j) = (Qvec.at(i)).at(j)/myrates.at(i);
@@ -969,7 +969,7 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 
 	double nstsize=nstnums.size()+1;
 
-	if(mymodel==0  || mymodel==1 ) 
+	if(mymodel==0  || mymodel==1 )
 	{
 		/*
 			0 is JC69: Jukes, T. H. and Cantor, C. (1969) Evolution of protein molecules. pp. 21-132 in Mammalian Protein Metabolism, ed. M. N. Munro. Academic Press, New York.
@@ -979,7 +979,7 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 		*/
 		a=b=c=d=e=f=1;
 	}
-	if(mymodel==2  || mymodel==3 ) 
+	if(mymodel==2  || mymodel==3 )
 	{
 		/*
 			2 is K80: Kimura, M. (1980) A simple model for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. J. Mol. Evol. 16:111-120.
@@ -990,28 +990,28 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 		//cout<<nstsize<<endl; cout<<nstnums.at(0)<<"Q"<<endl; if(nstnums.size()>1) cout<<nstnums.at(1)<<"Q"<<endl;
 		a=f=nstnums.at(0); if(nstsize==3) b=c=d=e=nstnums.at(1); else b=c=d=e=1;
 	}
-	if(mymodel==4  || mymodel==5 ) 
+	if(mymodel==4  || mymodel==5 )
 	{
 		/*
 			4 is Tn93ef, 5 is Tn93   a.k.a. TrN
 
-			Tn93: Tamura, K. and Nei, M. (1993) Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees. Mol. Bio. Evol. 10:512-526. 
+			Tn93: Tamura, K. and Nei, M. (1993) Estimation of the number of nucleotide substitutions in the control region of mitochondrial DNA in humans and chimpanzees. Mol. Bio. Evol. 10:512-526.
 		*/
 
 		a=nstnums.at(0);   if(nstsize==4) b=c=d=e=nstnums.at(2); else b=c=d=e=1; f=nstnums.at(1);
 	}
-	if(mymodel==6  || mymodel==7 ) 
+	if(mymodel==6  || mymodel==7 )
 	{
 		/*
 			6 is K81, 7 is K81uf
 
-			K81: Kimura, M. (1981) Estimation of evolutionary distances between homologous nucleotide sequences. Proc. Natl. Acad. Sci. USA. 78:454-458. 
+			K81: Kimura, M. (1981) Estimation of evolutionary distances between homologous nucleotide sequences. Proc. Natl. Acad. Sci. USA. 78:454-458.
 		*/
 
-		a=f=1; b=e=nstnums.at(0); c=d=nstnums.at(1); if(nstsize==4) a=f=nstnums.at(2); 
-		//if(nstsize==4) {a=f=nstnums.at(0); b=e=nstnums.at(1); c=d=nstnums.at(2);} else {a=f=1; b=e=nstnums.at(0); c=d=nstnums.at(1);} 
+		a=f=1; b=e=nstnums.at(0); c=d=nstnums.at(1); if(nstsize==4) a=f=nstnums.at(2);
+		//if(nstsize==4) {a=f=nstnums.at(0); b=e=nstnums.at(1); c=d=nstnums.at(2);} else {a=f=1; b=e=nstnums.at(0); c=d=nstnums.at(1);}
 	}
-	if(mymodel==8  || mymodel==9 ) 
+	if(mymodel==8  || mymodel==9 )
 	{
 		/*
 			8 is TIMef, 9 is TIM
@@ -1019,32 +1019,32 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 
 		a=nstnums.at(0);   b=e=nstnums.at(1);     c=d=nstnums.at(2); f=1; if(nstsize==5) f=nstnums.at(3);
 	}
-	if(mymodel==10 || mymodel==11) 
+	if(mymodel==10 || mymodel==11)
 	{
 		/*
 			10 is TVMef, 11 is TVM
 		*/
-		
+
 		//if(nstsize==6) {a=f=nstnums.at(0); b=nstnums.at(1);       c=nstnums.at(2);   d=nstnums.at(3); e=nstnums.at(4);} else {a=f=1; b=nstnums.at(0); c=nstnums.at(1); d=nstnums.at(2); e=nstnums.at(3);}
 		a=f=1; b=nstnums.at(0); c=nstnums.at(1); d=nstnums.at(2); e=nstnums.at(3); if(nstsize==6) a=f=nstnums.at(4);
 	}
-	if(mymodel==12 || mymodel==13) 
+	if(mymodel==12 || mymodel==13)
 	{
 		/*
 			12 is SYM : Zharkikh, A. (1994) Estimation of evolutionary distances between nucleotide sequences. J. Mol. Evol. 39:315-329.
 
-			13 is GTR: 
-				Lanave, C., G. Preparata, C. Saccone, and G. Serio. (1984) A new method for calculating evolutionary substitution rates. J. Mol. Evol. 20:86-93. 
+			13 is GTR:
+				Lanave, C., G. Preparata, C. Saccone, and G. Serio. (1984) A new method for calculating evolutionary substitution rates. J. Mol. Evol. 20:86-93.
 				Tavare, S. (1986) Some probabilistic and statistical problems in the analysis of DNA sequences. Lec. Math. Life Sci. 17:57-86.
 		*/
 		a=nstnums.at(0);   b=nstnums.at(1);       c=nstnums.at(2);   d=nstnums.at(3); e=nstnums.at(4); f=1; if(nstsize==7) f=nstnums.at(5);
 	}
-				
-	if(mymodel==14 || mymodel==15) 
+
+	if(mymodel==14 || mymodel==15)
 	{
 		/*
 			14 is F84ef, 15 is F84
-			
+
 			Felsenstein, J. (1984) Distance Methods for inferring phylogenies: a justification.  Evolution. 38. 16-24.
 		*/
 
@@ -1053,26 +1053,26 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 
 		double Pi_Y  = basefreqs.at(0)+basefreqs.at(1);
 		double Pi_R  = basefreqs.at(2)+basefreqs.at(3);
-						
-		a=(1+Kappa/Pi_Y)*b;  
-		f=(1+Kappa/Pi_R)*b;  
-					
+
+		a=(1+Kappa/Pi_Y)*b;
+		f=(1+Kappa/Pi_R)*b;
+
 	}
-					
-/*	if(mymodel==16) 
+
+/*	if(mymodel==16)
 	{
 		//myinclude.at(10)=true;
 		double pi;
 		b=c=d=e=1; if(nstsize==4) b=c=d=e=nstnums.at(2);
-		a=f=b*nstnums.at(1); 
+		a=f=b*nstnums.at(1);
 		pi=nstnums.at(0);
-                        
+
 		basefreqs.at(0)=basefreqs.at(2)=(1-pi)/2;
 		basefreqs.at(1)=basefreqs.at(3)=pi/2;
-						
+
 	}
-					
-		if(mymodel==17) 
+
+		if(mymodel==17)
 */
 		if(mymodel==16)
 		{
@@ -1082,7 +1082,7 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 
 			double denom,piT,piC,piA,piG;
 			double TC,TA,TG,CT,CA,CG,AT,AC,AG,GT,GC,GA;
-			
+
 			TC=nstnums.at(0);
 			TA=nstnums.at(1);
 			TG=nstnums.at(2);
@@ -1092,44 +1092,44 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 			AT=nstnums.at(6);
 			AC=nstnums.at(7);
 			AG=nstnums.at(8);
-			GT=nstnums.at(9);  
-			GC=nstnums.at(10); 
+			GT=nstnums.at(9);
+			GC=nstnums.at(10);
 			GA=1;
 			if(nstsize==13) GA=nstnums.at(11); //cout<<TA<<endl;
-										
+
 			denom=((AT*CA*GA)+(AT*CG*GA)+(AC*CT*GA)+(AT*CT*GA)+(AT*CA*GC)+(AC*CT*GC)+(AG*CT*GC)+(AT*CT*GC)+(AG*CA*GT)+(AT*CA*GT)+(AC*CG*GT)+(AG*CG*GT)+(AT*CG*GT)+(AC*CT*GT)+(AG*CT*GT)+(AT*CT*GT)+(AG*CA*TA)+(AC*CG*TA)+(AG*CG*TA)+(AG*CT*TA)+(AC*GA*TA)+(CA*GA*TA)+(CG*GA*TA)+(CT*GA*TA)+(AC*GC*TA)+(AG*GC*TA)+(CA*GC*TA)+(CT*GC*TA)+(AC*GT*TA)+(CA*GT*TA)+(CG*GT*TA)+(CT*GT*TA)+(AG*CA*TC)+(AC*CG*TC)+(AG*CG*TC)+(AT*CG*TC)+(AC*GA*TC)+(AT*GA*TC)+(CA*GA*TC)+(CG*GA*TC)+(AC*GC*TC)+(AG*GC*TC)+(AT*GC*TC)+(CA*GC*TC)+(AC*GT*TC)+(AG*GT*TC)+(AT*GT*TC)+(CA*GT*TC)+(AG*CA*TG)+(AT*CA*TG)+(AC*CG*TG)+(AG*CG*TG)+(AT*CG*TG)+(AC*CT*TG)+(AG*CT*TG)+(AT*CT*TG)+(AC*GA*TG)+(CA*GA*TG)+(CG*GA*TG)+(CT*GA*TG)+(AC*GC*TG)+(AG*GC*TG)+(AT*GC*TG)+(CA*GC*TG));
 			piT=((AT*CA*GA)+(AT*CG*GA)+(AC*CT*GA)+(AT*CT*GA)+(AT*CA*GC)+(AC*CT*GC)+(AG*CT*GC)+(AT*CT*GC)+(AG*CA*GT)+(AT*CA*GT)+(AC*CG*GT)+(AG*CG*GT)+(AT*CG*GT)+(AC*CT*GT)+(AG*CT*GT)+(AT*CT*GT))/denom;
 			piC=((AC*GA*TA)+(AC*GC*TA)+(AG*GC*TA)+(AC*GT*TA)+(AC*GA*TC)+(AT*GA*TC)+(AC*GC*TC)+(AG*GC*TC)+(AT*GC*TC)+(AC*GT*TC)+(AG*GT*TC)+(AT*GT*TC)+(AC*GA*TG)+(AC*GC*TG)+(AG*GC*TG)+(AT*GC*TG))/denom;
 			piA=((CA*GA*TA)+(CG*GA*TA)+(CT*GA*TA)+(CA*GC*TA)+(CT*GC*TA)+(CA*GT*TA)+(CG*GT*TA)+(CT*GT*TA)+(CA*GA*TC)+(CG*GA*TC)+(CA*GC*TC)+(CA*GT*TC)+(CA*GA*TG)+(CG*GA*TG)+(CT*GA*TG)+(CA*GC*TG))/denom;
 			piG=((AG*CA*TA)+(AC*CG*TA)+(AG*CG*TA)+(AG*CT*TA)+(AG*CA*TC)+(AC*CG*TC)+(AG*CG*TC)+(AT*CG*TC)+(AG*CA*TG)+(AT*CA*TG)+(AC*CG*TG)+(AG*CG*TG)+(AT*CG*TG)+(AC*CT*TG)+(AG*CT*TG)+(AT*CT*TG))/denom;
-		
+
 			/*
-			               a = TC/piC;   b = TA/piA;   c = TG/piG;  
-			a1 = CT/piT;                 d = CA/piA;   e = CG/piG;  
-			b1 = AT/piT;  d1 = AC/piC;                 f = AG/piG;  
-			c1 = GT/piT;  e1 = GC/piC;  f1 = GA/piA;  
-			*/			
-		               a = TC;   b = TA;  c = TG;  
-			a1 = CT;             d = CA;  e = CG;  
-			b1 = AT;  d1 = AC;            f = AG;  
-			c1 = GT;  e1 = GC;  f1 = GA; 
-			
+			               a = TC/piC;   b = TA/piA;   c = TG/piG;
+			a1 = CT/piT;                 d = CA/piA;   e = CG/piG;
+			b1 = AT/piT;  d1 = AC/piC;                 f = AG/piG;
+			c1 = GT/piT;  e1 = GC/piC;  f1 = GA/piA;
+			*/
+		               a = TC;   b = TA;  c = TG;
+			a1 = CT;             d = CA;  e = CG;
+			b1 = AT;  d1 = AC;            f = AG;
+			c1 = GT;  e1 = GC;  f1 = GA;
+
 			basefreqs.clear();
 			basefreqs.push_back(piT);  basefreqs.push_back(piC);
 			basefreqs.push_back(piA);  basefreqs.push_back(piG);
-					
-		
+
+
 		}
-					
-		if(mymodel!=16) 
+
+		if(mymodel!=16)
 		{
 			// make matrix symmetrical if it is not UNREST
 			a1=a;b1=b;c1=c;d1=d;e1=e;f1=f;
-					
+
 			if(a==-1 || b==-1 || c==-1 || d==-1 || e==-1 || f==-1 || a1==-1 || b1==-1 || c1==-1 || d1==-1 || e1==-1 || f1==-1 )
-			{	controlerrorprint2(	"[MODEL]", name, "INT:makeQmatrix","DNA substitution parameter routine error - one or more values = -1",""); error=-1;}			
+			{	controlerrorprint2(	"[MODEL]", name, "INT:makeQmatrix","DNA substitution parameter routine error - one or more values = -1",""); error=-1;}
 		}
-				
+
 
 
 	// set entries of Q matrix.
@@ -1143,24 +1143,24 @@ vector<vector<double> > getDNA( string name, vector<double> nstnums, vector<doub
 
 	if(mymodel!=16)	// these steps not necessary for UNREST
 	{
-		// rescale stationary frequencies, to make certain they sum to 1.0 
+		// rescale stationary frequencies, to make certain they sum to 1.0
 		for (i=0; i<4; i++) sum += basefreqs.at(i); //cout<<basefreqs.at(i)<<" ";} cout<<endl;
 		if(sum!=1) for (i=0; i<4; i++) basefreqs.at(i) /= sum;
 
-		// multiply entries by stationary frequencies 
+		// multiply entries by stationary frequencies
 		for (i=0; i<4; i++) for (j=0; j<4; j++) (myQvec.at(i)).at(j) *= basefreqs.at(j); //base freqs are same along a column. j is column
 	}
-	
-	// rescale, so branch lengths are in terms of expected number of substitutions per site 
+
+	// rescale, so branch lengths are in terms of expected number of substitutions per site
 	double scaler = 0.0;
 
 	// calculate scale factor. note that Q_ii = 0 .
 	for (i=0; i<4; i++) for (j=0; j<4; j++)  scaler += basefreqs.at(i) * (myQvec.at(i)).at(j);
 
 	scaler = 1.0 / scaler;
-	
+
 	for (i=0; i<4; i++) for (j=0; j<4; j++) (myQvec.at(i)).at(j) *= scaler;
-		
+
 	//set diagonal of matrix
 	for( i=0; i<4; i++) {sum=0; for(j=0; j<4; j++) sum+=(myQvec.at(i)).at(j); (myQvec.at(i)).at(i)=-sum; }  //cout<<-sum<<endl;}
 
@@ -1183,10 +1183,10 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	double AAPi[20], AAmatrix[20][20], AAmatrixT[20][20], AAPiT[20];
 
 	/* 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 */
-	/* A R N D C Q E G H I L  K  M  F  P  S  T  W  Y  V  */ 
+	/* A R N D C Q E G H I L  K  M  F  P  S  T  W  Y  V  */
 
-	bool rootTOmodelOVERRIDE=false;	
-	
+	bool rootTOmodelOVERRIDE=false;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	if(aamodel.size()!=0)
@@ -1211,102 +1211,102 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	{
 		/*poisson*/
 
-		for(i=0; i<20; i++){ AAPi[i]=0.05; for(j=0; j<20; j++){ if(i!=j) AAmatrix[i][j]=1; else AAmatrix[i][j]=0; }}  
+		for(i=0; i<20; i++){ AAPi[i]=0.05; for(j=0; j<20; j++){ if(i!=j) AAmatrix[i][j]=1; else AAmatrix[i][j]=0; }}
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	else
 	if(modelnumber==1)
 	{
 
-	/* 
-		jones or JTT 
+	/*
+		jones or JTT
 
-		Jones, D.T., Taylor, W.R. & Thornton, J.M. (1992) The rapid generation of mutation data matrices from protein sequences. 
+		Jones, D.T., Taylor, W.R. & Thornton, J.M. (1992) The rapid generation of mutation data matrices from protein sequences.
 		Comput. Applic. Biosci. 8, 275- 282.
-		
+
 	*/
-	AAmatrix[ 0][ 0] =   0; AAmatrix[ 0][ 1] =  58; AAmatrix[ 0][ 2] =  54; AAmatrix[ 0][ 3] =  81; AAmatrix[ 0][ 4] =  56; 
-	AAmatrix[ 0][ 5] =  57; AAmatrix[ 0][ 6] = 105; AAmatrix[ 0][ 7] = 179; AAmatrix[ 0][ 8] =  27; AAmatrix[ 0][ 9] =  36; 
-	AAmatrix[ 0][10] =  30; AAmatrix[ 0][11] =  35; AAmatrix[ 0][12] =  54; AAmatrix[ 0][13] =  15; AAmatrix[ 0][14] = 194; 
-	AAmatrix[ 0][15] = 378; AAmatrix[ 0][16] = 475; AAmatrix[ 0][17] =   9; AAmatrix[ 0][18] =  11; AAmatrix[ 0][19] = 298; 
-	AAmatrix[ 1][ 0] =  58; AAmatrix[ 1][ 1] =   0; AAmatrix[ 1][ 2] =  45; AAmatrix[ 1][ 3] =  16; AAmatrix[ 1][ 4] = 113; 
-	AAmatrix[ 1][ 5] = 310; AAmatrix[ 1][ 6] =  29; AAmatrix[ 1][ 7] = 137; AAmatrix[ 1][ 8] = 328; AAmatrix[ 1][ 9] =  22; 
-	AAmatrix[ 1][10] =  38; AAmatrix[ 1][11] = 646; AAmatrix[ 1][12] =  44; AAmatrix[ 1][13] =   5; AAmatrix[ 1][14] =  74; 
-	AAmatrix[ 1][15] = 101; AAmatrix[ 1][16] =  64; AAmatrix[ 1][17] = 126; AAmatrix[ 1][18] =  20; AAmatrix[ 1][19] =  17; 
-	AAmatrix[ 2][ 0] =  54; AAmatrix[ 2][ 1] =  45; AAmatrix[ 2][ 2] =   0; AAmatrix[ 2][ 3] = 528; AAmatrix[ 2][ 4] =  34; 
-	AAmatrix[ 2][ 5] =  86; AAmatrix[ 2][ 6] =  58; AAmatrix[ 2][ 7] =  81; AAmatrix[ 2][ 8] = 391; AAmatrix[ 2][ 9] =  47; 
-	AAmatrix[ 2][10] =  12; AAmatrix[ 2][11] = 263; AAmatrix[ 2][12] =  30; AAmatrix[ 2][13] =  10; AAmatrix[ 2][14] =  15; 
-	AAmatrix[ 2][15] = 503; AAmatrix[ 2][16] = 232; AAmatrix[ 2][17] =   8; AAmatrix[ 2][18] =  70; AAmatrix[ 2][19] =  16; 
-	AAmatrix[ 3][ 0] =  81; AAmatrix[ 3][ 1] =  16; AAmatrix[ 3][ 2] = 528; AAmatrix[ 3][ 3] =   0; AAmatrix[ 3][ 4] =  10; 
-	AAmatrix[ 3][ 5] =  49; AAmatrix[ 3][ 6] = 767; AAmatrix[ 3][ 7] = 130; AAmatrix[ 3][ 8] = 112; AAmatrix[ 3][ 9] =  11; 
-	AAmatrix[ 3][10] =   7; AAmatrix[ 3][11] =  26; AAmatrix[ 3][12] =  15; AAmatrix[ 3][13] =   4; AAmatrix[ 3][14] =  15; 
-	AAmatrix[ 3][15] =  59; AAmatrix[ 3][16] =  38; AAmatrix[ 3][17] =   4; AAmatrix[ 3][18] =  46; AAmatrix[ 3][19] =  31; 
-	AAmatrix[ 4][ 0] =  56; AAmatrix[ 4][ 1] = 113; AAmatrix[ 4][ 2] =  34; AAmatrix[ 4][ 3] =  10; AAmatrix[ 4][ 4] =   0; 
-	AAmatrix[ 4][ 5] =   9; AAmatrix[ 4][ 6] =   5; AAmatrix[ 4][ 7] =  59; AAmatrix[ 4][ 8] =  69; AAmatrix[ 4][ 9] =  17; 
-	AAmatrix[ 4][10] =  23; AAmatrix[ 4][11] =   7; AAmatrix[ 4][12] =  31; AAmatrix[ 4][13] =  78; AAmatrix[ 4][14] =  14; 
-	AAmatrix[ 4][15] = 223; AAmatrix[ 4][16] =  42; AAmatrix[ 4][17] = 115; AAmatrix[ 4][18] = 209; AAmatrix[ 4][19] =  62; 
-	AAmatrix[ 5][ 0] =  57; AAmatrix[ 5][ 1] = 310; AAmatrix[ 5][ 2] =  86; AAmatrix[ 5][ 3] =  49; AAmatrix[ 5][ 4] =   9; 
-	AAmatrix[ 5][ 5] =   0; AAmatrix[ 5][ 6] = 323; AAmatrix[ 5][ 7] =  26; AAmatrix[ 5][ 8] = 597; AAmatrix[ 5][ 9] =   9; 
-	AAmatrix[ 5][10] =  72; AAmatrix[ 5][11] = 292; AAmatrix[ 5][12] =  43; AAmatrix[ 5][13] =   4; AAmatrix[ 5][14] = 164; 
-	AAmatrix[ 5][15] =  53; AAmatrix[ 5][16] =  51; AAmatrix[ 5][17] =  18; AAmatrix[ 5][18] =  24; AAmatrix[ 5][19] =  20; 
-	AAmatrix[ 6][ 0] = 105; AAmatrix[ 6][ 1] =  29; AAmatrix[ 6][ 2] =  58; AAmatrix[ 6][ 3] = 767; AAmatrix[ 6][ 4] =   5; 
-	AAmatrix[ 6][ 5] = 323; AAmatrix[ 6][ 6] =   0; AAmatrix[ 6][ 7] = 119; AAmatrix[ 6][ 8] =  26; AAmatrix[ 6][ 9] =  12; 
-	AAmatrix[ 6][10] =   9; AAmatrix[ 6][11] = 181; AAmatrix[ 6][12] =  18; AAmatrix[ 6][13] =   5; AAmatrix[ 6][14] =  18; 
-	AAmatrix[ 6][15] =  30; AAmatrix[ 6][16] =  32; AAmatrix[ 6][17] =  10; AAmatrix[ 6][18] =   7; AAmatrix[ 6][19] =  45; 
-	AAmatrix[ 7][ 0] = 179; AAmatrix[ 7][ 1] = 137; AAmatrix[ 7][ 2] =  81; AAmatrix[ 7][ 3] = 130; AAmatrix[ 7][ 4] =  59; 
-	AAmatrix[ 7][ 5] =  26; AAmatrix[ 7][ 6] = 119; AAmatrix[ 7][ 7] =   0; AAmatrix[ 7][ 8] =  23; AAmatrix[ 7][ 9] =   6; 
-	AAmatrix[ 7][10] =   6; AAmatrix[ 7][11] =  27; AAmatrix[ 7][12] =  14; AAmatrix[ 7][13] =   5; AAmatrix[ 7][14] =  24; 
-	AAmatrix[ 7][15] = 201; AAmatrix[ 7][16] =  33; AAmatrix[ 7][17] =  55; AAmatrix[ 7][18] =   8; AAmatrix[ 7][19] =  47; 
-	AAmatrix[ 8][ 0] =  27; AAmatrix[ 8][ 1] = 328; AAmatrix[ 8][ 2] = 391; AAmatrix[ 8][ 3] = 112; AAmatrix[ 8][ 4] =  69; 
-	AAmatrix[ 8][ 5] = 597; AAmatrix[ 8][ 6] =  26; AAmatrix[ 8][ 7] =  23; AAmatrix[ 8][ 8] =   0; AAmatrix[ 8][ 9] =  16; 
-	AAmatrix[ 8][10] =  56; AAmatrix[ 8][11] =  45; AAmatrix[ 8][12] =  33; AAmatrix[ 8][13] =  40; AAmatrix[ 8][14] = 115; 
-	AAmatrix[ 8][15] =  73; AAmatrix[ 8][16] =  46; AAmatrix[ 8][17] =   8; AAmatrix[ 8][18] = 573; AAmatrix[ 8][19] =  11; 
-	AAmatrix[ 9][ 0] =  36; AAmatrix[ 9][ 1] =  22; AAmatrix[ 9][ 2] =  47; AAmatrix[ 9][ 3] =  11; AAmatrix[ 9][ 4] =  17; 
-	AAmatrix[ 9][ 5] =   9; AAmatrix[ 9][ 6] =  12; AAmatrix[ 9][ 7] =   6; AAmatrix[ 9][ 8] =  16; AAmatrix[ 9][ 9] =   0; 
-	AAmatrix[ 9][10] = 229; AAmatrix[ 9][11] =  21; AAmatrix[ 9][12] = 479; AAmatrix[ 9][13] =  89; AAmatrix[ 9][14] =  10; 
-	AAmatrix[ 9][15] =  40; AAmatrix[ 9][16] = 245; AAmatrix[ 9][17] =   9; AAmatrix[ 9][18] =  32; AAmatrix[ 9][19] = 961; 
-	AAmatrix[10][ 0] =  30; AAmatrix[10][ 1] =  38; AAmatrix[10][ 2] =  12; AAmatrix[10][ 3] =   7; AAmatrix[10][ 4] =  23; 
-	AAmatrix[10][ 5] =  72; AAmatrix[10][ 6] =   9; AAmatrix[10][ 7] =   6; AAmatrix[10][ 8] =  56; AAmatrix[10][ 9] = 229; 
-	AAmatrix[10][10] =   0; AAmatrix[10][11] =  14; AAmatrix[10][12] = 388; AAmatrix[10][13] = 248; AAmatrix[10][14] = 102; 
-	AAmatrix[10][15] =  59; AAmatrix[10][16] =  25; AAmatrix[10][17] =  52; AAmatrix[10][18] =  24; AAmatrix[10][19] = 180; 
-	AAmatrix[11][ 0] =  35; AAmatrix[11][ 1] = 646; AAmatrix[11][ 2] = 263; AAmatrix[11][ 3] =  26; AAmatrix[11][ 4] =   7; 
-	AAmatrix[11][ 5] = 292; AAmatrix[11][ 6] = 181; AAmatrix[11][ 7] =  27; AAmatrix[11][ 8] =  45; AAmatrix[11][ 9] =  21; 
-	AAmatrix[11][10] =  14; AAmatrix[11][11] =   0; AAmatrix[11][12] =  65; AAmatrix[11][13] =   4; AAmatrix[11][14] =  21; 
-	AAmatrix[11][15] =  47; AAmatrix[11][16] = 103; AAmatrix[11][17] =  10; AAmatrix[11][18] =   8; AAmatrix[11][19] =  14; 
-	AAmatrix[12][ 0] =  54; AAmatrix[12][ 1] =  44; AAmatrix[12][ 2] =  30; AAmatrix[12][ 3] =  15; AAmatrix[12][ 4] =  31; 
-	AAmatrix[12][ 5] =  43; AAmatrix[12][ 6] =  18; AAmatrix[12][ 7] =  14; AAmatrix[12][ 8] =  33; AAmatrix[12][ 9] = 479; 
-	AAmatrix[12][10] = 388; AAmatrix[12][11] =  65; AAmatrix[12][12] =   0; AAmatrix[12][13] =  43; AAmatrix[12][14] =  16; 
-	AAmatrix[12][15] =  29; AAmatrix[12][16] = 226; AAmatrix[12][17] =  24; AAmatrix[12][18] =  18; AAmatrix[12][19] = 323; 
-	AAmatrix[13][ 0] =  15; AAmatrix[13][ 1] =   5; AAmatrix[13][ 2] =  10; AAmatrix[13][ 3] =   4; AAmatrix[13][ 4] =  78; 
-	AAmatrix[13][ 5] =   4; AAmatrix[13][ 6] =   5; AAmatrix[13][ 7] =   5; AAmatrix[13][ 8] =  40; AAmatrix[13][ 9] =  89; 
-	AAmatrix[13][10] = 248; AAmatrix[13][11] =   4; AAmatrix[13][12] =  43; AAmatrix[13][13] =   0; AAmatrix[13][14] =  17; 
-	AAmatrix[13][15] =  92; AAmatrix[13][16] =  12; AAmatrix[13][17] =  53; AAmatrix[13][18] = 536; AAmatrix[13][19] =  62; 
-	AAmatrix[14][ 0] = 194; AAmatrix[14][ 1] =  74; AAmatrix[14][ 2] =  15; AAmatrix[14][ 3] =  15; AAmatrix[14][ 4] =  14; 
-	AAmatrix[14][ 5] = 164; AAmatrix[14][ 6] =  18; AAmatrix[14][ 7] =  24; AAmatrix[14][ 8] = 115; AAmatrix[14][ 9] =  10; 
-	AAmatrix[14][10] = 102; AAmatrix[14][11] =  21; AAmatrix[14][12] =  16; AAmatrix[14][13] =  17; AAmatrix[14][14] =   0; 
-	AAmatrix[14][15] = 285; AAmatrix[14][16] = 118; AAmatrix[14][17] =   6; AAmatrix[14][18] =  10; AAmatrix[14][19] =  23; 
-	AAmatrix[15][ 0] = 378; AAmatrix[15][ 1] = 101; AAmatrix[15][ 2] = 503; AAmatrix[15][ 3] =  59; AAmatrix[15][ 4] = 223; 
-	AAmatrix[15][ 5] =  53; AAmatrix[15][ 6] =  30; AAmatrix[15][ 7] = 201; AAmatrix[15][ 8] =  73; AAmatrix[15][ 9] =  40; 
-	AAmatrix[15][10] =  59; AAmatrix[15][11] =  47; AAmatrix[15][12] =  29; AAmatrix[15][13] =  92; AAmatrix[15][14] = 285; 
-	AAmatrix[15][15] =   0; AAmatrix[15][16] = 477; AAmatrix[15][17] =  35; AAmatrix[15][18] =  63; AAmatrix[15][19] =  38; 
-	AAmatrix[16][ 0] = 475; AAmatrix[16][ 1] =  64; AAmatrix[16][ 2] = 232; AAmatrix[16][ 3] =  38; AAmatrix[16][ 4] =  42; 
-	AAmatrix[16][ 5] =  51; AAmatrix[16][ 6] =  32; AAmatrix[16][ 7] =  33; AAmatrix[16][ 8] =  46; AAmatrix[16][ 9] = 245; 
-	AAmatrix[16][10] =  25; AAmatrix[16][11] = 103; AAmatrix[16][12] = 226; AAmatrix[16][13] =  12; AAmatrix[16][14] = 118; 
-	AAmatrix[16][15] = 477; AAmatrix[16][16] =   0; AAmatrix[16][17] =  12; AAmatrix[16][18] =  21; AAmatrix[16][19] = 112; 
-	AAmatrix[17][ 0] =   9; AAmatrix[17][ 1] = 126; AAmatrix[17][ 2] =   8; AAmatrix[17][ 3] =   4; AAmatrix[17][ 4] = 115; 
-	AAmatrix[17][ 5] =  18; AAmatrix[17][ 6] =  10; AAmatrix[17][ 7] =  55; AAmatrix[17][ 8] =   8; AAmatrix[17][ 9] =   9; 
-	AAmatrix[17][10] =  52; AAmatrix[17][11] =  10; AAmatrix[17][12] =  24; AAmatrix[17][13] =  53; AAmatrix[17][14] =   6; 
-	AAmatrix[17][15] =  35; AAmatrix[17][16] =  12; AAmatrix[17][17] =   0; AAmatrix[17][18] =  71; AAmatrix[17][19] =  25; 
-	AAmatrix[18][ 0] =  11; AAmatrix[18][ 1] =  20; AAmatrix[18][ 2] =  70; AAmatrix[18][ 3] =  46; AAmatrix[18][ 4] = 209; 
-	AAmatrix[18][ 5] =  24; AAmatrix[18][ 6] =   7; AAmatrix[18][ 7] =   8; AAmatrix[18][ 8] = 573; AAmatrix[18][ 9] =  32; 
-	AAmatrix[18][10] =  24; AAmatrix[18][11] =   8; AAmatrix[18][12] =  18; AAmatrix[18][13] = 536; AAmatrix[18][14] =  10; 
-	AAmatrix[18][15] =  63; AAmatrix[18][16] =  21; AAmatrix[18][17] =  71; AAmatrix[18][18] =   0; AAmatrix[18][19] =  16; 
-	AAmatrix[19][ 0] = 298; AAmatrix[19][ 1] =  17; AAmatrix[19][ 2] =  16; AAmatrix[19][ 3] =  31; AAmatrix[19][ 4] =  62; 
-	AAmatrix[19][ 5] =  20; AAmatrix[19][ 6] =  45; AAmatrix[19][ 7] =  47; AAmatrix[19][ 8] =  11; AAmatrix[19][ 9] = 961; 
-	AAmatrix[19][10] = 180; AAmatrix[19][11] =  14; AAmatrix[19][12] = 323; AAmatrix[19][13] =  62; AAmatrix[19][14] =  23; 
-	AAmatrix[19][15] =  38; AAmatrix[19][16] = 112; AAmatrix[19][17] =  25; AAmatrix[19][18] =  16; AAmatrix[19][19] =   0; 
+	AAmatrix[ 0][ 0] =   0; AAmatrix[ 0][ 1] =  58; AAmatrix[ 0][ 2] =  54; AAmatrix[ 0][ 3] =  81; AAmatrix[ 0][ 4] =  56;
+	AAmatrix[ 0][ 5] =  57; AAmatrix[ 0][ 6] = 105; AAmatrix[ 0][ 7] = 179; AAmatrix[ 0][ 8] =  27; AAmatrix[ 0][ 9] =  36;
+	AAmatrix[ 0][10] =  30; AAmatrix[ 0][11] =  35; AAmatrix[ 0][12] =  54; AAmatrix[ 0][13] =  15; AAmatrix[ 0][14] = 194;
+	AAmatrix[ 0][15] = 378; AAmatrix[ 0][16] = 475; AAmatrix[ 0][17] =   9; AAmatrix[ 0][18] =  11; AAmatrix[ 0][19] = 298;
+	AAmatrix[ 1][ 0] =  58; AAmatrix[ 1][ 1] =   0; AAmatrix[ 1][ 2] =  45; AAmatrix[ 1][ 3] =  16; AAmatrix[ 1][ 4] = 113;
+	AAmatrix[ 1][ 5] = 310; AAmatrix[ 1][ 6] =  29; AAmatrix[ 1][ 7] = 137; AAmatrix[ 1][ 8] = 328; AAmatrix[ 1][ 9] =  22;
+	AAmatrix[ 1][10] =  38; AAmatrix[ 1][11] = 646; AAmatrix[ 1][12] =  44; AAmatrix[ 1][13] =   5; AAmatrix[ 1][14] =  74;
+	AAmatrix[ 1][15] = 101; AAmatrix[ 1][16] =  64; AAmatrix[ 1][17] = 126; AAmatrix[ 1][18] =  20; AAmatrix[ 1][19] =  17;
+	AAmatrix[ 2][ 0] =  54; AAmatrix[ 2][ 1] =  45; AAmatrix[ 2][ 2] =   0; AAmatrix[ 2][ 3] = 528; AAmatrix[ 2][ 4] =  34;
+	AAmatrix[ 2][ 5] =  86; AAmatrix[ 2][ 6] =  58; AAmatrix[ 2][ 7] =  81; AAmatrix[ 2][ 8] = 391; AAmatrix[ 2][ 9] =  47;
+	AAmatrix[ 2][10] =  12; AAmatrix[ 2][11] = 263; AAmatrix[ 2][12] =  30; AAmatrix[ 2][13] =  10; AAmatrix[ 2][14] =  15;
+	AAmatrix[ 2][15] = 503; AAmatrix[ 2][16] = 232; AAmatrix[ 2][17] =   8; AAmatrix[ 2][18] =  70; AAmatrix[ 2][19] =  16;
+	AAmatrix[ 3][ 0] =  81; AAmatrix[ 3][ 1] =  16; AAmatrix[ 3][ 2] = 528; AAmatrix[ 3][ 3] =   0; AAmatrix[ 3][ 4] =  10;
+	AAmatrix[ 3][ 5] =  49; AAmatrix[ 3][ 6] = 767; AAmatrix[ 3][ 7] = 130; AAmatrix[ 3][ 8] = 112; AAmatrix[ 3][ 9] =  11;
+	AAmatrix[ 3][10] =   7; AAmatrix[ 3][11] =  26; AAmatrix[ 3][12] =  15; AAmatrix[ 3][13] =   4; AAmatrix[ 3][14] =  15;
+	AAmatrix[ 3][15] =  59; AAmatrix[ 3][16] =  38; AAmatrix[ 3][17] =   4; AAmatrix[ 3][18] =  46; AAmatrix[ 3][19] =  31;
+	AAmatrix[ 4][ 0] =  56; AAmatrix[ 4][ 1] = 113; AAmatrix[ 4][ 2] =  34; AAmatrix[ 4][ 3] =  10; AAmatrix[ 4][ 4] =   0;
+	AAmatrix[ 4][ 5] =   9; AAmatrix[ 4][ 6] =   5; AAmatrix[ 4][ 7] =  59; AAmatrix[ 4][ 8] =  69; AAmatrix[ 4][ 9] =  17;
+	AAmatrix[ 4][10] =  23; AAmatrix[ 4][11] =   7; AAmatrix[ 4][12] =  31; AAmatrix[ 4][13] =  78; AAmatrix[ 4][14] =  14;
+	AAmatrix[ 4][15] = 223; AAmatrix[ 4][16] =  42; AAmatrix[ 4][17] = 115; AAmatrix[ 4][18] = 209; AAmatrix[ 4][19] =  62;
+	AAmatrix[ 5][ 0] =  57; AAmatrix[ 5][ 1] = 310; AAmatrix[ 5][ 2] =  86; AAmatrix[ 5][ 3] =  49; AAmatrix[ 5][ 4] =   9;
+	AAmatrix[ 5][ 5] =   0; AAmatrix[ 5][ 6] = 323; AAmatrix[ 5][ 7] =  26; AAmatrix[ 5][ 8] = 597; AAmatrix[ 5][ 9] =   9;
+	AAmatrix[ 5][10] =  72; AAmatrix[ 5][11] = 292; AAmatrix[ 5][12] =  43; AAmatrix[ 5][13] =   4; AAmatrix[ 5][14] = 164;
+	AAmatrix[ 5][15] =  53; AAmatrix[ 5][16] =  51; AAmatrix[ 5][17] =  18; AAmatrix[ 5][18] =  24; AAmatrix[ 5][19] =  20;
+	AAmatrix[ 6][ 0] = 105; AAmatrix[ 6][ 1] =  29; AAmatrix[ 6][ 2] =  58; AAmatrix[ 6][ 3] = 767; AAmatrix[ 6][ 4] =   5;
+	AAmatrix[ 6][ 5] = 323; AAmatrix[ 6][ 6] =   0; AAmatrix[ 6][ 7] = 119; AAmatrix[ 6][ 8] =  26; AAmatrix[ 6][ 9] =  12;
+	AAmatrix[ 6][10] =   9; AAmatrix[ 6][11] = 181; AAmatrix[ 6][12] =  18; AAmatrix[ 6][13] =   5; AAmatrix[ 6][14] =  18;
+	AAmatrix[ 6][15] =  30; AAmatrix[ 6][16] =  32; AAmatrix[ 6][17] =  10; AAmatrix[ 6][18] =   7; AAmatrix[ 6][19] =  45;
+	AAmatrix[ 7][ 0] = 179; AAmatrix[ 7][ 1] = 137; AAmatrix[ 7][ 2] =  81; AAmatrix[ 7][ 3] = 130; AAmatrix[ 7][ 4] =  59;
+	AAmatrix[ 7][ 5] =  26; AAmatrix[ 7][ 6] = 119; AAmatrix[ 7][ 7] =   0; AAmatrix[ 7][ 8] =  23; AAmatrix[ 7][ 9] =   6;
+	AAmatrix[ 7][10] =   6; AAmatrix[ 7][11] =  27; AAmatrix[ 7][12] =  14; AAmatrix[ 7][13] =   5; AAmatrix[ 7][14] =  24;
+	AAmatrix[ 7][15] = 201; AAmatrix[ 7][16] =  33; AAmatrix[ 7][17] =  55; AAmatrix[ 7][18] =   8; AAmatrix[ 7][19] =  47;
+	AAmatrix[ 8][ 0] =  27; AAmatrix[ 8][ 1] = 328; AAmatrix[ 8][ 2] = 391; AAmatrix[ 8][ 3] = 112; AAmatrix[ 8][ 4] =  69;
+	AAmatrix[ 8][ 5] = 597; AAmatrix[ 8][ 6] =  26; AAmatrix[ 8][ 7] =  23; AAmatrix[ 8][ 8] =   0; AAmatrix[ 8][ 9] =  16;
+	AAmatrix[ 8][10] =  56; AAmatrix[ 8][11] =  45; AAmatrix[ 8][12] =  33; AAmatrix[ 8][13] =  40; AAmatrix[ 8][14] = 115;
+	AAmatrix[ 8][15] =  73; AAmatrix[ 8][16] =  46; AAmatrix[ 8][17] =   8; AAmatrix[ 8][18] = 573; AAmatrix[ 8][19] =  11;
+	AAmatrix[ 9][ 0] =  36; AAmatrix[ 9][ 1] =  22; AAmatrix[ 9][ 2] =  47; AAmatrix[ 9][ 3] =  11; AAmatrix[ 9][ 4] =  17;
+	AAmatrix[ 9][ 5] =   9; AAmatrix[ 9][ 6] =  12; AAmatrix[ 9][ 7] =   6; AAmatrix[ 9][ 8] =  16; AAmatrix[ 9][ 9] =   0;
+	AAmatrix[ 9][10] = 229; AAmatrix[ 9][11] =  21; AAmatrix[ 9][12] = 479; AAmatrix[ 9][13] =  89; AAmatrix[ 9][14] =  10;
+	AAmatrix[ 9][15] =  40; AAmatrix[ 9][16] = 245; AAmatrix[ 9][17] =   9; AAmatrix[ 9][18] =  32; AAmatrix[ 9][19] = 961;
+	AAmatrix[10][ 0] =  30; AAmatrix[10][ 1] =  38; AAmatrix[10][ 2] =  12; AAmatrix[10][ 3] =   7; AAmatrix[10][ 4] =  23;
+	AAmatrix[10][ 5] =  72; AAmatrix[10][ 6] =   9; AAmatrix[10][ 7] =   6; AAmatrix[10][ 8] =  56; AAmatrix[10][ 9] = 229;
+	AAmatrix[10][10] =   0; AAmatrix[10][11] =  14; AAmatrix[10][12] = 388; AAmatrix[10][13] = 248; AAmatrix[10][14] = 102;
+	AAmatrix[10][15] =  59; AAmatrix[10][16] =  25; AAmatrix[10][17] =  52; AAmatrix[10][18] =  24; AAmatrix[10][19] = 180;
+	AAmatrix[11][ 0] =  35; AAmatrix[11][ 1] = 646; AAmatrix[11][ 2] = 263; AAmatrix[11][ 3] =  26; AAmatrix[11][ 4] =   7;
+	AAmatrix[11][ 5] = 292; AAmatrix[11][ 6] = 181; AAmatrix[11][ 7] =  27; AAmatrix[11][ 8] =  45; AAmatrix[11][ 9] =  21;
+	AAmatrix[11][10] =  14; AAmatrix[11][11] =   0; AAmatrix[11][12] =  65; AAmatrix[11][13] =   4; AAmatrix[11][14] =  21;
+	AAmatrix[11][15] =  47; AAmatrix[11][16] = 103; AAmatrix[11][17] =  10; AAmatrix[11][18] =   8; AAmatrix[11][19] =  14;
+	AAmatrix[12][ 0] =  54; AAmatrix[12][ 1] =  44; AAmatrix[12][ 2] =  30; AAmatrix[12][ 3] =  15; AAmatrix[12][ 4] =  31;
+	AAmatrix[12][ 5] =  43; AAmatrix[12][ 6] =  18; AAmatrix[12][ 7] =  14; AAmatrix[12][ 8] =  33; AAmatrix[12][ 9] = 479;
+	AAmatrix[12][10] = 388; AAmatrix[12][11] =  65; AAmatrix[12][12] =   0; AAmatrix[12][13] =  43; AAmatrix[12][14] =  16;
+	AAmatrix[12][15] =  29; AAmatrix[12][16] = 226; AAmatrix[12][17] =  24; AAmatrix[12][18] =  18; AAmatrix[12][19] = 323;
+	AAmatrix[13][ 0] =  15; AAmatrix[13][ 1] =   5; AAmatrix[13][ 2] =  10; AAmatrix[13][ 3] =   4; AAmatrix[13][ 4] =  78;
+	AAmatrix[13][ 5] =   4; AAmatrix[13][ 6] =   5; AAmatrix[13][ 7] =   5; AAmatrix[13][ 8] =  40; AAmatrix[13][ 9] =  89;
+	AAmatrix[13][10] = 248; AAmatrix[13][11] =   4; AAmatrix[13][12] =  43; AAmatrix[13][13] =   0; AAmatrix[13][14] =  17;
+	AAmatrix[13][15] =  92; AAmatrix[13][16] =  12; AAmatrix[13][17] =  53; AAmatrix[13][18] = 536; AAmatrix[13][19] =  62;
+	AAmatrix[14][ 0] = 194; AAmatrix[14][ 1] =  74; AAmatrix[14][ 2] =  15; AAmatrix[14][ 3] =  15; AAmatrix[14][ 4] =  14;
+	AAmatrix[14][ 5] = 164; AAmatrix[14][ 6] =  18; AAmatrix[14][ 7] =  24; AAmatrix[14][ 8] = 115; AAmatrix[14][ 9] =  10;
+	AAmatrix[14][10] = 102; AAmatrix[14][11] =  21; AAmatrix[14][12] =  16; AAmatrix[14][13] =  17; AAmatrix[14][14] =   0;
+	AAmatrix[14][15] = 285; AAmatrix[14][16] = 118; AAmatrix[14][17] =   6; AAmatrix[14][18] =  10; AAmatrix[14][19] =  23;
+	AAmatrix[15][ 0] = 378; AAmatrix[15][ 1] = 101; AAmatrix[15][ 2] = 503; AAmatrix[15][ 3] =  59; AAmatrix[15][ 4] = 223;
+	AAmatrix[15][ 5] =  53; AAmatrix[15][ 6] =  30; AAmatrix[15][ 7] = 201; AAmatrix[15][ 8] =  73; AAmatrix[15][ 9] =  40;
+	AAmatrix[15][10] =  59; AAmatrix[15][11] =  47; AAmatrix[15][12] =  29; AAmatrix[15][13] =  92; AAmatrix[15][14] = 285;
+	AAmatrix[15][15] =   0; AAmatrix[15][16] = 477; AAmatrix[15][17] =  35; AAmatrix[15][18] =  63; AAmatrix[15][19] =  38;
+	AAmatrix[16][ 0] = 475; AAmatrix[16][ 1] =  64; AAmatrix[16][ 2] = 232; AAmatrix[16][ 3] =  38; AAmatrix[16][ 4] =  42;
+	AAmatrix[16][ 5] =  51; AAmatrix[16][ 6] =  32; AAmatrix[16][ 7] =  33; AAmatrix[16][ 8] =  46; AAmatrix[16][ 9] = 245;
+	AAmatrix[16][10] =  25; AAmatrix[16][11] = 103; AAmatrix[16][12] = 226; AAmatrix[16][13] =  12; AAmatrix[16][14] = 118;
+	AAmatrix[16][15] = 477; AAmatrix[16][16] =   0; AAmatrix[16][17] =  12; AAmatrix[16][18] =  21; AAmatrix[16][19] = 112;
+	AAmatrix[17][ 0] =   9; AAmatrix[17][ 1] = 126; AAmatrix[17][ 2] =   8; AAmatrix[17][ 3] =   4; AAmatrix[17][ 4] = 115;
+	AAmatrix[17][ 5] =  18; AAmatrix[17][ 6] =  10; AAmatrix[17][ 7] =  55; AAmatrix[17][ 8] =   8; AAmatrix[17][ 9] =   9;
+	AAmatrix[17][10] =  52; AAmatrix[17][11] =  10; AAmatrix[17][12] =  24; AAmatrix[17][13] =  53; AAmatrix[17][14] =   6;
+	AAmatrix[17][15] =  35; AAmatrix[17][16] =  12; AAmatrix[17][17] =   0; AAmatrix[17][18] =  71; AAmatrix[17][19] =  25;
+	AAmatrix[18][ 0] =  11; AAmatrix[18][ 1] =  20; AAmatrix[18][ 2] =  70; AAmatrix[18][ 3] =  46; AAmatrix[18][ 4] = 209;
+	AAmatrix[18][ 5] =  24; AAmatrix[18][ 6] =   7; AAmatrix[18][ 7] =   8; AAmatrix[18][ 8] = 573; AAmatrix[18][ 9] =  32;
+	AAmatrix[18][10] =  24; AAmatrix[18][11] =   8; AAmatrix[18][12] =  18; AAmatrix[18][13] = 536; AAmatrix[18][14] =  10;
+	AAmatrix[18][15] =  63; AAmatrix[18][16] =  21; AAmatrix[18][17] =  71; AAmatrix[18][18] =   0; AAmatrix[18][19] =  16;
+	AAmatrix[19][ 0] = 298; AAmatrix[19][ 1] =  17; AAmatrix[19][ 2] =  16; AAmatrix[19][ 3] =  31; AAmatrix[19][ 4] =  62;
+	AAmatrix[19][ 5] =  20; AAmatrix[19][ 6] =  45; AAmatrix[19][ 7] =  47; AAmatrix[19][ 8] =  11; AAmatrix[19][ 9] = 961;
+	AAmatrix[19][10] = 180; AAmatrix[19][11] =  14; AAmatrix[19][12] = 323; AAmatrix[19][13] =  62; AAmatrix[19][14] =  23;
+	AAmatrix[19][15] =  38; AAmatrix[19][16] = 112; AAmatrix[19][17] =  25; AAmatrix[19][18] =  16; AAmatrix[19][19] =   0;
 
 	AAPi[ 0] = 0.076748;
 	AAPi[ 1] = 0.051691;
@@ -1330,154 +1330,154 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[19] = 0.066005;
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
 	if(modelnumber==2)
 	{
 
-	/* 
+	/*
 		Jones DCMUT
-		
+
 		Kosiol, C., and Goldman, N. (2005) Different versions of the Dayhoff rate matrix. Molecular Biology and Evolution 22:193-199.
 	*/
-	AAmatrix[0][0]=0;			AAmatrix[0][1]=0.531678; 	AAmatrix[0][2]=0.557967; 	AAmatrix[0][3]=0.827445; 	AAmatrix[0][4]=0.574478; 	AAmatrix[0][5]=0.556725; 	AAmatrix[0][6]=1.066681; 	AAmatrix[0][7]=1.740159; 	AAmatrix[0][8]=0.21997; 	AAmatrix[0][9]=0.361684; 	AAmatrix[0][10]=0.310007; 	AAmatrix[0][11]=0.369437; 	AAmatrix[0][12]=0.469395; 	AAmatrix[0][13]=0.138293; 	AAmatrix[0][14]=1.959599; 	AAmatrix[0][15]=3.887095; 	AAmatrix[0][16]=4.582565; 	AAmatrix[0][17]=0.084329; 	AAmatrix[0][18]=0.139492; 	AAmatrix[0][19]=2.924161; 		
-	AAmatrix[1][0]=0.531678; 	AAmatrix[1][1]=0;			AAmatrix[1][2]=0.451095; 	AAmatrix[1][3]=0.154899; 	AAmatrix[1][4]=1.019843; 	AAmatrix[1][5]=3.021995; 	AAmatrix[1][6]=0.318483; 	AAmatrix[1][7]=1.359652; 	AAmatrix[1][8]=3.210671; 	AAmatrix[1][9]=0.239195; 	AAmatrix[1][10]=0.372261; 	AAmatrix[1][11]=6.529255; 	AAmatrix[1][12]=0.431045; 	AAmatrix[1][13]=0.065314; 	AAmatrix[1][14]=0.710489; 	AAmatrix[1][15]=1.001551; 	AAmatrix[1][16]=0.650282; 	AAmatrix[1][17]=1.257961; 	AAmatrix[1][18]=0.235601; 	AAmatrix[1][19]=0.171995; 		
-	AAmatrix[2][0]=0.557967; 	AAmatrix[2][1]=0.451095; 	AAmatrix[2][2]=0; 			AAmatrix[2][3]=5.54953; 	AAmatrix[2][4]=0.313311; 	AAmatrix[2][5]=0.768834; 	AAmatrix[2][6]=0.578115; 	AAmatrix[2][7]=0.773313; 	AAmatrix[2][8]=4.025778; 	AAmatrix[2][9]=0.491003; 	AAmatrix[2][10]=0.137289; 	AAmatrix[2][11]=2.529517; 	AAmatrix[2][12]=0.33072; 	AAmatrix[2][13]=0.073481; 	AAmatrix[2][14]=0.121804; 	AAmatrix[2][15]=5.057964; 	AAmatrix[2][16]=2.351311; 	AAmatrix[2][17]=0.0277; 	AAmatrix[2][18]=0.700693; 	AAmatrix[2][19]=0.164525; 		
-	AAmatrix[3][0]=0.827445; 	AAmatrix[3][1]=0.154899; 	AAmatrix[3][2]=5.54953; 	AAmatrix[3][3]=0;			AAmatrix[3][4]=0.105625; 	AAmatrix[3][5]=0.521646; 	AAmatrix[3][6]=7.766557; 	AAmatrix[3][7]=1.272434; 	AAmatrix[3][8]=1.032342; 	AAmatrix[3][9]=0.115968; 	AAmatrix[3][10]=0.061486; 	AAmatrix[3][11]=0.282466; 	AAmatrix[3][12]=0.190001; 	AAmatrix[3][13]=0.032522; 	AAmatrix[3][14]=0.127164; 	AAmatrix[3][15]=0.589268; 	AAmatrix[3][16]=0.425159; 	AAmatrix[3][17]=0.057466; 	AAmatrix[3][18]=0.453952; 	AAmatrix[3][19]=0.315261; 		
-	AAmatrix[4][0]=0.574478; 	AAmatrix[4][1]=1.019843; 	AAmatrix[4][2]=0.313311; 	AAmatrix[4][3]=0.105625; 	AAmatrix[4][4]=0; 			AAmatrix[4][5]=0.091304; 	AAmatrix[4][6]=0.053907; 	AAmatrix[4][7]=0.546389; 	AAmatrix[4][8]=0.724998; 	AAmatrix[4][9]=0.150559; 	AAmatrix[4][10]=0.164593; 	AAmatrix[4][11]=0.049009; 	AAmatrix[4][12]=0.409202; 	AAmatrix[4][13]=0.678335; 	AAmatrix[4][14]=0.123653; 	AAmatrix[4][15]=2.155331; 	AAmatrix[4][16]=0.469823; 	AAmatrix[4][17]=1.104181; 	AAmatrix[4][18]=2.114852; 	AAmatrix[4][19]=0.621323; 		
-	AAmatrix[5][0]=0.556725; 	AAmatrix[5][1]=3.021995; 	AAmatrix[5][2]=0.768834; 	AAmatrix[5][3]=0.521646; 	AAmatrix[5][4]=0.091304; 	AAmatrix[5][5]=0;			AAmatrix[5][6]=3.417706; 	AAmatrix[5][7]=0.231294; 	AAmatrix[5][8]=5.68408; 	AAmatrix[5][9]=0.07827; 	AAmatrix[5][10]=0.709004; 	AAmatrix[5][11]=2.966732; 	AAmatrix[5][12]=0.456901; 	AAmatrix[5][13]=0.045683; 	AAmatrix[5][14]=1.608126; 	AAmatrix[5][15]=0.548807; 	AAmatrix[5][16]=0.523825; 	AAmatrix[5][17]=0.172206; 	AAmatrix[5][18]=0.254745; 	AAmatrix[5][19]=0.179771; 		
-	AAmatrix[6][0]=1.066681; 	AAmatrix[6][1]=0.318483; 	AAmatrix[6][2]=0.578115; 	AAmatrix[6][3]=7.766557; 	AAmatrix[6][4]=0.053907; 	AAmatrix[6][5]=3.417706; 	AAmatrix[6][6]=0;			AAmatrix[6][7]=1.115632; 	AAmatrix[6][8]=0.243768; 	AAmatrix[6][9]=0.111773; 	AAmatrix[6][10]=0.097485; 	AAmatrix[6][11]=1.731684; 	AAmatrix[6][12]=0.175084; 	AAmatrix[6][13]=0.043829; 	AAmatrix[6][14]=0.191994; 	AAmatrix[6][15]=0.312449; 	AAmatrix[6][16]=0.331584; 	AAmatrix[6][17]=0.114381; 	AAmatrix[6][18]=0.063452; 	AAmatrix[6][19]=0.465271; 		
-	AAmatrix[7][0]=1.740159; 	AAmatrix[7][1]=1.359652; 	AAmatrix[7][2]=0.773313; 	AAmatrix[7][3]=1.272434; 	AAmatrix[7][4]=0.546389; 	AAmatrix[7][5]=0.231294; 	AAmatrix[7][6]=1.115632; 	AAmatrix[7][7]=0; 			AAmatrix[7][8]=0.201696; 	AAmatrix[7][9]=0.053769; 	AAmatrix[7][10]=0.069492; 	AAmatrix[7][11]=0.26984; 	AAmatrix[7][12]=0.130379; 	AAmatrix[7][13]=0.050212; 	AAmatrix[7][14]=0.208081; 	AAmatrix[7][15]=1.874296; 	AAmatrix[7][16]=0.316862; 	AAmatrix[7][17]=0.54418; 	AAmatrix[7][18]=0.0525; 	AAmatrix[7][19]=0.47014; 		
-	AAmatrix[8][0]=0.21997; 	AAmatrix[8][1]=3.210671; 	AAmatrix[8][2]=4.025778; 	AAmatrix[8][3]=1.032342; 	AAmatrix[8][4]=0.724998; 	AAmatrix[8][5]=5.68408; 	AAmatrix[8][6]=0.243768; 	AAmatrix[8][7]=0.201696; 	AAmatrix[8][8]=0;			AAmatrix[8][9]=0.181788; 	AAmatrix[8][10]=0.540571; 	AAmatrix[8][11]=0.525096; 	AAmatrix[8][12]=0.32966; 	AAmatrix[8][13]=0.453428; 	AAmatrix[8][14]=1.141961; 	AAmatrix[8][15]=0.743458; 	AAmatrix[8][16]=0.477355; 	AAmatrix[8][17]=0.128193; 	AAmatrix[8][18]=5.8484; 	AAmatrix[8][19]=0.121827; 		
-	AAmatrix[9][0]=0.361684; 	AAmatrix[9][1]=0.239195; 	AAmatrix[9][2]=0.491003; 	AAmatrix[9][3]=0.115968; 	AAmatrix[9][4]=0.150559; 	AAmatrix[9][5]=0.07827; 	AAmatrix[9][6]=0.111773; 	AAmatrix[9][7]=0.053769; 	AAmatrix[9][8]=0.181788; 	AAmatrix[9][9]=0;			AAmatrix[9][10]=2.335139; 	AAmatrix[9][11]=0.202562; 	AAmatrix[9][12]=4.831666; 	AAmatrix[9][13]=0.77709; 	AAmatrix[9][14]=0.09858; 	AAmatrix[9][15]=0.405119; 	AAmatrix[9][16]=2.553806; 	AAmatrix[9][17]=0.13451; 	AAmatrix[9][18]=0.303445; 	AAmatrix[9][19]=9.533943; 		
-	AAmatrix[10][0]=0.310007; 	AAmatrix[10][1]=0.372261; 	AAmatrix[10][2]=0.137289; 	AAmatrix[10][3]=0.061486; 	AAmatrix[10][4]=0.164593; 	AAmatrix[10][5]=0.709004; 	AAmatrix[10][6]=0.097485; 	AAmatrix[10][7]=0.069492; 	AAmatrix[10][8]=0.540571; 	AAmatrix[10][9]=2.335139; 	AAmatrix[10][10]=0; 		AAmatrix[10][11]=0.146481; 	AAmatrix[10][12]=3.856906; 	AAmatrix[10][13]=2.500294; 	AAmatrix[10][14]=1.060504; 	AAmatrix[10][15]=0.592511; 	AAmatrix[10][16]=0.272514; 	AAmatrix[10][17]=0.530324; 	AAmatrix[10][18]=0.241094; 	AAmatrix[10][19]=1.761439; 		
-	AAmatrix[11][0]=0.369437; 	AAmatrix[11][1]=6.529255; 	AAmatrix[11][2]=2.529517; 	AAmatrix[11][3]=0.282466; 	AAmatrix[11][4]=0.049009; 	AAmatrix[11][5]=2.966732; 	AAmatrix[11][6]=1.731684; 	AAmatrix[11][7]=0.26984; 	AAmatrix[11][8]=0.525096; 	AAmatrix[11][9]=0.202562; 	AAmatrix[11][10]=0.146481; 	AAmatrix[11][11]=0;			AAmatrix[11][12]=0.624581; 	AAmatrix[11][13]=0.024521; 	AAmatrix[11][14]=0.216345; 	AAmatrix[11][15]=0.474478; 	AAmatrix[11][16]=0.965641; 	AAmatrix[11][17]=0.089134; 	AAmatrix[11][18]=0.087904; 	AAmatrix[11][19]=0.124066; 		
-	AAmatrix[12][0]=0.469395; 	AAmatrix[12][1]=0.431045; 	AAmatrix[12][2]=0.33072; 	AAmatrix[12][3]=0.190001; 	AAmatrix[12][4]=0.409202; 	AAmatrix[12][5]=0.456901; 	AAmatrix[12][6]=0.175084; 	AAmatrix[12][7]=0.130379; 	AAmatrix[12][8]=0.32966; 	AAmatrix[12][9]=4.831666; 	AAmatrix[12][10]=3.856906; 	AAmatrix[12][11]=0.624581; 	AAmatrix[12][12]=0;			AAmatrix[12][13]=0.436181; 	AAmatrix[12][14]=0.164215; 	AAmatrix[12][15]=0.285564; 	AAmatrix[12][16]=2.114728; 	AAmatrix[12][17]=0.201334; 	AAmatrix[12][18]=0.18987; 	AAmatrix[12][19]=3.038533; 		
-	AAmatrix[13][0]=0.138293; 	AAmatrix[13][1]=0.065314; 	AAmatrix[13][2]=0.073481; 	AAmatrix[13][3]=0.032522; 	AAmatrix[13][4]=0.678335; 	AAmatrix[13][5]=0.045683; 	AAmatrix[13][6]=0.043829; 	AAmatrix[13][7]=0.050212; 	AAmatrix[13][8]=0.453428; 	AAmatrix[13][9]=0.77709; 	AAmatrix[13][10]=2.500294; 	AAmatrix[13][11]=0.024521; 	AAmatrix[13][12]=0.436181; 	AAmatrix[13][13]=0;			AAmatrix[13][14]=0.148483; 	AAmatrix[13][15]=0.943971; 	AAmatrix[13][16]=0.138904; 	AAmatrix[13][17]=0.537922; 	AAmatrix[13][18]=5.484236; 	AAmatrix[13][19]=0.593478; 		
-	AAmatrix[14][0]=1.959599; 	AAmatrix[14][1]=0.710489; 	AAmatrix[14][2]=0.121804; 	AAmatrix[14][3]=0.127164; 	AAmatrix[14][4]=0.123653; 	AAmatrix[14][5]=1.608126; 	AAmatrix[14][6]=0.191994; 	AAmatrix[14][7]=0.208081; 	AAmatrix[14][8]=1.141961; 	AAmatrix[14][9]=0.09858; 	AAmatrix[14][10]=1.060504; 	AAmatrix[14][11]=0.216345; 	AAmatrix[14][12]=0.164215; 	AAmatrix[14][13]=0.148483; 	AAmatrix[14][14]=0;			AAmatrix[14][15]=2.788406; 	AAmatrix[14][16]=1.176961; 	AAmatrix[14][17]=0.069965; 	AAmatrix[14][18]=0.11385; 	AAmatrix[14][19]=0.211561; 		
-	AAmatrix[15][0]=3.887095; 	AAmatrix[15][1]=1.001551; 	AAmatrix[15][2]=5.057964; 	AAmatrix[15][3]=0.589268; 	AAmatrix[15][4]=2.155331; 	AAmatrix[15][5]=0.548807; 	AAmatrix[15][6]=0.312449; 	AAmatrix[15][7]=1.874296; 	AAmatrix[15][8]=0.743458; 	AAmatrix[15][9]=0.405119; 	AAmatrix[15][10]=0.592511; 	AAmatrix[15][11]=0.474478; 	AAmatrix[15][12]=0.285564; 	AAmatrix[15][13]=0.943971; 	AAmatrix[15][14]=2.788406; 	AAmatrix[15][15]=0;			AAmatrix[15][16]=4.777647; 	AAmatrix[15][17]=0.310927; 	AAmatrix[15][18]=0.628608; 	AAmatrix[15][19]=0.408532; 		
-	AAmatrix[16][0]=4.582565; 	AAmatrix[16][1]=0.650282; 	AAmatrix[16][2]=2.351311; 	AAmatrix[16][3]=0.425159; 	AAmatrix[16][4]=0.469823; 	AAmatrix[16][5]=0.523825; 	AAmatrix[16][6]=0.331584; 	AAmatrix[16][7]=0.316862; 	AAmatrix[16][8]=0.477355; 	AAmatrix[16][9]=2.553806; 	AAmatrix[16][10]=0.272514; 	AAmatrix[16][11]=0.965641; 	AAmatrix[16][12]=2.114728; 	AAmatrix[16][13]=0.138904; 	AAmatrix[16][14]=1.176961; 	AAmatrix[16][15]=4.777647; 	AAmatrix[16][16]=0;			AAmatrix[16][17]=0.080556; 	AAmatrix[16][18]=0.201094; 	AAmatrix[16][19]=1.14398; 		
-	AAmatrix[17][0]=0.084329; 	AAmatrix[17][1]=1.257961; 	AAmatrix[17][2]=0.0277; 	AAmatrix[17][3]=0.057466; 	AAmatrix[17][4]=1.104181; 	AAmatrix[17][5]=0.172206; 	AAmatrix[17][6]=0.114381; 	AAmatrix[17][7]=0.54418; 	AAmatrix[17][8]=0.128193; 	AAmatrix[17][9]=0.13451; 	AAmatrix[17][10]=0.530324; 	AAmatrix[17][11]=0.089134; 	AAmatrix[17][12]=0.201334; 	AAmatrix[17][13]=0.537922; 	AAmatrix[17][14]=0.069965; 	AAmatrix[17][15]=0.310927; 	AAmatrix[17][16]=0.080556; 	AAmatrix[17][17]=0;			AAmatrix[17][18]=0.747889; 	AAmatrix[17][19]=0.239697; 		
-	AAmatrix[18][0]=0.139492; 	AAmatrix[18][1]=0.235601; 	AAmatrix[18][2]=0.700693; 	AAmatrix[18][3]=0.453952; 	AAmatrix[18][4]=2.114852; 	AAmatrix[18][5]=0.254745; 	AAmatrix[18][6]=0.063452; 	AAmatrix[18][7]=0.0525; 	AAmatrix[18][8]=5.8484; 	AAmatrix[18][9]=0.303445; 	AAmatrix[18][10]=0.241094; 	AAmatrix[18][11]=0.087904; 	AAmatrix[18][12]=0.18987; 	AAmatrix[18][13]=5.484236; 	AAmatrix[18][14]=0.11385; 	AAmatrix[18][15]=0.628608; 	AAmatrix[18][16]=0.201094; 	AAmatrix[18][17]=0.747889; 	AAmatrix[18][18]=0;			AAmatrix[18][19]=0.165473; 		
-	AAmatrix[19][0]=2.924161; 	AAmatrix[19][1]=0.171995; 	AAmatrix[19][2]=0.164525; 	AAmatrix[19][3]=0.315261; 	AAmatrix[19][4]=0.621323; 	AAmatrix[19][5]=0.179771; 	AAmatrix[19][6]=0.465271; 	AAmatrix[19][7]=0.47014; 	AAmatrix[19][8]=0.121827; 	AAmatrix[19][9]=9.533943; 	AAmatrix[19][10]=1.761439; 	AAmatrix[19][11]=0.124066; 	AAmatrix[19][12]=3.038533; 	AAmatrix[19][13]=0.593478; 	AAmatrix[19][14]=0.211561; 	AAmatrix[19][15]=0.408532; 	AAmatrix[19][16]=1.14398; 	AAmatrix[19][17]=0.239697; 	AAmatrix[19][18]=0.165473; 	AAmatrix[19][19]=0; 		
+	AAmatrix[0][0]=0;			AAmatrix[0][1]=0.531678; 	AAmatrix[0][2]=0.557967; 	AAmatrix[0][3]=0.827445; 	AAmatrix[0][4]=0.574478; 	AAmatrix[0][5]=0.556725; 	AAmatrix[0][6]=1.066681; 	AAmatrix[0][7]=1.740159; 	AAmatrix[0][8]=0.21997; 	AAmatrix[0][9]=0.361684; 	AAmatrix[0][10]=0.310007; 	AAmatrix[0][11]=0.369437; 	AAmatrix[0][12]=0.469395; 	AAmatrix[0][13]=0.138293; 	AAmatrix[0][14]=1.959599; 	AAmatrix[0][15]=3.887095; 	AAmatrix[0][16]=4.582565; 	AAmatrix[0][17]=0.084329; 	AAmatrix[0][18]=0.139492; 	AAmatrix[0][19]=2.924161;
+	AAmatrix[1][0]=0.531678; 	AAmatrix[1][1]=0;			AAmatrix[1][2]=0.451095; 	AAmatrix[1][3]=0.154899; 	AAmatrix[1][4]=1.019843; 	AAmatrix[1][5]=3.021995; 	AAmatrix[1][6]=0.318483; 	AAmatrix[1][7]=1.359652; 	AAmatrix[1][8]=3.210671; 	AAmatrix[1][9]=0.239195; 	AAmatrix[1][10]=0.372261; 	AAmatrix[1][11]=6.529255; 	AAmatrix[1][12]=0.431045; 	AAmatrix[1][13]=0.065314; 	AAmatrix[1][14]=0.710489; 	AAmatrix[1][15]=1.001551; 	AAmatrix[1][16]=0.650282; 	AAmatrix[1][17]=1.257961; 	AAmatrix[1][18]=0.235601; 	AAmatrix[1][19]=0.171995;
+	AAmatrix[2][0]=0.557967; 	AAmatrix[2][1]=0.451095; 	AAmatrix[2][2]=0; 			AAmatrix[2][3]=5.54953; 	AAmatrix[2][4]=0.313311; 	AAmatrix[2][5]=0.768834; 	AAmatrix[2][6]=0.578115; 	AAmatrix[2][7]=0.773313; 	AAmatrix[2][8]=4.025778; 	AAmatrix[2][9]=0.491003; 	AAmatrix[2][10]=0.137289; 	AAmatrix[2][11]=2.529517; 	AAmatrix[2][12]=0.33072; 	AAmatrix[2][13]=0.073481; 	AAmatrix[2][14]=0.121804; 	AAmatrix[2][15]=5.057964; 	AAmatrix[2][16]=2.351311; 	AAmatrix[2][17]=0.0277; 	AAmatrix[2][18]=0.700693; 	AAmatrix[2][19]=0.164525;
+	AAmatrix[3][0]=0.827445; 	AAmatrix[3][1]=0.154899; 	AAmatrix[3][2]=5.54953; 	AAmatrix[3][3]=0;			AAmatrix[3][4]=0.105625; 	AAmatrix[3][5]=0.521646; 	AAmatrix[3][6]=7.766557; 	AAmatrix[3][7]=1.272434; 	AAmatrix[3][8]=1.032342; 	AAmatrix[3][9]=0.115968; 	AAmatrix[3][10]=0.061486; 	AAmatrix[3][11]=0.282466; 	AAmatrix[3][12]=0.190001; 	AAmatrix[3][13]=0.032522; 	AAmatrix[3][14]=0.127164; 	AAmatrix[3][15]=0.589268; 	AAmatrix[3][16]=0.425159; 	AAmatrix[3][17]=0.057466; 	AAmatrix[3][18]=0.453952; 	AAmatrix[3][19]=0.315261;
+	AAmatrix[4][0]=0.574478; 	AAmatrix[4][1]=1.019843; 	AAmatrix[4][2]=0.313311; 	AAmatrix[4][3]=0.105625; 	AAmatrix[4][4]=0; 			AAmatrix[4][5]=0.091304; 	AAmatrix[4][6]=0.053907; 	AAmatrix[4][7]=0.546389; 	AAmatrix[4][8]=0.724998; 	AAmatrix[4][9]=0.150559; 	AAmatrix[4][10]=0.164593; 	AAmatrix[4][11]=0.049009; 	AAmatrix[4][12]=0.409202; 	AAmatrix[4][13]=0.678335; 	AAmatrix[4][14]=0.123653; 	AAmatrix[4][15]=2.155331; 	AAmatrix[4][16]=0.469823; 	AAmatrix[4][17]=1.104181; 	AAmatrix[4][18]=2.114852; 	AAmatrix[4][19]=0.621323;
+	AAmatrix[5][0]=0.556725; 	AAmatrix[5][1]=3.021995; 	AAmatrix[5][2]=0.768834; 	AAmatrix[5][3]=0.521646; 	AAmatrix[5][4]=0.091304; 	AAmatrix[5][5]=0;			AAmatrix[5][6]=3.417706; 	AAmatrix[5][7]=0.231294; 	AAmatrix[5][8]=5.68408; 	AAmatrix[5][9]=0.07827; 	AAmatrix[5][10]=0.709004; 	AAmatrix[5][11]=2.966732; 	AAmatrix[5][12]=0.456901; 	AAmatrix[5][13]=0.045683; 	AAmatrix[5][14]=1.608126; 	AAmatrix[5][15]=0.548807; 	AAmatrix[5][16]=0.523825; 	AAmatrix[5][17]=0.172206; 	AAmatrix[5][18]=0.254745; 	AAmatrix[5][19]=0.179771;
+	AAmatrix[6][0]=1.066681; 	AAmatrix[6][1]=0.318483; 	AAmatrix[6][2]=0.578115; 	AAmatrix[6][3]=7.766557; 	AAmatrix[6][4]=0.053907; 	AAmatrix[6][5]=3.417706; 	AAmatrix[6][6]=0;			AAmatrix[6][7]=1.115632; 	AAmatrix[6][8]=0.243768; 	AAmatrix[6][9]=0.111773; 	AAmatrix[6][10]=0.097485; 	AAmatrix[6][11]=1.731684; 	AAmatrix[6][12]=0.175084; 	AAmatrix[6][13]=0.043829; 	AAmatrix[6][14]=0.191994; 	AAmatrix[6][15]=0.312449; 	AAmatrix[6][16]=0.331584; 	AAmatrix[6][17]=0.114381; 	AAmatrix[6][18]=0.063452; 	AAmatrix[6][19]=0.465271;
+	AAmatrix[7][0]=1.740159; 	AAmatrix[7][1]=1.359652; 	AAmatrix[7][2]=0.773313; 	AAmatrix[7][3]=1.272434; 	AAmatrix[7][4]=0.546389; 	AAmatrix[7][5]=0.231294; 	AAmatrix[7][6]=1.115632; 	AAmatrix[7][7]=0; 			AAmatrix[7][8]=0.201696; 	AAmatrix[7][9]=0.053769; 	AAmatrix[7][10]=0.069492; 	AAmatrix[7][11]=0.26984; 	AAmatrix[7][12]=0.130379; 	AAmatrix[7][13]=0.050212; 	AAmatrix[7][14]=0.208081; 	AAmatrix[7][15]=1.874296; 	AAmatrix[7][16]=0.316862; 	AAmatrix[7][17]=0.54418; 	AAmatrix[7][18]=0.0525; 	AAmatrix[7][19]=0.47014;
+	AAmatrix[8][0]=0.21997; 	AAmatrix[8][1]=3.210671; 	AAmatrix[8][2]=4.025778; 	AAmatrix[8][3]=1.032342; 	AAmatrix[8][4]=0.724998; 	AAmatrix[8][5]=5.68408; 	AAmatrix[8][6]=0.243768; 	AAmatrix[8][7]=0.201696; 	AAmatrix[8][8]=0;			AAmatrix[8][9]=0.181788; 	AAmatrix[8][10]=0.540571; 	AAmatrix[8][11]=0.525096; 	AAmatrix[8][12]=0.32966; 	AAmatrix[8][13]=0.453428; 	AAmatrix[8][14]=1.141961; 	AAmatrix[8][15]=0.743458; 	AAmatrix[8][16]=0.477355; 	AAmatrix[8][17]=0.128193; 	AAmatrix[8][18]=5.8484; 	AAmatrix[8][19]=0.121827;
+	AAmatrix[9][0]=0.361684; 	AAmatrix[9][1]=0.239195; 	AAmatrix[9][2]=0.491003; 	AAmatrix[9][3]=0.115968; 	AAmatrix[9][4]=0.150559; 	AAmatrix[9][5]=0.07827; 	AAmatrix[9][6]=0.111773; 	AAmatrix[9][7]=0.053769; 	AAmatrix[9][8]=0.181788; 	AAmatrix[9][9]=0;			AAmatrix[9][10]=2.335139; 	AAmatrix[9][11]=0.202562; 	AAmatrix[9][12]=4.831666; 	AAmatrix[9][13]=0.77709; 	AAmatrix[9][14]=0.09858; 	AAmatrix[9][15]=0.405119; 	AAmatrix[9][16]=2.553806; 	AAmatrix[9][17]=0.13451; 	AAmatrix[9][18]=0.303445; 	AAmatrix[9][19]=9.533943;
+	AAmatrix[10][0]=0.310007; 	AAmatrix[10][1]=0.372261; 	AAmatrix[10][2]=0.137289; 	AAmatrix[10][3]=0.061486; 	AAmatrix[10][4]=0.164593; 	AAmatrix[10][5]=0.709004; 	AAmatrix[10][6]=0.097485; 	AAmatrix[10][7]=0.069492; 	AAmatrix[10][8]=0.540571; 	AAmatrix[10][9]=2.335139; 	AAmatrix[10][10]=0; 		AAmatrix[10][11]=0.146481; 	AAmatrix[10][12]=3.856906; 	AAmatrix[10][13]=2.500294; 	AAmatrix[10][14]=1.060504; 	AAmatrix[10][15]=0.592511; 	AAmatrix[10][16]=0.272514; 	AAmatrix[10][17]=0.530324; 	AAmatrix[10][18]=0.241094; 	AAmatrix[10][19]=1.761439;
+	AAmatrix[11][0]=0.369437; 	AAmatrix[11][1]=6.529255; 	AAmatrix[11][2]=2.529517; 	AAmatrix[11][3]=0.282466; 	AAmatrix[11][4]=0.049009; 	AAmatrix[11][5]=2.966732; 	AAmatrix[11][6]=1.731684; 	AAmatrix[11][7]=0.26984; 	AAmatrix[11][8]=0.525096; 	AAmatrix[11][9]=0.202562; 	AAmatrix[11][10]=0.146481; 	AAmatrix[11][11]=0;			AAmatrix[11][12]=0.624581; 	AAmatrix[11][13]=0.024521; 	AAmatrix[11][14]=0.216345; 	AAmatrix[11][15]=0.474478; 	AAmatrix[11][16]=0.965641; 	AAmatrix[11][17]=0.089134; 	AAmatrix[11][18]=0.087904; 	AAmatrix[11][19]=0.124066;
+	AAmatrix[12][0]=0.469395; 	AAmatrix[12][1]=0.431045; 	AAmatrix[12][2]=0.33072; 	AAmatrix[12][3]=0.190001; 	AAmatrix[12][4]=0.409202; 	AAmatrix[12][5]=0.456901; 	AAmatrix[12][6]=0.175084; 	AAmatrix[12][7]=0.130379; 	AAmatrix[12][8]=0.32966; 	AAmatrix[12][9]=4.831666; 	AAmatrix[12][10]=3.856906; 	AAmatrix[12][11]=0.624581; 	AAmatrix[12][12]=0;			AAmatrix[12][13]=0.436181; 	AAmatrix[12][14]=0.164215; 	AAmatrix[12][15]=0.285564; 	AAmatrix[12][16]=2.114728; 	AAmatrix[12][17]=0.201334; 	AAmatrix[12][18]=0.18987; 	AAmatrix[12][19]=3.038533;
+	AAmatrix[13][0]=0.138293; 	AAmatrix[13][1]=0.065314; 	AAmatrix[13][2]=0.073481; 	AAmatrix[13][3]=0.032522; 	AAmatrix[13][4]=0.678335; 	AAmatrix[13][5]=0.045683; 	AAmatrix[13][6]=0.043829; 	AAmatrix[13][7]=0.050212; 	AAmatrix[13][8]=0.453428; 	AAmatrix[13][9]=0.77709; 	AAmatrix[13][10]=2.500294; 	AAmatrix[13][11]=0.024521; 	AAmatrix[13][12]=0.436181; 	AAmatrix[13][13]=0;			AAmatrix[13][14]=0.148483; 	AAmatrix[13][15]=0.943971; 	AAmatrix[13][16]=0.138904; 	AAmatrix[13][17]=0.537922; 	AAmatrix[13][18]=5.484236; 	AAmatrix[13][19]=0.593478;
+	AAmatrix[14][0]=1.959599; 	AAmatrix[14][1]=0.710489; 	AAmatrix[14][2]=0.121804; 	AAmatrix[14][3]=0.127164; 	AAmatrix[14][4]=0.123653; 	AAmatrix[14][5]=1.608126; 	AAmatrix[14][6]=0.191994; 	AAmatrix[14][7]=0.208081; 	AAmatrix[14][8]=1.141961; 	AAmatrix[14][9]=0.09858; 	AAmatrix[14][10]=1.060504; 	AAmatrix[14][11]=0.216345; 	AAmatrix[14][12]=0.164215; 	AAmatrix[14][13]=0.148483; 	AAmatrix[14][14]=0;			AAmatrix[14][15]=2.788406; 	AAmatrix[14][16]=1.176961; 	AAmatrix[14][17]=0.069965; 	AAmatrix[14][18]=0.11385; 	AAmatrix[14][19]=0.211561;
+	AAmatrix[15][0]=3.887095; 	AAmatrix[15][1]=1.001551; 	AAmatrix[15][2]=5.057964; 	AAmatrix[15][3]=0.589268; 	AAmatrix[15][4]=2.155331; 	AAmatrix[15][5]=0.548807; 	AAmatrix[15][6]=0.312449; 	AAmatrix[15][7]=1.874296; 	AAmatrix[15][8]=0.743458; 	AAmatrix[15][9]=0.405119; 	AAmatrix[15][10]=0.592511; 	AAmatrix[15][11]=0.474478; 	AAmatrix[15][12]=0.285564; 	AAmatrix[15][13]=0.943971; 	AAmatrix[15][14]=2.788406; 	AAmatrix[15][15]=0;			AAmatrix[15][16]=4.777647; 	AAmatrix[15][17]=0.310927; 	AAmatrix[15][18]=0.628608; 	AAmatrix[15][19]=0.408532;
+	AAmatrix[16][0]=4.582565; 	AAmatrix[16][1]=0.650282; 	AAmatrix[16][2]=2.351311; 	AAmatrix[16][3]=0.425159; 	AAmatrix[16][4]=0.469823; 	AAmatrix[16][5]=0.523825; 	AAmatrix[16][6]=0.331584; 	AAmatrix[16][7]=0.316862; 	AAmatrix[16][8]=0.477355; 	AAmatrix[16][9]=2.553806; 	AAmatrix[16][10]=0.272514; 	AAmatrix[16][11]=0.965641; 	AAmatrix[16][12]=2.114728; 	AAmatrix[16][13]=0.138904; 	AAmatrix[16][14]=1.176961; 	AAmatrix[16][15]=4.777647; 	AAmatrix[16][16]=0;			AAmatrix[16][17]=0.080556; 	AAmatrix[16][18]=0.201094; 	AAmatrix[16][19]=1.14398;
+	AAmatrix[17][0]=0.084329; 	AAmatrix[17][1]=1.257961; 	AAmatrix[17][2]=0.0277; 	AAmatrix[17][3]=0.057466; 	AAmatrix[17][4]=1.104181; 	AAmatrix[17][5]=0.172206; 	AAmatrix[17][6]=0.114381; 	AAmatrix[17][7]=0.54418; 	AAmatrix[17][8]=0.128193; 	AAmatrix[17][9]=0.13451; 	AAmatrix[17][10]=0.530324; 	AAmatrix[17][11]=0.089134; 	AAmatrix[17][12]=0.201334; 	AAmatrix[17][13]=0.537922; 	AAmatrix[17][14]=0.069965; 	AAmatrix[17][15]=0.310927; 	AAmatrix[17][16]=0.080556; 	AAmatrix[17][17]=0;			AAmatrix[17][18]=0.747889; 	AAmatrix[17][19]=0.239697;
+	AAmatrix[18][0]=0.139492; 	AAmatrix[18][1]=0.235601; 	AAmatrix[18][2]=0.700693; 	AAmatrix[18][3]=0.453952; 	AAmatrix[18][4]=2.114852; 	AAmatrix[18][5]=0.254745; 	AAmatrix[18][6]=0.063452; 	AAmatrix[18][7]=0.0525; 	AAmatrix[18][8]=5.8484; 	AAmatrix[18][9]=0.303445; 	AAmatrix[18][10]=0.241094; 	AAmatrix[18][11]=0.087904; 	AAmatrix[18][12]=0.18987; 	AAmatrix[18][13]=5.484236; 	AAmatrix[18][14]=0.11385; 	AAmatrix[18][15]=0.628608; 	AAmatrix[18][16]=0.201094; 	AAmatrix[18][17]=0.747889; 	AAmatrix[18][18]=0;			AAmatrix[18][19]=0.165473;
+	AAmatrix[19][0]=2.924161; 	AAmatrix[19][1]=0.171995; 	AAmatrix[19][2]=0.164525; 	AAmatrix[19][3]=0.315261; 	AAmatrix[19][4]=0.621323; 	AAmatrix[19][5]=0.179771; 	AAmatrix[19][6]=0.465271; 	AAmatrix[19][7]=0.47014; 	AAmatrix[19][8]=0.121827; 	AAmatrix[19][9]=9.533943; 	AAmatrix[19][10]=1.761439; 	AAmatrix[19][11]=0.124066; 	AAmatrix[19][12]=3.038533; 	AAmatrix[19][13]=0.593478; 	AAmatrix[19][14]=0.211561; 	AAmatrix[19][15]=0.408532; 	AAmatrix[19][16]=1.14398; 	AAmatrix[19][17]=0.239697; 	AAmatrix[19][18]=0.165473; 	AAmatrix[19][19]=0;
 
-		
-	AAPi[0]=0.076862; 
-	AAPi[1]=0.051057; 
-	AAPi[2]=0.042546; 
-	AAPi[3]=0.051269; 
-	AAPi[4]=0.020279; 
-	AAPi[5]=0.041061; 
-	AAPi[6]=0.06182; 
-	AAPi[7]=0.074714; 
-	AAPi[8]=0.022983; 
-	AAPi[9]=0.052569; 
-	AAPi[10]=0.091111; 
-	AAPi[11]=0.059498; 
-	AAPi[12]=0.023414; 
-	AAPi[13]=0.04053; 
-	AAPi[14]=0.050532; 
-	AAPi[15]=0.068225; 
-	AAPi[16]=0.058518; 
-	AAPi[17]=0.014336; 
-	AAPi[18]=0.032303; 
-	AAPi[19]=0.066374; 
+
+	AAPi[0]=0.076862;
+	AAPi[1]=0.051057;
+	AAPi[2]=0.042546;
+	AAPi[3]=0.051269;
+	AAPi[4]=0.020279;
+	AAPi[5]=0.041061;
+	AAPi[6]=0.06182;
+	AAPi[7]=0.074714;
+	AAPi[8]=0.022983;
+	AAPi[9]=0.052569;
+	AAPi[10]=0.091111;
+	AAPi[11]=0.059498;
+	AAPi[12]=0.023414;
+	AAPi[13]=0.04053;
+	AAPi[14]=0.050532;
+	AAPi[15]=0.068225;
+	AAPi[16]=0.058518;
+	AAPi[17]=0.014336;
+	AAPi[18]=0.032303;
+	AAPi[19]=0.066374;
 
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	else
 	if(modelnumber==3)
 	{
 
-	/* 
-		dayhoff 
-		
+	/*
+		dayhoff
+
 		Dayhoff, M., Schwartz, R., & Orcutt, B. (1978) A model of evolutionary change in protein. Atlas of Protein Sequences and Structure, 5, 345--352
 	*/
-	AAmatrix[ 0][ 0] =   0; AAmatrix[ 0][ 1] =  27; AAmatrix[ 0][ 2] =  98; AAmatrix[ 0][ 3] = 120; AAmatrix[ 0][ 4] =  36; 
-	AAmatrix[ 0][ 5] =  89; AAmatrix[ 0][ 6] = 198; AAmatrix[ 0][ 7] = 240; AAmatrix[ 0][ 8] =  23; AAmatrix[ 0][ 9] =  65; 
-	AAmatrix[ 0][10] =  41; AAmatrix[ 0][11] =  26; AAmatrix[ 0][12] =  72; AAmatrix[ 0][13] =  18; AAmatrix[ 0][14] = 250; 
-	AAmatrix[ 0][15] = 409; AAmatrix[ 0][16] = 371; AAmatrix[ 0][17] =   0; AAmatrix[ 0][18] =  24; AAmatrix[ 0][19] = 208; 
-	AAmatrix[ 1][ 0] =  27; AAmatrix[ 1][ 1] =   0; AAmatrix[ 1][ 2] =  32; AAmatrix[ 1][ 3] =   0; AAmatrix[ 1][ 4] =  23; 
-	AAmatrix[ 1][ 5] = 246; AAmatrix[ 1][ 6] =   1; AAmatrix[ 1][ 7] =   9; AAmatrix[ 1][ 8] = 240; AAmatrix[ 1][ 9] =  64; 
-	AAmatrix[ 1][10] =  15; AAmatrix[ 1][11] = 464; AAmatrix[ 1][12] =  90; AAmatrix[ 1][13] =  14; AAmatrix[ 1][14] = 103; 
-	AAmatrix[ 1][15] = 154; AAmatrix[ 1][16] =  26; AAmatrix[ 1][17] = 201; AAmatrix[ 1][18] =   8; AAmatrix[ 1][19] =  24; 
-	AAmatrix[ 2][ 0] =  98; AAmatrix[ 2][ 1] =  32; AAmatrix[ 2][ 2] =   0; AAmatrix[ 2][ 3] = 905; AAmatrix[ 2][ 4] =   0; 
-	AAmatrix[ 2][ 5] = 103; AAmatrix[ 2][ 6] = 148; AAmatrix[ 2][ 7] = 139; AAmatrix[ 2][ 8] = 535; AAmatrix[ 2][ 9] =  77; 
-	AAmatrix[ 2][10] =  34; AAmatrix[ 2][11] = 318; AAmatrix[ 2][12] =   1; AAmatrix[ 2][13] =  14; AAmatrix[ 2][14] =  42; 
-	AAmatrix[ 2][15] = 495; AAmatrix[ 2][16] = 229; AAmatrix[ 2][17] =  23; AAmatrix[ 2][18] =  95; AAmatrix[ 2][19] =  15; 
-	AAmatrix[ 3][ 0] = 120; AAmatrix[ 3][ 1] =   0; AAmatrix[ 3][ 2] = 905; AAmatrix[ 3][ 3] =   0; AAmatrix[ 3][ 4] =   0; 
-	AAmatrix[ 3][ 5] = 134; AAmatrix[ 3][ 6] = 1153; AAmatrix[ 3][ 7] = 125; AAmatrix[ 3][ 8] =  86; AAmatrix[ 3][ 9] =  24; 
-	AAmatrix[ 3][10] =   0; AAmatrix[ 3][11] =  71; AAmatrix[ 3][12] =   0; AAmatrix[ 3][13] =   0; AAmatrix[ 3][14] =  13; 
-	AAmatrix[ 3][15] =  95; AAmatrix[ 3][16] =  66; AAmatrix[ 3][17] =   0; AAmatrix[ 3][18] =   0; AAmatrix[ 3][19] =  18; 
-	AAmatrix[ 4][ 0] =  36; AAmatrix[ 4][ 1] =  23; AAmatrix[ 4][ 2] =   0; AAmatrix[ 4][ 3] =   0; AAmatrix[ 4][ 4] =   0; 
-	AAmatrix[ 4][ 5] =   0; AAmatrix[ 4][ 6] =   0; AAmatrix[ 4][ 7] =  11; AAmatrix[ 4][ 8] =  28; AAmatrix[ 4][ 9] =  44; 
-	AAmatrix[ 4][10] =   0; AAmatrix[ 4][11] =   0; AAmatrix[ 4][12] =   0; AAmatrix[ 4][13] =   0; AAmatrix[ 4][14] =  19; 
-	AAmatrix[ 4][15] = 161; AAmatrix[ 4][16] =  16; AAmatrix[ 4][17] =   0; AAmatrix[ 4][18] =  96; AAmatrix[ 4][19] =  49; 
-	AAmatrix[ 5][ 0] =  89; AAmatrix[ 5][ 1] = 246; AAmatrix[ 5][ 2] = 103; AAmatrix[ 5][ 3] = 134; AAmatrix[ 5][ 4] =   0; 
-	AAmatrix[ 5][ 5] =   0; AAmatrix[ 5][ 6] = 716; AAmatrix[ 5][ 7] =  28; AAmatrix[ 5][ 8] = 606; AAmatrix[ 5][ 9] =  18; 
-	AAmatrix[ 5][10] =  73; AAmatrix[ 5][11] = 153; AAmatrix[ 5][12] = 114; AAmatrix[ 5][13] =   0; AAmatrix[ 5][14] = 153; 
-	AAmatrix[ 5][15] =  56; AAmatrix[ 5][16] =  53; AAmatrix[ 5][17] =   0; AAmatrix[ 5][18] =   0; AAmatrix[ 5][19] =  35; 
-	AAmatrix[ 6][ 0] = 198; AAmatrix[ 6][ 1] =   1; AAmatrix[ 6][ 2] = 148; AAmatrix[ 6][ 3] = 1153; AAmatrix[ 6][ 4] =   0; 
-	AAmatrix[ 6][ 5] = 716; AAmatrix[ 6][ 6] =   0; AAmatrix[ 6][ 7] =  81; AAmatrix[ 6][ 8] =  43; AAmatrix[ 6][ 9] =  61; 
-	AAmatrix[ 6][10] =  11; AAmatrix[ 6][11] =  83; AAmatrix[ 6][12] =  30; AAmatrix[ 6][13] =   0; AAmatrix[ 6][14] =  51; 
-	AAmatrix[ 6][15] =  79; AAmatrix[ 6][16] =  34; AAmatrix[ 6][17] =   0; AAmatrix[ 6][18] =  22; AAmatrix[ 6][19] =  37; 
-	AAmatrix[ 7][ 0] = 240; AAmatrix[ 7][ 1] =   9; AAmatrix[ 7][ 2] = 139; AAmatrix[ 7][ 3] = 125; AAmatrix[ 7][ 4] =  11; 
-	AAmatrix[ 7][ 5] =  28; AAmatrix[ 7][ 6] =  81; AAmatrix[ 7][ 7] =   0; AAmatrix[ 7][ 8] =  10; AAmatrix[ 7][ 9] =   0; 
-	AAmatrix[ 7][10] =   7; AAmatrix[ 7][11] =  27; AAmatrix[ 7][12] =  17; AAmatrix[ 7][13] =  15; AAmatrix[ 7][14] =  34; 
-	AAmatrix[ 7][15] = 234; AAmatrix[ 7][16] =  30; AAmatrix[ 7][17] =   0; AAmatrix[ 7][18] =   0; AAmatrix[ 7][19] =  54; 
-	AAmatrix[ 8][ 0] =  23; AAmatrix[ 8][ 1] = 240; AAmatrix[ 8][ 2] = 535; AAmatrix[ 8][ 3] =  86; AAmatrix[ 8][ 4] =  28; 
-	AAmatrix[ 8][ 5] = 606; AAmatrix[ 8][ 6] =  43; AAmatrix[ 8][ 7] =  10; AAmatrix[ 8][ 8] =   0; AAmatrix[ 8][ 9] =   7; 
-	AAmatrix[ 8][10] =  44; AAmatrix[ 8][11] =  26; AAmatrix[ 8][12] =   0; AAmatrix[ 8][13] =  48; AAmatrix[ 8][14] =  94; 
-	AAmatrix[ 8][15] =  35; AAmatrix[ 8][16] =  22; AAmatrix[ 8][17] =  27; AAmatrix[ 8][18] = 127; AAmatrix[ 8][19] =  44; 
-	AAmatrix[ 9][ 0] =  65; AAmatrix[ 9][ 1] =  64; AAmatrix[ 9][ 2] =  77; AAmatrix[ 9][ 3] =  24; AAmatrix[ 9][ 4] =  44; 
-	AAmatrix[ 9][ 5] =  18; AAmatrix[ 9][ 6] =  61; AAmatrix[ 9][ 7] =   0; AAmatrix[ 9][ 8] =   7; AAmatrix[ 9][ 9] =   0; 
-	AAmatrix[ 9][10] = 257; AAmatrix[ 9][11] =  46; AAmatrix[ 9][12] = 336; AAmatrix[ 9][13] = 196; AAmatrix[ 9][14] =  12; 
-	AAmatrix[ 9][15] =  24; AAmatrix[ 9][16] = 192; AAmatrix[ 9][17] =   0; AAmatrix[ 9][18] =  37; AAmatrix[ 9][19] = 889; 
-	AAmatrix[10][ 0] =  41; AAmatrix[10][ 1] =  15; AAmatrix[10][ 2] =  34; AAmatrix[10][ 3] =   0; AAmatrix[10][ 4] =   0; 
-	AAmatrix[10][ 5] =  73; AAmatrix[10][ 6] =  11; AAmatrix[10][ 7] =   7; AAmatrix[10][ 8] =  44; AAmatrix[10][ 9] = 257; 
-	AAmatrix[10][10] =   0; AAmatrix[10][11] =  18; AAmatrix[10][12] = 527; AAmatrix[10][13] = 157; AAmatrix[10][14] =  32; 
-	AAmatrix[10][15] =  17; AAmatrix[10][16] =  33; AAmatrix[10][17] =  46; AAmatrix[10][18] =  28; AAmatrix[10][19] = 175; 
-	AAmatrix[11][ 0] =  26; AAmatrix[11][ 1] = 464; AAmatrix[11][ 2] = 318; AAmatrix[11][ 3] =  71; AAmatrix[11][ 4] =   0; 
-	AAmatrix[11][ 5] = 153; AAmatrix[11][ 6] =  83; AAmatrix[11][ 7] =  27; AAmatrix[11][ 8] =  26; AAmatrix[11][ 9] =  46; 
-	AAmatrix[11][10] =  18; AAmatrix[11][11] =   0; AAmatrix[11][12] = 243; AAmatrix[11][13] =   0; AAmatrix[11][14] =  33; 
-	AAmatrix[11][15] =  96; AAmatrix[11][16] = 136; AAmatrix[11][17] =   0; AAmatrix[11][18] =  13; AAmatrix[11][19] =  10; 
-	AAmatrix[12][ 0] =  72; AAmatrix[12][ 1] =  90; AAmatrix[12][ 2] =   1; AAmatrix[12][ 3] =   0; AAmatrix[12][ 4] =   0; 
-	AAmatrix[12][ 5] = 114; AAmatrix[12][ 6] =  30; AAmatrix[12][ 7] =  17; AAmatrix[12][ 8] =   0; AAmatrix[12][ 9] = 336; 
-	AAmatrix[12][10] = 527; AAmatrix[12][11] = 243; AAmatrix[12][12] =   0; AAmatrix[12][13] =  92; AAmatrix[12][14] =  17; 
-	AAmatrix[12][15] =  62; AAmatrix[12][16] = 104; AAmatrix[12][17] =   0; AAmatrix[12][18] =   0; AAmatrix[12][19] = 258; 
-	AAmatrix[13][ 0] =  18; AAmatrix[13][ 1] =  14; AAmatrix[13][ 2] =  14; AAmatrix[13][ 3] =   0; AAmatrix[13][ 4] =   0; 
-	AAmatrix[13][ 5] =   0; AAmatrix[13][ 6] =   0; AAmatrix[13][ 7] =  15; AAmatrix[13][ 8] =  48; AAmatrix[13][ 9] = 196; 
-	AAmatrix[13][10] = 157; AAmatrix[13][11] =   0; AAmatrix[13][12] =  92; AAmatrix[13][13] =   0; AAmatrix[13][14] =  11; 
-	AAmatrix[13][15] =  46; AAmatrix[13][16] =  13; AAmatrix[13][17] =  76; AAmatrix[13][18] = 698; AAmatrix[13][19] =  12; 
-	AAmatrix[14][ 0] = 250; AAmatrix[14][ 1] = 103; AAmatrix[14][ 2] =  42; AAmatrix[14][ 3] =  13; AAmatrix[14][ 4] =  19; 
-	AAmatrix[14][ 5] = 153; AAmatrix[14][ 6] =  51; AAmatrix[14][ 7] =  34; AAmatrix[14][ 8] =  94; AAmatrix[14][ 9] =  12; 
-	AAmatrix[14][10] =  32; AAmatrix[14][11] =  33; AAmatrix[14][12] =  17; AAmatrix[14][13] =  11; AAmatrix[14][14] =   0; 
-	AAmatrix[14][15] = 245; AAmatrix[14][16] =  78; AAmatrix[14][17] =   0; AAmatrix[14][18] =   0; AAmatrix[14][19] =  48; 
-	AAmatrix[15][ 0] = 409; AAmatrix[15][ 1] = 154; AAmatrix[15][ 2] = 495; AAmatrix[15][ 3] =  95; AAmatrix[15][ 4] = 161; 
-	AAmatrix[15][ 5] =  56; AAmatrix[15][ 6] =  79; AAmatrix[15][ 7] = 234; AAmatrix[15][ 8] =  35; AAmatrix[15][ 9] =  24; 
-	AAmatrix[15][10] =  17; AAmatrix[15][11] =  96; AAmatrix[15][12] =  62; AAmatrix[15][13] =  46; AAmatrix[15][14] = 245; 
-	AAmatrix[15][15] =   0; AAmatrix[15][16] = 550; AAmatrix[15][17] =  75; AAmatrix[15][18] =  34; AAmatrix[15][19] =  30; 
-	AAmatrix[16][ 0] = 371; AAmatrix[16][ 1] =  26; AAmatrix[16][ 2] = 229; AAmatrix[16][ 3] =  66; AAmatrix[16][ 4] =  16; 
-	AAmatrix[16][ 5] =  53; AAmatrix[16][ 6] =  34; AAmatrix[16][ 7] =  30; AAmatrix[16][ 8] =  22; AAmatrix[16][ 9] = 192; 
-	AAmatrix[16][10] =  33; AAmatrix[16][11] = 136; AAmatrix[16][12] = 104; AAmatrix[16][13] =  13; AAmatrix[16][14] =  78; 
-	AAmatrix[16][15] = 550; AAmatrix[16][16] =   0; AAmatrix[16][17] =   0; AAmatrix[16][18] =  42; AAmatrix[16][19] = 157; 
-	AAmatrix[17][ 0] =   0; AAmatrix[17][ 1] = 201; AAmatrix[17][ 2] =  23; AAmatrix[17][ 3] =   0; AAmatrix[17][ 4] =   0; 
-	AAmatrix[17][ 5] =   0; AAmatrix[17][ 6] =   0; AAmatrix[17][ 7] =   0; AAmatrix[17][ 8] =  27; AAmatrix[17][ 9] =   0; 
-	AAmatrix[17][10] =  46; AAmatrix[17][11] =   0; AAmatrix[17][12] =   0; AAmatrix[17][13] =  76; AAmatrix[17][14] =   0; 
-	AAmatrix[17][15] =  75; AAmatrix[17][16] =   0; AAmatrix[17][17] =   0; AAmatrix[17][18] =  61; AAmatrix[17][19] =   0; 
-	AAmatrix[18][ 0] =  24; AAmatrix[18][ 1] =   8; AAmatrix[18][ 2] =  95; AAmatrix[18][ 3] =   0; AAmatrix[18][ 4] =  96; 
-	AAmatrix[18][ 5] =   0; AAmatrix[18][ 6] =  22; AAmatrix[18][ 7] =   0; AAmatrix[18][ 8] = 127; AAmatrix[18][ 9] =  37; 
-	AAmatrix[18][10] =  28; AAmatrix[18][11] =  13; AAmatrix[18][12] =   0; AAmatrix[18][13] = 698; AAmatrix[18][14] =   0; 
-	AAmatrix[18][15] =  34; AAmatrix[18][16] =  42; AAmatrix[18][17] =  61; AAmatrix[18][18] =   0; AAmatrix[18][19] =  28; 
-	AAmatrix[19][ 0] = 208; AAmatrix[19][ 1] =  24; AAmatrix[19][ 2] =  15; AAmatrix[19][ 3] =  18; AAmatrix[19][ 4] =  49; 
-	AAmatrix[19][ 5] =  35; AAmatrix[19][ 6] =  37; AAmatrix[19][ 7] =  54; AAmatrix[19][ 8] =  44; AAmatrix[19][ 9] = 889; 
-	AAmatrix[19][10] = 175; AAmatrix[19][11] =  10; AAmatrix[19][12] = 258; AAmatrix[19][13] =  12; AAmatrix[19][14] =  48; 
+	AAmatrix[ 0][ 0] =   0; AAmatrix[ 0][ 1] =  27; AAmatrix[ 0][ 2] =  98; AAmatrix[ 0][ 3] = 120; AAmatrix[ 0][ 4] =  36;
+	AAmatrix[ 0][ 5] =  89; AAmatrix[ 0][ 6] = 198; AAmatrix[ 0][ 7] = 240; AAmatrix[ 0][ 8] =  23; AAmatrix[ 0][ 9] =  65;
+	AAmatrix[ 0][10] =  41; AAmatrix[ 0][11] =  26; AAmatrix[ 0][12] =  72; AAmatrix[ 0][13] =  18; AAmatrix[ 0][14] = 250;
+	AAmatrix[ 0][15] = 409; AAmatrix[ 0][16] = 371; AAmatrix[ 0][17] =   0; AAmatrix[ 0][18] =  24; AAmatrix[ 0][19] = 208;
+	AAmatrix[ 1][ 0] =  27; AAmatrix[ 1][ 1] =   0; AAmatrix[ 1][ 2] =  32; AAmatrix[ 1][ 3] =   0; AAmatrix[ 1][ 4] =  23;
+	AAmatrix[ 1][ 5] = 246; AAmatrix[ 1][ 6] =   1; AAmatrix[ 1][ 7] =   9; AAmatrix[ 1][ 8] = 240; AAmatrix[ 1][ 9] =  64;
+	AAmatrix[ 1][10] =  15; AAmatrix[ 1][11] = 464; AAmatrix[ 1][12] =  90; AAmatrix[ 1][13] =  14; AAmatrix[ 1][14] = 103;
+	AAmatrix[ 1][15] = 154; AAmatrix[ 1][16] =  26; AAmatrix[ 1][17] = 201; AAmatrix[ 1][18] =   8; AAmatrix[ 1][19] =  24;
+	AAmatrix[ 2][ 0] =  98; AAmatrix[ 2][ 1] =  32; AAmatrix[ 2][ 2] =   0; AAmatrix[ 2][ 3] = 905; AAmatrix[ 2][ 4] =   0;
+	AAmatrix[ 2][ 5] = 103; AAmatrix[ 2][ 6] = 148; AAmatrix[ 2][ 7] = 139; AAmatrix[ 2][ 8] = 535; AAmatrix[ 2][ 9] =  77;
+	AAmatrix[ 2][10] =  34; AAmatrix[ 2][11] = 318; AAmatrix[ 2][12] =   1; AAmatrix[ 2][13] =  14; AAmatrix[ 2][14] =  42;
+	AAmatrix[ 2][15] = 495; AAmatrix[ 2][16] = 229; AAmatrix[ 2][17] =  23; AAmatrix[ 2][18] =  95; AAmatrix[ 2][19] =  15;
+	AAmatrix[ 3][ 0] = 120; AAmatrix[ 3][ 1] =   0; AAmatrix[ 3][ 2] = 905; AAmatrix[ 3][ 3] =   0; AAmatrix[ 3][ 4] =   0;
+	AAmatrix[ 3][ 5] = 134; AAmatrix[ 3][ 6] = 1153; AAmatrix[ 3][ 7] = 125; AAmatrix[ 3][ 8] =  86; AAmatrix[ 3][ 9] =  24;
+	AAmatrix[ 3][10] =   0; AAmatrix[ 3][11] =  71; AAmatrix[ 3][12] =   0; AAmatrix[ 3][13] =   0; AAmatrix[ 3][14] =  13;
+	AAmatrix[ 3][15] =  95; AAmatrix[ 3][16] =  66; AAmatrix[ 3][17] =   0; AAmatrix[ 3][18] =   0; AAmatrix[ 3][19] =  18;
+	AAmatrix[ 4][ 0] =  36; AAmatrix[ 4][ 1] =  23; AAmatrix[ 4][ 2] =   0; AAmatrix[ 4][ 3] =   0; AAmatrix[ 4][ 4] =   0;
+	AAmatrix[ 4][ 5] =   0; AAmatrix[ 4][ 6] =   0; AAmatrix[ 4][ 7] =  11; AAmatrix[ 4][ 8] =  28; AAmatrix[ 4][ 9] =  44;
+	AAmatrix[ 4][10] =   0; AAmatrix[ 4][11] =   0; AAmatrix[ 4][12] =   0; AAmatrix[ 4][13] =   0; AAmatrix[ 4][14] =  19;
+	AAmatrix[ 4][15] = 161; AAmatrix[ 4][16] =  16; AAmatrix[ 4][17] =   0; AAmatrix[ 4][18] =  96; AAmatrix[ 4][19] =  49;
+	AAmatrix[ 5][ 0] =  89; AAmatrix[ 5][ 1] = 246; AAmatrix[ 5][ 2] = 103; AAmatrix[ 5][ 3] = 134; AAmatrix[ 5][ 4] =   0;
+	AAmatrix[ 5][ 5] =   0; AAmatrix[ 5][ 6] = 716; AAmatrix[ 5][ 7] =  28; AAmatrix[ 5][ 8] = 606; AAmatrix[ 5][ 9] =  18;
+	AAmatrix[ 5][10] =  73; AAmatrix[ 5][11] = 153; AAmatrix[ 5][12] = 114; AAmatrix[ 5][13] =   0; AAmatrix[ 5][14] = 153;
+	AAmatrix[ 5][15] =  56; AAmatrix[ 5][16] =  53; AAmatrix[ 5][17] =   0; AAmatrix[ 5][18] =   0; AAmatrix[ 5][19] =  35;
+	AAmatrix[ 6][ 0] = 198; AAmatrix[ 6][ 1] =   1; AAmatrix[ 6][ 2] = 148; AAmatrix[ 6][ 3] = 1153; AAmatrix[ 6][ 4] =   0;
+	AAmatrix[ 6][ 5] = 716; AAmatrix[ 6][ 6] =   0; AAmatrix[ 6][ 7] =  81; AAmatrix[ 6][ 8] =  43; AAmatrix[ 6][ 9] =  61;
+	AAmatrix[ 6][10] =  11; AAmatrix[ 6][11] =  83; AAmatrix[ 6][12] =  30; AAmatrix[ 6][13] =   0; AAmatrix[ 6][14] =  51;
+	AAmatrix[ 6][15] =  79; AAmatrix[ 6][16] =  34; AAmatrix[ 6][17] =   0; AAmatrix[ 6][18] =  22; AAmatrix[ 6][19] =  37;
+	AAmatrix[ 7][ 0] = 240; AAmatrix[ 7][ 1] =   9; AAmatrix[ 7][ 2] = 139; AAmatrix[ 7][ 3] = 125; AAmatrix[ 7][ 4] =  11;
+	AAmatrix[ 7][ 5] =  28; AAmatrix[ 7][ 6] =  81; AAmatrix[ 7][ 7] =   0; AAmatrix[ 7][ 8] =  10; AAmatrix[ 7][ 9] =   0;
+	AAmatrix[ 7][10] =   7; AAmatrix[ 7][11] =  27; AAmatrix[ 7][12] =  17; AAmatrix[ 7][13] =  15; AAmatrix[ 7][14] =  34;
+	AAmatrix[ 7][15] = 234; AAmatrix[ 7][16] =  30; AAmatrix[ 7][17] =   0; AAmatrix[ 7][18] =   0; AAmatrix[ 7][19] =  54;
+	AAmatrix[ 8][ 0] =  23; AAmatrix[ 8][ 1] = 240; AAmatrix[ 8][ 2] = 535; AAmatrix[ 8][ 3] =  86; AAmatrix[ 8][ 4] =  28;
+	AAmatrix[ 8][ 5] = 606; AAmatrix[ 8][ 6] =  43; AAmatrix[ 8][ 7] =  10; AAmatrix[ 8][ 8] =   0; AAmatrix[ 8][ 9] =   7;
+	AAmatrix[ 8][10] =  44; AAmatrix[ 8][11] =  26; AAmatrix[ 8][12] =   0; AAmatrix[ 8][13] =  48; AAmatrix[ 8][14] =  94;
+	AAmatrix[ 8][15] =  35; AAmatrix[ 8][16] =  22; AAmatrix[ 8][17] =  27; AAmatrix[ 8][18] = 127; AAmatrix[ 8][19] =  44;
+	AAmatrix[ 9][ 0] =  65; AAmatrix[ 9][ 1] =  64; AAmatrix[ 9][ 2] =  77; AAmatrix[ 9][ 3] =  24; AAmatrix[ 9][ 4] =  44;
+	AAmatrix[ 9][ 5] =  18; AAmatrix[ 9][ 6] =  61; AAmatrix[ 9][ 7] =   0; AAmatrix[ 9][ 8] =   7; AAmatrix[ 9][ 9] =   0;
+	AAmatrix[ 9][10] = 257; AAmatrix[ 9][11] =  46; AAmatrix[ 9][12] = 336; AAmatrix[ 9][13] = 196; AAmatrix[ 9][14] =  12;
+	AAmatrix[ 9][15] =  24; AAmatrix[ 9][16] = 192; AAmatrix[ 9][17] =   0; AAmatrix[ 9][18] =  37; AAmatrix[ 9][19] = 889;
+	AAmatrix[10][ 0] =  41; AAmatrix[10][ 1] =  15; AAmatrix[10][ 2] =  34; AAmatrix[10][ 3] =   0; AAmatrix[10][ 4] =   0;
+	AAmatrix[10][ 5] =  73; AAmatrix[10][ 6] =  11; AAmatrix[10][ 7] =   7; AAmatrix[10][ 8] =  44; AAmatrix[10][ 9] = 257;
+	AAmatrix[10][10] =   0; AAmatrix[10][11] =  18; AAmatrix[10][12] = 527; AAmatrix[10][13] = 157; AAmatrix[10][14] =  32;
+	AAmatrix[10][15] =  17; AAmatrix[10][16] =  33; AAmatrix[10][17] =  46; AAmatrix[10][18] =  28; AAmatrix[10][19] = 175;
+	AAmatrix[11][ 0] =  26; AAmatrix[11][ 1] = 464; AAmatrix[11][ 2] = 318; AAmatrix[11][ 3] =  71; AAmatrix[11][ 4] =   0;
+	AAmatrix[11][ 5] = 153; AAmatrix[11][ 6] =  83; AAmatrix[11][ 7] =  27; AAmatrix[11][ 8] =  26; AAmatrix[11][ 9] =  46;
+	AAmatrix[11][10] =  18; AAmatrix[11][11] =   0; AAmatrix[11][12] = 243; AAmatrix[11][13] =   0; AAmatrix[11][14] =  33;
+	AAmatrix[11][15] =  96; AAmatrix[11][16] = 136; AAmatrix[11][17] =   0; AAmatrix[11][18] =  13; AAmatrix[11][19] =  10;
+	AAmatrix[12][ 0] =  72; AAmatrix[12][ 1] =  90; AAmatrix[12][ 2] =   1; AAmatrix[12][ 3] =   0; AAmatrix[12][ 4] =   0;
+	AAmatrix[12][ 5] = 114; AAmatrix[12][ 6] =  30; AAmatrix[12][ 7] =  17; AAmatrix[12][ 8] =   0; AAmatrix[12][ 9] = 336;
+	AAmatrix[12][10] = 527; AAmatrix[12][11] = 243; AAmatrix[12][12] =   0; AAmatrix[12][13] =  92; AAmatrix[12][14] =  17;
+	AAmatrix[12][15] =  62; AAmatrix[12][16] = 104; AAmatrix[12][17] =   0; AAmatrix[12][18] =   0; AAmatrix[12][19] = 258;
+	AAmatrix[13][ 0] =  18; AAmatrix[13][ 1] =  14; AAmatrix[13][ 2] =  14; AAmatrix[13][ 3] =   0; AAmatrix[13][ 4] =   0;
+	AAmatrix[13][ 5] =   0; AAmatrix[13][ 6] =   0; AAmatrix[13][ 7] =  15; AAmatrix[13][ 8] =  48; AAmatrix[13][ 9] = 196;
+	AAmatrix[13][10] = 157; AAmatrix[13][11] =   0; AAmatrix[13][12] =  92; AAmatrix[13][13] =   0; AAmatrix[13][14] =  11;
+	AAmatrix[13][15] =  46; AAmatrix[13][16] =  13; AAmatrix[13][17] =  76; AAmatrix[13][18] = 698; AAmatrix[13][19] =  12;
+	AAmatrix[14][ 0] = 250; AAmatrix[14][ 1] = 103; AAmatrix[14][ 2] =  42; AAmatrix[14][ 3] =  13; AAmatrix[14][ 4] =  19;
+	AAmatrix[14][ 5] = 153; AAmatrix[14][ 6] =  51; AAmatrix[14][ 7] =  34; AAmatrix[14][ 8] =  94; AAmatrix[14][ 9] =  12;
+	AAmatrix[14][10] =  32; AAmatrix[14][11] =  33; AAmatrix[14][12] =  17; AAmatrix[14][13] =  11; AAmatrix[14][14] =   0;
+	AAmatrix[14][15] = 245; AAmatrix[14][16] =  78; AAmatrix[14][17] =   0; AAmatrix[14][18] =   0; AAmatrix[14][19] =  48;
+	AAmatrix[15][ 0] = 409; AAmatrix[15][ 1] = 154; AAmatrix[15][ 2] = 495; AAmatrix[15][ 3] =  95; AAmatrix[15][ 4] = 161;
+	AAmatrix[15][ 5] =  56; AAmatrix[15][ 6] =  79; AAmatrix[15][ 7] = 234; AAmatrix[15][ 8] =  35; AAmatrix[15][ 9] =  24;
+	AAmatrix[15][10] =  17; AAmatrix[15][11] =  96; AAmatrix[15][12] =  62; AAmatrix[15][13] =  46; AAmatrix[15][14] = 245;
+	AAmatrix[15][15] =   0; AAmatrix[15][16] = 550; AAmatrix[15][17] =  75; AAmatrix[15][18] =  34; AAmatrix[15][19] =  30;
+	AAmatrix[16][ 0] = 371; AAmatrix[16][ 1] =  26; AAmatrix[16][ 2] = 229; AAmatrix[16][ 3] =  66; AAmatrix[16][ 4] =  16;
+	AAmatrix[16][ 5] =  53; AAmatrix[16][ 6] =  34; AAmatrix[16][ 7] =  30; AAmatrix[16][ 8] =  22; AAmatrix[16][ 9] = 192;
+	AAmatrix[16][10] =  33; AAmatrix[16][11] = 136; AAmatrix[16][12] = 104; AAmatrix[16][13] =  13; AAmatrix[16][14] =  78;
+	AAmatrix[16][15] = 550; AAmatrix[16][16] =   0; AAmatrix[16][17] =   0; AAmatrix[16][18] =  42; AAmatrix[16][19] = 157;
+	AAmatrix[17][ 0] =   0; AAmatrix[17][ 1] = 201; AAmatrix[17][ 2] =  23; AAmatrix[17][ 3] =   0; AAmatrix[17][ 4] =   0;
+	AAmatrix[17][ 5] =   0; AAmatrix[17][ 6] =   0; AAmatrix[17][ 7] =   0; AAmatrix[17][ 8] =  27; AAmatrix[17][ 9] =   0;
+	AAmatrix[17][10] =  46; AAmatrix[17][11] =   0; AAmatrix[17][12] =   0; AAmatrix[17][13] =  76; AAmatrix[17][14] =   0;
+	AAmatrix[17][15] =  75; AAmatrix[17][16] =   0; AAmatrix[17][17] =   0; AAmatrix[17][18] =  61; AAmatrix[17][19] =   0;
+	AAmatrix[18][ 0] =  24; AAmatrix[18][ 1] =   8; AAmatrix[18][ 2] =  95; AAmatrix[18][ 3] =   0; AAmatrix[18][ 4] =  96;
+	AAmatrix[18][ 5] =   0; AAmatrix[18][ 6] =  22; AAmatrix[18][ 7] =   0; AAmatrix[18][ 8] = 127; AAmatrix[18][ 9] =  37;
+	AAmatrix[18][10] =  28; AAmatrix[18][11] =  13; AAmatrix[18][12] =   0; AAmatrix[18][13] = 698; AAmatrix[18][14] =   0;
+	AAmatrix[18][15] =  34; AAmatrix[18][16] =  42; AAmatrix[18][17] =  61; AAmatrix[18][18] =   0; AAmatrix[18][19] =  28;
+	AAmatrix[19][ 0] = 208; AAmatrix[19][ 1] =  24; AAmatrix[19][ 2] =  15; AAmatrix[19][ 3] =  18; AAmatrix[19][ 4] =  49;
+	AAmatrix[19][ 5] =  35; AAmatrix[19][ 6] =  37; AAmatrix[19][ 7] =  54; AAmatrix[19][ 8] =  44; AAmatrix[19][ 9] = 889;
+	AAmatrix[19][10] = 175; AAmatrix[19][11] =  10; AAmatrix[19][12] = 258; AAmatrix[19][13] =  12; AAmatrix[19][14] =  48;
 	AAmatrix[19][15] =  30; AAmatrix[19][16] = 157; AAmatrix[19][17] =   0; AAmatrix[19][18] =  28; AAmatrix[19][19] =   0;
 
 	AAPi[ 0] = 0.087127;
@@ -1503,118 +1503,118 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	else
 	if(modelnumber==4)
 	{
 
 	/*
 		DayhoffDCMUT
-		
+
 		Kosiol, C., and Goldman, N. (2005) Different versions of the Dayhoff rate matrix. Molecular Biology and Evolution 22:193-199.
 	*/
-	AAmatrix[0][0] = 0;			AAmatrix[0][1] = 0.267828;	AAmatrix[0][2] = 0.984474;	AAmatrix[0][3] = 1.19981;	
-	AAmatrix[0][4] = 0.360016;	AAmatrix[0][5] = 0.887753;	AAmatrix[0][6] = 1.96117;	AAmatrix[0][7] = 2.38611;	
-	AAmatrix[0][8] = 0.228116;	AAmatrix[0][9] = 0.653416;	AAmatrix[0][10] = 0.406431;	AAmatrix[0][11] = 0.258635;	
-	AAmatrix[0][12] = 0.71784;	AAmatrix[0][13] = 0.183641;	AAmatrix[0][14] = 2.48592;	AAmatrix[0][15] = 4.05187;	
-	AAmatrix[0][16] = 3.68037;	AAmatrix[0][17] = 0;		AAmatrix[0][18] = 0.244139;	AAmatrix[0][19] = 2.05956;	
-	AAmatrix[1][0] = 0.267828;	AAmatrix[1][1] = 0;			AAmatrix[1][2] = 0.327059;	AAmatrix[1][3] = 0;	
-	AAmatrix[1][4] = 0.232374;	AAmatrix[1][5] = 2.43994;	AAmatrix[1][6] = 0;			AAmatrix[1][7] = 0.087791;	
-	AAmatrix[1][8] = 2.38315;	AAmatrix[1][9] = 0.632629;	AAmatrix[1][10] = 0.154924;	AAmatrix[1][11] = 4.61012;	
-	AAmatrix[1][12] = 0.896321;	AAmatrix[1][13] = 0.136906;	AAmatrix[1][14] = 1.02831;	AAmatrix[1][15] = 1.53159;	
-	AAmatrix[1][16] = 0.265745;	AAmatrix[1][17] = 2.00137;	AAmatrix[1][18] = 0.078012;	AAmatrix[1][19] = 0.240368;	
-	AAmatrix[2][0] = 0.984474;	AAmatrix[2][1] = 0.327059;	AAmatrix[2][2] = 0;			AAmatrix[2][3] = 8.93151;	
-	AAmatrix[2][4] = 0;			AAmatrix[2][5] = 1.02851;	AAmatrix[2][6] = 1.49341;	AAmatrix[2][7] = 1.38535;	
-	AAmatrix[2][8] = 5.29002;	AAmatrix[2][9] = 0.768024;	AAmatrix[2][10] = 0.341113;	AAmatrix[2][11] = 3.14837;	
-	AAmatrix[2][12] = 0;		AAmatrix[2][13] = 0.138503;	AAmatrix[2][14] = 0.419244;	AAmatrix[2][15] = 4.88589;	
-	AAmatrix[2][16] = 2.2717;	AAmatrix[2][17] = 0.224968;	AAmatrix[2][18] = 0.94694;	AAmatrix[2][19] = 0.158067;	
-	AAmatrix[3][0] = 1.19981;	AAmatrix[3][1] = 0;			AAmatrix[3][2] = 8.93151;	AAmatrix[3][3] = 0;	
-	AAmatrix[3][4] = 0;			AAmatrix[3][5] = 1.34855;	AAmatrix[3][6] = 11.3887;	AAmatrix[3][7] = 1.24098;	
-	AAmatrix[3][8] = 0.868241;	AAmatrix[3][9] = 0.239248;	AAmatrix[3][10] = 0;		AAmatrix[3][11] = 0.716913;	
-	AAmatrix[3][12] = 0;		AAmatrix[3][13] = 0;		AAmatrix[3][14] = 0.13394;	AAmatrix[3][15] = 0.956097;	
-	AAmatrix[3][16] = 0.66093;	AAmatrix[3][17] = 0;		AAmatrix[3][18] = 0;		AAmatrix[3][19] = 0.178316;	
-	AAmatrix[4][0] = 0.360016;	AAmatrix[4][1] = 0.232374;	AAmatrix[4][2] = 0;			AAmatrix[4][3] = 0;	
-	AAmatrix[4][4] = 0;			AAmatrix[4][5] = 0;			AAmatrix[4][6] = 0;			AAmatrix[4][7] = 0.107278;	
-	AAmatrix[4][8] = 0.282729;	AAmatrix[4][9] = 0.438074;	AAmatrix[4][10] = 0;		AAmatrix[4][11] = 0;	
-	AAmatrix[4][12] = 0;		AAmatrix[4][13] = 0;		AAmatrix[4][14] = 0.18755;	AAmatrix[4][15] = 1.59836;	
-	AAmatrix[4][16] = 0.162366;	AAmatrix[4][17] = 0;		AAmatrix[4][18] = 0.953164;	AAmatrix[4][19] = 0.484678;	
-	AAmatrix[5][0] = 0.887753;	AAmatrix[5][1] = 2.43994;	AAmatrix[5][2] = 1.02851;	AAmatrix[5][3] = 1.34855;	
-	AAmatrix[5][4] = 0;			AAmatrix[5][5] = 0;			AAmatrix[5][6] = 7.08602;	AAmatrix[5][7] = 0.281581;	
-	AAmatrix[5][8] = 6.01161;	AAmatrix[5][9] = 0.180393;	AAmatrix[5][10] = 0.730772;	AAmatrix[5][11] = 1.51908;	
-	AAmatrix[5][12] = 1.1275;	AAmatrix[5][13] = 0;		AAmatrix[5][14] = 1.52619;	AAmatrix[5][15] = 0.561828;	
-	AAmatrix[5][16] = 0.525651;	AAmatrix[5][17] = 0;		AAmatrix[5][18] = 0;		AAmatrix[5][19] = 0.346983;	
-	AAmatrix[6][0] = 1.96117;	AAmatrix[6][1] = 0;			AAmatrix[6][2] = 1.49341;	AAmatrix[6][3] = 11.3887;	
-	AAmatrix[6][4] = 0;			AAmatrix[6][5] = 7.08602;	AAmatrix[6][6] = 0;			AAmatrix[6][7] = 0.811907;	
-	AAmatrix[6][8] = 0.439469;	AAmatrix[6][9] = 0.609526;	AAmatrix[6][10] = 0.11288;	AAmatrix[6][11] = 0.830078;	
-	AAmatrix[6][12] = 0.304803;	AAmatrix[6][13] = 0;		AAmatrix[6][14] = 0.507003;	AAmatrix[6][15] = 0.793999;	
-	AAmatrix[6][16] = 0.340156;	AAmatrix[6][17] = 0;		AAmatrix[6][18] = 0.214717;	AAmatrix[6][19] = 0.36725;	
-	AAmatrix[7][0] = 2.38611;	AAmatrix[7][1] = 0.087791;	AAmatrix[7][2] = 1.38535;	AAmatrix[7][3] = 1.24098;	
-	AAmatrix[7][4] = 0.107278;	AAmatrix[7][5] = 0.281581;	AAmatrix[7][6] = 0.811907;	AAmatrix[7][7] = 0;	
-	AAmatrix[7][8] = 0.106802;	AAmatrix[7][9] = 0;			AAmatrix[7][10] = 0.071514;	AAmatrix[7][11] = 0.267683;	
-	AAmatrix[7][12] = 0.170372;	AAmatrix[7][13] = 0.153478;	AAmatrix[7][14] = 0.347153;	AAmatrix[7][15] = 2.32224;	
-	AAmatrix[7][16] = 0.306662;	AAmatrix[7][17] = 0;		AAmatrix[7][18] = 0;		AAmatrix[7][19] = 0.538165;	
-	AAmatrix[8][0] = 0.228116;	AAmatrix[8][1] = 2.38315;	AAmatrix[8][2] = 5.29002;	AAmatrix[8][3] = 0.868241;	
-	AAmatrix[8][4] = 0.282729;	AAmatrix[8][5] = 6.01161;	AAmatrix[8][6] = 0.439469;	AAmatrix[8][7] = 0.106802;	
-	AAmatrix[8][8] = 0;			AAmatrix[8][9] = 0.076981;	AAmatrix[8][10] = 0.443504;	AAmatrix[8][11] = 0.270475;	
-	AAmatrix[8][12] = 0;		AAmatrix[8][13] = 0.475927;	AAmatrix[8][14] = 0.933709;	AAmatrix[8][15] = 0.353643;	
-	AAmatrix[8][16] = 0.226333;	AAmatrix[8][17] = 0.270564;	AAmatrix[8][18] = 1.2654;	AAmatrix[8][19] = 0.438715;	
-	AAmatrix[9][0] = 0.653416;	AAmatrix[9][1] = 0.632629;	AAmatrix[9][2] = 0.768024;	AAmatrix[9][3] = 0.239248;	
-	AAmatrix[9][4] = 0.438074;	AAmatrix[9][5] = 0.180393;	AAmatrix[9][6] = 0.609526;	AAmatrix[9][7] = 0;	
-	AAmatrix[9][8] = 0.076981;	AAmatrix[9][9] = 0;			AAmatrix[9][10] = 2.55668;	AAmatrix[9][11] = 0.460857;	
-	AAmatrix[9][12] = 3.33273;	AAmatrix[9][13] = 1.95195;	AAmatrix[9][14] = 0.119152;	AAmatrix[9][15] = 0.247955;	
-	AAmatrix[9][16] = 1.90074;	AAmatrix[9][17] = 0;		AAmatrix[9][18] = 0.374834;	AAmatrix[9][19] = 8.81004;	
-	AAmatrix[10][0] = 0.406431;	AAmatrix[10][1] = 0.154924;	AAmatrix[10][2] = 0.341113;	AAmatrix[10][3] = 0;	
-	AAmatrix[10][4] = 0;		AAmatrix[10][5] = 0.730772;	AAmatrix[10][6] = 0.11288;	AAmatrix[10][7] = 0.071514;	
-	AAmatrix[10][8] = 0.443504;	AAmatrix[10][9] = 2.55668;	AAmatrix[10][10] = 0;		AAmatrix[10][11] = 0.180629;	
-	AAmatrix[10][12] = 5.23011;	AAmatrix[10][13] = 1.56516;	AAmatrix[10][14] = 0.316258;AAmatrix[10][15] = 0.171432;	
-	AAmatrix[10][16] = 0.33109;	AAmatrix[10][17] = 0.461776;AAmatrix[10][18] = 0.286572;AAmatrix[10][19] = 1.74516;	
-	AAmatrix[11][0] = 0.258635;	AAmatrix[11][1] = 4.61012;	AAmatrix[11][2] = 3.14837;	AAmatrix[11][3] = 0.716913;	
-	AAmatrix[11][4] = 0;		AAmatrix[11][5] = 1.51908;	AAmatrix[11][6] = 0.830078;	AAmatrix[11][7] = 0.267683;	
-	AAmatrix[11][8] = 0.270475;	AAmatrix[11][9] = 0.460857;	AAmatrix[11][10] = 0.180629;AAmatrix[11][11] = 0;	
-	AAmatrix[11][12] = 2.41174;	AAmatrix[11][13] = 0;		AAmatrix[11][14] = 0.335419;AAmatrix[11][15] = 0.954557;	
-	AAmatrix[11][16] = 1.3506;	AAmatrix[11][17] = 0;		AAmatrix[11][18] = 0.132142;AAmatrix[11][19] = 0.10385;	
-	AAmatrix[12][0] = 0.71784;	AAmatrix[12][1] = 0.896321;	AAmatrix[12][2] = 0;		AAmatrix[12][3] = 0;	
-	AAmatrix[12][4] = 0;		AAmatrix[12][5] = 1.1275;	AAmatrix[12][6] = 0.304803;	AAmatrix[12][7] = 0.170372;	
-	AAmatrix[12][8] = 0;		AAmatrix[12][9] = 3.33273;	AAmatrix[12][10] = 5.23011;	AAmatrix[12][11] = 2.41174;	
-	AAmatrix[12][12] = 0;		AAmatrix[12][13] = 0.92186;	AAmatrix[12][14] = 0.170205;AAmatrix[12][15] = 0.619951;	
-	AAmatrix[12][16] = 1.03153;	AAmatrix[12][17] = 0;		AAmatrix[12][18] = 0;		AAmatrix[12][19] = 2.56596;	
-	AAmatrix[13][0] = 0.183641;	AAmatrix[13][1] = 0.136906;	AAmatrix[13][2] = 0.138503;	AAmatrix[13][3] = 0;	
-	AAmatrix[13][4] = 0;		AAmatrix[13][5] = 0;		AAmatrix[13][6] = 0;		AAmatrix[13][7] = 0.153478;	
-	AAmatrix[13][8] = 0.475927;	AAmatrix[13][9] = 1.95195;	AAmatrix[13][10] = 1.56516;	AAmatrix[13][11] = 0;	
-	AAmatrix[13][12] = 0.92186;	AAmatrix[13][13] = 0;		AAmatrix[13][14] = 0.110506;AAmatrix[13][15] = 0.459901;	
-	AAmatrix[13][16] = 0.136655;AAmatrix[13][17] = 0.762354;AAmatrix[13][18] = 6.95263;	AAmatrix[13][19] = 0.123606;	
-	AAmatrix[14][0] = 2.48592;	AAmatrix[14][1] = 1.02831;	AAmatrix[14][2] = 0.419244;	AAmatrix[14][3] = 0.13394;	
-	AAmatrix[14][4] = 0.18755;	AAmatrix[14][5] = 1.52619;	AAmatrix[14][6] = 0.507003;	AAmatrix[14][7] = 0.347153;	
-	AAmatrix[14][8] = 0.933709;	AAmatrix[14][9] = 0.119152;	AAmatrix[14][10] = 0.316258;AAmatrix[14][11] = 0.335419;	
-	AAmatrix[14][12] = 0.170205;AAmatrix[14][13] = 0.110506;AAmatrix[14][14] = 0;		AAmatrix[14][15] = 2.4272;	
-	AAmatrix[14][16] = 0.782857;AAmatrix[14][17] = 0;		AAmatrix[14][18] = 0;		AAmatrix[14][19] = 0.485026;	
-	AAmatrix[15][0] = 4.05187;	AAmatrix[15][1] = 1.53159;	AAmatrix[15][2] = 4.88589;	AAmatrix[15][3] = 0.956097;	
-	AAmatrix[15][4] = 1.59836;	AAmatrix[15][5] = 0.561828;	AAmatrix[15][6] = 0.793999;	AAmatrix[15][7] = 2.32224;	
-	AAmatrix[15][8] = 0.353643;	AAmatrix[15][9] = 0.247955;	AAmatrix[15][10] = 0.171432;AAmatrix[15][11] = 0.954557;	
-	AAmatrix[15][12] = 0.619951;AAmatrix[15][13] = 0.459901;AAmatrix[15][14] = 2.4272;	AAmatrix[15][15] = 0;	
-	AAmatrix[15][16] = 5.43667;	AAmatrix[15][17] = 0.740819;AAmatrix[15][18] = 0.336289;AAmatrix[15][19] = 0.303836;	
-	AAmatrix[16][0] = 3.68037;	AAmatrix[16][1] = 0.265745;	AAmatrix[16][2] = 2.2717;	AAmatrix[16][3] = 0.66093;	
-	AAmatrix[16][4] = 0.162366;	AAmatrix[16][5] = 0.525651;	AAmatrix[16][6] = 0.340156;	AAmatrix[16][7] = 0.306662;	
-	AAmatrix[16][8] = 0.226333;	AAmatrix[16][9] = 1.90074;	AAmatrix[16][10] = 0.33109;	AAmatrix[16][11] = 1.3506;	
-	AAmatrix[16][12] = 1.03153;	AAmatrix[16][13] = 0.136655;AAmatrix[16][14] = 0.782857;AAmatrix[16][15] = 5.43667;	
-	AAmatrix[16][16] = 0;		AAmatrix[16][17] = 0;		AAmatrix[16][18] = 0.417839;AAmatrix[16][19] = 1.562;	
-	AAmatrix[17][0] = 0;		AAmatrix[17][1] = 2.00137;	AAmatrix[17][2] = 0.224968;	AAmatrix[17][3] = 0;	
-	AAmatrix[17][4] = 0;		AAmatrix[17][5] = 0;		AAmatrix[17][6] = 0;		AAmatrix[17][7] = 0;	
-	AAmatrix[17][8] = 0.270564;	AAmatrix[17][9] = 0;		AAmatrix[17][10] = 0.461776;AAmatrix[17][11] = 0;	
-	AAmatrix[17][12] = 0;		AAmatrix[17][13] = 0.762354;AAmatrix[17][14] = 0;		AAmatrix[17][15] = 0.740819;	
-	AAmatrix[17][16] = 0;		AAmatrix[17][17] = 0;		AAmatrix[17][18] = 0.60807;	AAmatrix[17][19] = 0;	
-	AAmatrix[18][0] = 0.244139;	AAmatrix[18][1] = 0.078012;	AAmatrix[18][2] = 0.94694;	AAmatrix[18][3] = 0;	
-	AAmatrix[18][4] = 0.953164;	AAmatrix[18][5] = 0;		AAmatrix[18][6] = 0.214717;	AAmatrix[18][7] = 0;	
-	AAmatrix[18][8] = 1.2654;	AAmatrix[18][9] = 0.374834;	AAmatrix[18][10] = 0.286572;AAmatrix[18][11] = 0.132142;	
-	AAmatrix[18][12] = 0;		AAmatrix[18][13] = 6.95263;	AAmatrix[18][14] = 0;		AAmatrix[18][15] = 0.336289;	
-	AAmatrix[18][16] = 0.417839;AAmatrix[18][17] = 0.60807;	AAmatrix[18][18] = 0;		AAmatrix[18][19] = 0.279379;	
-	AAmatrix[19][0] = 2.05956;	AAmatrix[19][1] = 0.240368;	AAmatrix[19][2] = 0.158067;	AAmatrix[19][3] = 0.178316;	
-	AAmatrix[19][4] = 0.484678;	AAmatrix[19][5] = 0.346983;	AAmatrix[19][6] = 0.36725;	AAmatrix[19][7] = 0.538165;	
-	AAmatrix[19][8] = 0.438715;	AAmatrix[19][9] = 8.81004;	AAmatrix[19][10] = 1.74516;	AAmatrix[19][11] = 0.10385;	
-	AAmatrix[19][12] = 2.56596;	AAmatrix[19][13] = 0.123606;AAmatrix[19][14] = 0.485026;AAmatrix[19][15] = 0.303836;	
-	AAmatrix[19][16] = 1.562;	AAmatrix[19][17] = 0;		AAmatrix[19][18] = 0.279379;AAmatrix[19][19] = 0;	
+	AAmatrix[0][0] = 0;			AAmatrix[0][1] = 0.267828;	AAmatrix[0][2] = 0.984474;	AAmatrix[0][3] = 1.19981;
+	AAmatrix[0][4] = 0.360016;	AAmatrix[0][5] = 0.887753;	AAmatrix[0][6] = 1.96117;	AAmatrix[0][7] = 2.38611;
+	AAmatrix[0][8] = 0.228116;	AAmatrix[0][9] = 0.653416;	AAmatrix[0][10] = 0.406431;	AAmatrix[0][11] = 0.258635;
+	AAmatrix[0][12] = 0.71784;	AAmatrix[0][13] = 0.183641;	AAmatrix[0][14] = 2.48592;	AAmatrix[0][15] = 4.05187;
+	AAmatrix[0][16] = 3.68037;	AAmatrix[0][17] = 0;		AAmatrix[0][18] = 0.244139;	AAmatrix[0][19] = 2.05956;
+	AAmatrix[1][0] = 0.267828;	AAmatrix[1][1] = 0;			AAmatrix[1][2] = 0.327059;	AAmatrix[1][3] = 0;
+	AAmatrix[1][4] = 0.232374;	AAmatrix[1][5] = 2.43994;	AAmatrix[1][6] = 0;			AAmatrix[1][7] = 0.087791;
+	AAmatrix[1][8] = 2.38315;	AAmatrix[1][9] = 0.632629;	AAmatrix[1][10] = 0.154924;	AAmatrix[1][11] = 4.61012;
+	AAmatrix[1][12] = 0.896321;	AAmatrix[1][13] = 0.136906;	AAmatrix[1][14] = 1.02831;	AAmatrix[1][15] = 1.53159;
+	AAmatrix[1][16] = 0.265745;	AAmatrix[1][17] = 2.00137;	AAmatrix[1][18] = 0.078012;	AAmatrix[1][19] = 0.240368;
+	AAmatrix[2][0] = 0.984474;	AAmatrix[2][1] = 0.327059;	AAmatrix[2][2] = 0;			AAmatrix[2][3] = 8.93151;
+	AAmatrix[2][4] = 0;			AAmatrix[2][5] = 1.02851;	AAmatrix[2][6] = 1.49341;	AAmatrix[2][7] = 1.38535;
+	AAmatrix[2][8] = 5.29002;	AAmatrix[2][9] = 0.768024;	AAmatrix[2][10] = 0.341113;	AAmatrix[2][11] = 3.14837;
+	AAmatrix[2][12] = 0;		AAmatrix[2][13] = 0.138503;	AAmatrix[2][14] = 0.419244;	AAmatrix[2][15] = 4.88589;
+	AAmatrix[2][16] = 2.2717;	AAmatrix[2][17] = 0.224968;	AAmatrix[2][18] = 0.94694;	AAmatrix[2][19] = 0.158067;
+	AAmatrix[3][0] = 1.19981;	AAmatrix[3][1] = 0;			AAmatrix[3][2] = 8.93151;	AAmatrix[3][3] = 0;
+	AAmatrix[3][4] = 0;			AAmatrix[3][5] = 1.34855;	AAmatrix[3][6] = 11.3887;	AAmatrix[3][7] = 1.24098;
+	AAmatrix[3][8] = 0.868241;	AAmatrix[3][9] = 0.239248;	AAmatrix[3][10] = 0;		AAmatrix[3][11] = 0.716913;
+	AAmatrix[3][12] = 0;		AAmatrix[3][13] = 0;		AAmatrix[3][14] = 0.13394;	AAmatrix[3][15] = 0.956097;
+	AAmatrix[3][16] = 0.66093;	AAmatrix[3][17] = 0;		AAmatrix[3][18] = 0;		AAmatrix[3][19] = 0.178316;
+	AAmatrix[4][0] = 0.360016;	AAmatrix[4][1] = 0.232374;	AAmatrix[4][2] = 0;			AAmatrix[4][3] = 0;
+	AAmatrix[4][4] = 0;			AAmatrix[4][5] = 0;			AAmatrix[4][6] = 0;			AAmatrix[4][7] = 0.107278;
+	AAmatrix[4][8] = 0.282729;	AAmatrix[4][9] = 0.438074;	AAmatrix[4][10] = 0;		AAmatrix[4][11] = 0;
+	AAmatrix[4][12] = 0;		AAmatrix[4][13] = 0;		AAmatrix[4][14] = 0.18755;	AAmatrix[4][15] = 1.59836;
+	AAmatrix[4][16] = 0.162366;	AAmatrix[4][17] = 0;		AAmatrix[4][18] = 0.953164;	AAmatrix[4][19] = 0.484678;
+	AAmatrix[5][0] = 0.887753;	AAmatrix[5][1] = 2.43994;	AAmatrix[5][2] = 1.02851;	AAmatrix[5][3] = 1.34855;
+	AAmatrix[5][4] = 0;			AAmatrix[5][5] = 0;			AAmatrix[5][6] = 7.08602;	AAmatrix[5][7] = 0.281581;
+	AAmatrix[5][8] = 6.01161;	AAmatrix[5][9] = 0.180393;	AAmatrix[5][10] = 0.730772;	AAmatrix[5][11] = 1.51908;
+	AAmatrix[5][12] = 1.1275;	AAmatrix[5][13] = 0;		AAmatrix[5][14] = 1.52619;	AAmatrix[5][15] = 0.561828;
+	AAmatrix[5][16] = 0.525651;	AAmatrix[5][17] = 0;		AAmatrix[5][18] = 0;		AAmatrix[5][19] = 0.346983;
+	AAmatrix[6][0] = 1.96117;	AAmatrix[6][1] = 0;			AAmatrix[6][2] = 1.49341;	AAmatrix[6][3] = 11.3887;
+	AAmatrix[6][4] = 0;			AAmatrix[6][5] = 7.08602;	AAmatrix[6][6] = 0;			AAmatrix[6][7] = 0.811907;
+	AAmatrix[6][8] = 0.439469;	AAmatrix[6][9] = 0.609526;	AAmatrix[6][10] = 0.11288;	AAmatrix[6][11] = 0.830078;
+	AAmatrix[6][12] = 0.304803;	AAmatrix[6][13] = 0;		AAmatrix[6][14] = 0.507003;	AAmatrix[6][15] = 0.793999;
+	AAmatrix[6][16] = 0.340156;	AAmatrix[6][17] = 0;		AAmatrix[6][18] = 0.214717;	AAmatrix[6][19] = 0.36725;
+	AAmatrix[7][0] = 2.38611;	AAmatrix[7][1] = 0.087791;	AAmatrix[7][2] = 1.38535;	AAmatrix[7][3] = 1.24098;
+	AAmatrix[7][4] = 0.107278;	AAmatrix[7][5] = 0.281581;	AAmatrix[7][6] = 0.811907;	AAmatrix[7][7] = 0;
+	AAmatrix[7][8] = 0.106802;	AAmatrix[7][9] = 0;			AAmatrix[7][10] = 0.071514;	AAmatrix[7][11] = 0.267683;
+	AAmatrix[7][12] = 0.170372;	AAmatrix[7][13] = 0.153478;	AAmatrix[7][14] = 0.347153;	AAmatrix[7][15] = 2.32224;
+	AAmatrix[7][16] = 0.306662;	AAmatrix[7][17] = 0;		AAmatrix[7][18] = 0;		AAmatrix[7][19] = 0.538165;
+	AAmatrix[8][0] = 0.228116;	AAmatrix[8][1] = 2.38315;	AAmatrix[8][2] = 5.29002;	AAmatrix[8][3] = 0.868241;
+	AAmatrix[8][4] = 0.282729;	AAmatrix[8][5] = 6.01161;	AAmatrix[8][6] = 0.439469;	AAmatrix[8][7] = 0.106802;
+	AAmatrix[8][8] = 0;			AAmatrix[8][9] = 0.076981;	AAmatrix[8][10] = 0.443504;	AAmatrix[8][11] = 0.270475;
+	AAmatrix[8][12] = 0;		AAmatrix[8][13] = 0.475927;	AAmatrix[8][14] = 0.933709;	AAmatrix[8][15] = 0.353643;
+	AAmatrix[8][16] = 0.226333;	AAmatrix[8][17] = 0.270564;	AAmatrix[8][18] = 1.2654;	AAmatrix[8][19] = 0.438715;
+	AAmatrix[9][0] = 0.653416;	AAmatrix[9][1] = 0.632629;	AAmatrix[9][2] = 0.768024;	AAmatrix[9][3] = 0.239248;
+	AAmatrix[9][4] = 0.438074;	AAmatrix[9][5] = 0.180393;	AAmatrix[9][6] = 0.609526;	AAmatrix[9][7] = 0;
+	AAmatrix[9][8] = 0.076981;	AAmatrix[9][9] = 0;			AAmatrix[9][10] = 2.55668;	AAmatrix[9][11] = 0.460857;
+	AAmatrix[9][12] = 3.33273;	AAmatrix[9][13] = 1.95195;	AAmatrix[9][14] = 0.119152;	AAmatrix[9][15] = 0.247955;
+	AAmatrix[9][16] = 1.90074;	AAmatrix[9][17] = 0;		AAmatrix[9][18] = 0.374834;	AAmatrix[9][19] = 8.81004;
+	AAmatrix[10][0] = 0.406431;	AAmatrix[10][1] = 0.154924;	AAmatrix[10][2] = 0.341113;	AAmatrix[10][3] = 0;
+	AAmatrix[10][4] = 0;		AAmatrix[10][5] = 0.730772;	AAmatrix[10][6] = 0.11288;	AAmatrix[10][7] = 0.071514;
+	AAmatrix[10][8] = 0.443504;	AAmatrix[10][9] = 2.55668;	AAmatrix[10][10] = 0;		AAmatrix[10][11] = 0.180629;
+	AAmatrix[10][12] = 5.23011;	AAmatrix[10][13] = 1.56516;	AAmatrix[10][14] = 0.316258;AAmatrix[10][15] = 0.171432;
+	AAmatrix[10][16] = 0.33109;	AAmatrix[10][17] = 0.461776;AAmatrix[10][18] = 0.286572;AAmatrix[10][19] = 1.74516;
+	AAmatrix[11][0] = 0.258635;	AAmatrix[11][1] = 4.61012;	AAmatrix[11][2] = 3.14837;	AAmatrix[11][3] = 0.716913;
+	AAmatrix[11][4] = 0;		AAmatrix[11][5] = 1.51908;	AAmatrix[11][6] = 0.830078;	AAmatrix[11][7] = 0.267683;
+	AAmatrix[11][8] = 0.270475;	AAmatrix[11][9] = 0.460857;	AAmatrix[11][10] = 0.180629;AAmatrix[11][11] = 0;
+	AAmatrix[11][12] = 2.41174;	AAmatrix[11][13] = 0;		AAmatrix[11][14] = 0.335419;AAmatrix[11][15] = 0.954557;
+	AAmatrix[11][16] = 1.3506;	AAmatrix[11][17] = 0;		AAmatrix[11][18] = 0.132142;AAmatrix[11][19] = 0.10385;
+	AAmatrix[12][0] = 0.71784;	AAmatrix[12][1] = 0.896321;	AAmatrix[12][2] = 0;		AAmatrix[12][3] = 0;
+	AAmatrix[12][4] = 0;		AAmatrix[12][5] = 1.1275;	AAmatrix[12][6] = 0.304803;	AAmatrix[12][7] = 0.170372;
+	AAmatrix[12][8] = 0;		AAmatrix[12][9] = 3.33273;	AAmatrix[12][10] = 5.23011;	AAmatrix[12][11] = 2.41174;
+	AAmatrix[12][12] = 0;		AAmatrix[12][13] = 0.92186;	AAmatrix[12][14] = 0.170205;AAmatrix[12][15] = 0.619951;
+	AAmatrix[12][16] = 1.03153;	AAmatrix[12][17] = 0;		AAmatrix[12][18] = 0;		AAmatrix[12][19] = 2.56596;
+	AAmatrix[13][0] = 0.183641;	AAmatrix[13][1] = 0.136906;	AAmatrix[13][2] = 0.138503;	AAmatrix[13][3] = 0;
+	AAmatrix[13][4] = 0;		AAmatrix[13][5] = 0;		AAmatrix[13][6] = 0;		AAmatrix[13][7] = 0.153478;
+	AAmatrix[13][8] = 0.475927;	AAmatrix[13][9] = 1.95195;	AAmatrix[13][10] = 1.56516;	AAmatrix[13][11] = 0;
+	AAmatrix[13][12] = 0.92186;	AAmatrix[13][13] = 0;		AAmatrix[13][14] = 0.110506;AAmatrix[13][15] = 0.459901;
+	AAmatrix[13][16] = 0.136655;AAmatrix[13][17] = 0.762354;AAmatrix[13][18] = 6.95263;	AAmatrix[13][19] = 0.123606;
+	AAmatrix[14][0] = 2.48592;	AAmatrix[14][1] = 1.02831;	AAmatrix[14][2] = 0.419244;	AAmatrix[14][3] = 0.13394;
+	AAmatrix[14][4] = 0.18755;	AAmatrix[14][5] = 1.52619;	AAmatrix[14][6] = 0.507003;	AAmatrix[14][7] = 0.347153;
+	AAmatrix[14][8] = 0.933709;	AAmatrix[14][9] = 0.119152;	AAmatrix[14][10] = 0.316258;AAmatrix[14][11] = 0.335419;
+	AAmatrix[14][12] = 0.170205;AAmatrix[14][13] = 0.110506;AAmatrix[14][14] = 0;		AAmatrix[14][15] = 2.4272;
+	AAmatrix[14][16] = 0.782857;AAmatrix[14][17] = 0;		AAmatrix[14][18] = 0;		AAmatrix[14][19] = 0.485026;
+	AAmatrix[15][0] = 4.05187;	AAmatrix[15][1] = 1.53159;	AAmatrix[15][2] = 4.88589;	AAmatrix[15][3] = 0.956097;
+	AAmatrix[15][4] = 1.59836;	AAmatrix[15][5] = 0.561828;	AAmatrix[15][6] = 0.793999;	AAmatrix[15][7] = 2.32224;
+	AAmatrix[15][8] = 0.353643;	AAmatrix[15][9] = 0.247955;	AAmatrix[15][10] = 0.171432;AAmatrix[15][11] = 0.954557;
+	AAmatrix[15][12] = 0.619951;AAmatrix[15][13] = 0.459901;AAmatrix[15][14] = 2.4272;	AAmatrix[15][15] = 0;
+	AAmatrix[15][16] = 5.43667;	AAmatrix[15][17] = 0.740819;AAmatrix[15][18] = 0.336289;AAmatrix[15][19] = 0.303836;
+	AAmatrix[16][0] = 3.68037;	AAmatrix[16][1] = 0.265745;	AAmatrix[16][2] = 2.2717;	AAmatrix[16][3] = 0.66093;
+	AAmatrix[16][4] = 0.162366;	AAmatrix[16][5] = 0.525651;	AAmatrix[16][6] = 0.340156;	AAmatrix[16][7] = 0.306662;
+	AAmatrix[16][8] = 0.226333;	AAmatrix[16][9] = 1.90074;	AAmatrix[16][10] = 0.33109;	AAmatrix[16][11] = 1.3506;
+	AAmatrix[16][12] = 1.03153;	AAmatrix[16][13] = 0.136655;AAmatrix[16][14] = 0.782857;AAmatrix[16][15] = 5.43667;
+	AAmatrix[16][16] = 0;		AAmatrix[16][17] = 0;		AAmatrix[16][18] = 0.417839;AAmatrix[16][19] = 1.562;
+	AAmatrix[17][0] = 0;		AAmatrix[17][1] = 2.00137;	AAmatrix[17][2] = 0.224968;	AAmatrix[17][3] = 0;
+	AAmatrix[17][4] = 0;		AAmatrix[17][5] = 0;		AAmatrix[17][6] = 0;		AAmatrix[17][7] = 0;
+	AAmatrix[17][8] = 0.270564;	AAmatrix[17][9] = 0;		AAmatrix[17][10] = 0.461776;AAmatrix[17][11] = 0;
+	AAmatrix[17][12] = 0;		AAmatrix[17][13] = 0.762354;AAmatrix[17][14] = 0;		AAmatrix[17][15] = 0.740819;
+	AAmatrix[17][16] = 0;		AAmatrix[17][17] = 0;		AAmatrix[17][18] = 0.60807;	AAmatrix[17][19] = 0;
+	AAmatrix[18][0] = 0.244139;	AAmatrix[18][1] = 0.078012;	AAmatrix[18][2] = 0.94694;	AAmatrix[18][3] = 0;
+	AAmatrix[18][4] = 0.953164;	AAmatrix[18][5] = 0;		AAmatrix[18][6] = 0.214717;	AAmatrix[18][7] = 0;
+	AAmatrix[18][8] = 1.2654;	AAmatrix[18][9] = 0.374834;	AAmatrix[18][10] = 0.286572;AAmatrix[18][11] = 0.132142;
+	AAmatrix[18][12] = 0;		AAmatrix[18][13] = 6.95263;	AAmatrix[18][14] = 0;		AAmatrix[18][15] = 0.336289;
+	AAmatrix[18][16] = 0.417839;AAmatrix[18][17] = 0.60807;	AAmatrix[18][18] = 0;		AAmatrix[18][19] = 0.279379;
+	AAmatrix[19][0] = 2.05956;	AAmatrix[19][1] = 0.240368;	AAmatrix[19][2] = 0.158067;	AAmatrix[19][3] = 0.178316;
+	AAmatrix[19][4] = 0.484678;	AAmatrix[19][5] = 0.346983;	AAmatrix[19][6] = 0.36725;	AAmatrix[19][7] = 0.538165;
+	AAmatrix[19][8] = 0.438715;	AAmatrix[19][9] = 8.81004;	AAmatrix[19][10] = 1.74516;	AAmatrix[19][11] = 0.10385;
+	AAmatrix[19][12] = 2.56596;	AAmatrix[19][13] = 0.123606;AAmatrix[19][14] = 0.485026;AAmatrix[19][15] = 0.303836;
+	AAmatrix[19][16] = 1.562;	AAmatrix[19][17] = 0;		AAmatrix[19][18] = 0.279379;AAmatrix[19][19] = 0;
 
 	AAPi[0] = 0.087127;
 	AAPi[1] = 0.040904;
@@ -1639,106 +1639,106 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 
 
 	/*Dayhoff DCMUT Test*/
-	AAmatrixT[0][0] = 0;			AAmatrixT[0][1] = 26.7828;		AAmatrixT[0][2] = 98.4474;		AAmatrixT[0][3] = 119.981;	
-	AAmatrixT[0][4] = 36.0016;		AAmatrixT[0][5] = 88.7753;		AAmatrixT[0][6] = 196.117;		AAmatrixT[0][7] = 238.611;	
-	AAmatrixT[0][8] = 22.8116;		AAmatrixT[0][9] = 65.3416;		AAmatrixT[0][10] = 40.6431;		AAmatrixT[0][11] = 25.8635;	
-	AAmatrixT[0][12] = 71.784;		AAmatrixT[0][13] = 18.3641;		AAmatrixT[0][14] = 248.592;		AAmatrixT[0][15] = 405.187;	
-	AAmatrixT[0][16] = 368.036;		AAmatrixT[0][17] = 0;			AAmatrixT[0][18] = 24.4139;		AAmatrixT[0][19] = 205.956;	
-	AAmatrixT[1][0] = 26.7828;		AAmatrixT[1][1] = 0;			AAmatrixT[1][2] = 32.7059;		AAmatrixT[1][3] = 0;	
-	AAmatrixT[1][4] = 23.2374;		AAmatrixT[1][5] = 243.994;		AAmatrixT[1][6] = 0;			AAmatrixT[1][7] = 8.7791;	
-	AAmatrixT[1][8] = 238.315;		AAmatrixT[1][9] = 63.2629;		AAmatrixT[1][10] = 15.4924;		AAmatrixT[1][11] = 461.012;	
-	AAmatrixT[1][12] = 89.6321;		AAmatrixT[1][13] = 13.6906;		AAmatrixT[1][14] = 102.831;		AAmatrixT[1][15] = 153.159;	
-	AAmatrixT[1][16] = 26.5745;		AAmatrixT[1][17] = 200.137;		AAmatrixT[1][18] = 7.8012;		AAmatrixT[1][19] = 24.0368;	
-	AAmatrixT[2][0] = 98.4474;		AAmatrixT[2][1] = 32.7059;		AAmatrixT[2][2] = 0;			AAmatrixT[2][3] = 893.152;	
-	AAmatrixT[2][4] = 0;			AAmatrixT[2][5] = 102.851;		AAmatrixT[2][6] = 149.341;		AAmatrixT[2][7] = 138.535;	
-	AAmatrixT[2][8] = 529.002;		AAmatrixT[2][9] = 76.8024;		AAmatrixT[2][10] = 34.1113;		AAmatrixT[2][11] = 314.837;	
-	AAmatrixT[2][12] = 0;			AAmatrixT[2][13] = 13.8503;		AAmatrixT[2][14] = 41.9244;		AAmatrixT[2][15] = 488.589;	
-	AAmatrixT[2][16] = 227.17;		AAmatrixT[2][17] = 22.4968;		AAmatrixT[2][18] = 94.694;		AAmatrixT[2][19] = 15.8067;	
-	AAmatrixT[3][0] = 119.981;		AAmatrixT[3][1] = 0;			AAmatrixT[3][2] = 893.152;		AAmatrixT[3][3] = 0;	
-	AAmatrixT[3][4] = 0;			AAmatrixT[3][5] = 134.855;		AAmatrixT[3][6] = 1138.87;		AAmatrixT[3][7] = 124.098;	
-	AAmatrixT[3][8] = 86.8241;		AAmatrixT[3][9] = 23.9248;		AAmatrixT[3][10] = 0;			AAmatrixT[3][11] = 71.6913;	
-	AAmatrixT[3][12] = 0;			AAmatrixT[3][13] = 0;			AAmatrixT[3][14] = 13.394;		AAmatrixT[3][15] = 95.6097;	
-	AAmatrixT[3][16] = 66.093;		AAmatrixT[3][17] = 0;			AAmatrixT[3][18] = 0;			AAmatrixT[3][19] = 17.8316;	
-	AAmatrixT[4][0] = 36.0016;		AAmatrixT[4][1] = 23.2374;		AAmatrixT[4][2] = 0;			AAmatrixT[4][3] = 0;	
-	AAmatrixT[4][4] = 0;			AAmatrixT[4][5] = 0;			AAmatrixT[4][6] = 0;			AAmatrixT[4][7] = 10.7278;	
-	AAmatrixT[4][8] = 28.2729;		AAmatrixT[4][9] = 43.8074;		AAmatrixT[4][10] = 0;			AAmatrixT[4][11] = 0;	
-	AAmatrixT[4][12] = 0;			AAmatrixT[4][13] = 0;			AAmatrixT[4][14] = 18.755;		AAmatrixT[4][15] = 159.836;	
-	AAmatrixT[4][16] = 16.2366;		AAmatrixT[4][17] = 0;			AAmatrixT[4][18] = 95.3164;		AAmatrixT[4][19] = 48.4678;	
-	AAmatrixT[5][0] = 88.7753;		AAmatrixT[5][1] = 243.994;		AAmatrixT[5][2] = 102.851;		AAmatrixT[5][3] = 134.855;	
-	AAmatrixT[5][4] = 0;			AAmatrixT[5][5] = 0;			AAmatrixT[5][6] = 708.602;		AAmatrixT[5][7] = 28.1581;	
-	AAmatrixT[5][8] = 601.161;		AAmatrixT[5][9] = 18.0393;		AAmatrixT[5][10] = 73.0772;		AAmatrixT[5][11] = 151.908;	
-	AAmatrixT[5][12] = 112.75;		AAmatrixT[5][13] = 0;			AAmatrixT[5][14] = 152.619;		AAmatrixT[5][15] = 56.1828;	
-	AAmatrixT[5][16] = 52.5651;		AAmatrixT[5][17] = 0;			AAmatrixT[5][18] = 0;			AAmatrixT[5][19] = 34.6983;	
-	AAmatrixT[6][0] = 196.117;		AAmatrixT[6][1] = 0;			AAmatrixT[6][2] = 149.341;		AAmatrixT[6][3] = 1138.87;	
-	AAmatrixT[6][4] = 0;			AAmatrixT[6][5] = 708.602;		AAmatrixT[6][6] = 0;			AAmatrixT[6][7] = 81.1907;	
-	AAmatrixT[6][8] = 43.9469;		AAmatrixT[6][9] = 60.9526;		AAmatrixT[6][10] = 11.288;		AAmatrixT[6][11] = 83.0078;	
-	AAmatrixT[6][12] = 30.4803;		AAmatrixT[6][13] = 0;			AAmatrixT[6][14] = 50.7003;		AAmatrixT[6][15] = 79.3999;	
-	AAmatrixT[6][16] = 34.0156;		AAmatrixT[6][17] = 0;			AAmatrixT[6][18] = 21.4717;		AAmatrixT[6][19] = 36.725;	
-	AAmatrixT[7][0] = 238.611;		AAmatrixT[7][1] = 8.7791;		AAmatrixT[7][2] = 138.535;		AAmatrixT[7][3] = 124.098;	
-	AAmatrixT[7][4] = 10.7278;		AAmatrixT[7][5] = 28.1581;		AAmatrixT[7][6] = 81.1907;		AAmatrixT[7][7] = 0;	
-	AAmatrixT[7][8] = 10.6802;		AAmatrixT[7][9] = 0;			AAmatrixT[7][10] = 7.1514;		AAmatrixT[7][11] = 26.7683;	
-	AAmatrixT[7][12] = 17.0372;		AAmatrixT[7][13] = 15.3478;		AAmatrixT[7][14] = 34.7153;		AAmatrixT[7][15] = 232.224;	
-	AAmatrixT[7][16] = 30.6662;		AAmatrixT[7][17] = 0;			AAmatrixT[7][18] = 0;			AAmatrixT[7][19] = 53.8165;	
-	AAmatrixT[8][0] = 22.8116;		AAmatrixT[8][1] = 238.315;		AAmatrixT[8][2] = 529.002;		AAmatrixT[8][3] = 86.8241;	
-	AAmatrixT[8][4] = 28.2729;		AAmatrixT[8][5] = 601.161;		AAmatrixT[8][6] = 43.9469;		AAmatrixT[8][7] = 10.6802;	
-	AAmatrixT[8][8] = 0;			AAmatrixT[8][9] = 7.6981;		AAmatrixT[8][10] = 44.3504;		AAmatrixT[8][11] = 27.0475;	
-	AAmatrixT[8][12] = 0;			AAmatrixT[8][13] = 47.5927;		AAmatrixT[8][14] = 93.3709;		AAmatrixT[8][15] = 35.3643;	
-	AAmatrixT[8][16] = 22.6333;		AAmatrixT[8][17] = 27.0564;		AAmatrixT[8][18] = 126.54;		AAmatrixT[8][19] = 43.8715;	
-	AAmatrixT[9][0] = 65.3416;		AAmatrixT[9][1] = 63.2629;		AAmatrixT[9][2] = 76.8024;		AAmatrixT[9][3] = 23.9248;	
-	AAmatrixT[9][4] = 43.8074;		AAmatrixT[9][5] = 18.0393;		AAmatrixT[9][6] = 60.9526;		AAmatrixT[9][7] = 0;	
-	AAmatrixT[9][8] = 7.6981;		AAmatrixT[9][9] = 0;			AAmatrixT[9][10] = 255.668;		AAmatrixT[9][11] = 46.0857;	
-	AAmatrixT[9][12] = 333.273;		AAmatrixT[9][13] = 195.195;		AAmatrixT[9][14] = 11.9152;		AAmatrixT[9][15] = 24.7955;	
-	AAmatrixT[9][16] = 190.074;		AAmatrixT[9][17] = 0;			AAmatrixT[9][18] = 37.4834;		AAmatrixT[9][19] = 881.004;	
-	AAmatrixT[10][0] = 40.6431;		AAmatrixT[10][1] = 15.4924;		AAmatrixT[10][2] = 34.1113;		AAmatrixT[10][3] = 0;	
-	AAmatrixT[10][4] = 0;			AAmatrixT[10][5] = 73.0772;		AAmatrixT[10][6] = 11.288;		AAmatrixT[10][7] = 7.1514;	
-	AAmatrixT[10][8] = 44.3504;		AAmatrixT[10][9] = 255.668;		AAmatrixT[10][10] = 0;			AAmatrixT[10][11] = 18.0629;	
-	AAmatrixT[10][12] = 523.011;	AAmatrixT[10][13] = 156.516;	AAmatrixT[10][14] = 31.6258;	AAmatrixT[10][15] = 17.1432;	
-	AAmatrixT[10][16] = 33.109;		AAmatrixT[10][17] = 46.1776;	AAmatrixT[10][18] = 28.6572;	AAmatrixT[10][19] = 174.516;	
-	AAmatrixT[11][0] = 25.8635;		AAmatrixT[11][1] = 461.012;		AAmatrixT[11][2] = 314.837;		AAmatrixT[11][3] = 71.6913;	
-	AAmatrixT[11][4] = 0;			AAmatrixT[11][5] = 151.908;		AAmatrixT[11][6] = 83.0078;		AAmatrixT[11][7] = 26.7683;	
-	AAmatrixT[11][8] = 27.0475;		AAmatrixT[11][9] = 46.0857;		AAmatrixT[11][10] = 18.0629;	AAmatrixT[11][11] = 0;	
-	AAmatrixT[11][12] = 241.174;	AAmatrixT[11][13] = 0;			AAmatrixT[11][14] = 33.5419;	AAmatrixT[11][15] = 95.4557;	
-	AAmatrixT[11][16] = 135.06;		AAmatrixT[11][17] = 0;			AAmatrixT[11][18] = 13.2142;	AAmatrixT[11][19] = 10.385;	
-	AAmatrixT[12][0] = 71.784;		AAmatrixT[12][1] = 89.6321;		AAmatrixT[12][2] = 0;			AAmatrixT[12][3] = 0;	
-	AAmatrixT[12][4] = 0;			AAmatrixT[12][5] = 112.75;		AAmatrixT[12][6] = 30.4803;		AAmatrixT[12][7] = 17.0372;	
-	AAmatrixT[12][8] = 0;			AAmatrixT[12][9] = 333.273;		AAmatrixT[12][10] = 523.011;	AAmatrixT[12][11] = 241.174;	
-	AAmatrixT[12][12] = 0;			AAmatrixT[12][13] = 92.186;		AAmatrixT[12][14] = 17.0205;	AAmatrixT[12][15] = 61.9951;	
-	AAmatrixT[12][16] = 103.153;	AAmatrixT[12][17] = 0;			AAmatrixT[12][18] = 0;			AAmatrixT[12][19] = 256.596;	
-	AAmatrixT[13][0] = 18.3641;		AAmatrixT[13][1] = 13.6906;		AAmatrixT[13][2] = 13.8503;		AAmatrixT[13][3] = 0;	
-	AAmatrixT[13][4] = 0;			AAmatrixT[13][5] = 0;			AAmatrixT[13][6] = 0;			AAmatrixT[13][7] = 15.3478;	
-	AAmatrixT[13][8] = 47.5927;		AAmatrixT[13][9] = 195.195;		AAmatrixT[13][10] = 156.516;	AAmatrixT[13][11] = 0;	
-	AAmatrixT[13][12] = 92.186;		AAmatrixT[13][13] = 0;			AAmatrixT[13][14] = 11.0506;	AAmatrixT[13][15] = 45.9901;	
-	AAmatrixT[13][16] = 13.6655;	AAmatrixT[13][17] = 76.2354;	AAmatrixT[13][18] = 695.263;	AAmatrixT[13][19] = 12.3606;	
-	AAmatrixT[14][0] = 248.592;		AAmatrixT[14][1] = 102.831;		AAmatrixT[14][2] = 41.9244;		AAmatrixT[14][3] = 13.394;	
-	AAmatrixT[14][4] = 18.755;		AAmatrixT[14][5] = 152.619;		AAmatrixT[14][6] = 50.7003;		AAmatrixT[14][7] = 34.7153;	
-	AAmatrixT[14][8] = 93.3709;		AAmatrixT[14][9] = 11.9152;		AAmatrixT[14][10] = 31.6258;	AAmatrixT[14][11] = 33.5419;	
-	AAmatrixT[14][12] = 17.0205;	AAmatrixT[14][13] = 11.0506;	AAmatrixT[14][14] = 0;			AAmatrixT[14][15] = 242.72;	
-	AAmatrixT[14][16] = 78.2857;	AAmatrixT[14][17] = 0;			AAmatrixT[14][18] = 0;			AAmatrixT[14][19] = 48.5026;	
-	AAmatrixT[15][0] = 405.187;		AAmatrixT[15][1] = 153.159;		AAmatrixT[15][2] = 488.589;		AAmatrixT[15][3] = 95.6097;	
-	AAmatrixT[15][4] = 159.836;		AAmatrixT[15][5] = 56.1828;		AAmatrixT[15][6] = 79.3999;		AAmatrixT[15][7] = 232.224;	
-	AAmatrixT[15][8] = 35.3643;		AAmatrixT[15][9] = 24.7955;		AAmatrixT[15][10] = 17.1432;	AAmatrixT[15][11] = 95.4557;	
-	AAmatrixT[15][12] = 61.9951;	AAmatrixT[15][13] = 45.9901;	AAmatrixT[15][14] = 242.72;		AAmatrixT[15][15] = 0;	
-	AAmatrixT[15][16] = 543.667;	AAmatrixT[15][17] = 74.0819;	AAmatrixT[15][18] = 33.6289;	AAmatrixT[15][19] = 30.3836;	
-	AAmatrixT[16][0] = 368.036;		AAmatrixT[16][1] = 26.5745;		AAmatrixT[16][2] = 227.17;		AAmatrixT[16][3] = 66.093;	
-	AAmatrixT[16][4] = 16.2366;		AAmatrixT[16][5] = 52.5651;		AAmatrixT[16][6] = 34.0156;		AAmatrixT[16][7] = 30.6662;	
-	AAmatrixT[16][8] = 22.6333;		AAmatrixT[16][9] = 190.074;		AAmatrixT[16][10] = 33.109;		AAmatrixT[16][11] = 135.06;	
-	AAmatrixT[16][12] = 103.153;	AAmatrixT[16][13] = 13.6655;	AAmatrixT[16][14] = 78.2857;	AAmatrixT[16][15] = 543.667;	
-	AAmatrixT[16][16] = 0;			AAmatrixT[16][17] = 0;			AAmatrixT[16][18] = 41.7839;	AAmatrixT[16][19] = 156.2;	
-	AAmatrixT[17][0] = 0;			AAmatrixT[17][1] = 200.137;		AAmatrixT[17][2] = 22.4968;		AAmatrixT[17][3] = 0;	
-	AAmatrixT[17][4] = 0;			AAmatrixT[17][5] = 0;			AAmatrixT[17][6] = 0;			AAmatrixT[17][7] = 0;	
-	AAmatrixT[17][8] = 27.0564;		AAmatrixT[17][9] = 0;			AAmatrixT[17][10] = 46.1776;	AAmatrixT[17][11] = 0;	
-	AAmatrixT[17][12] = 0;			AAmatrixT[17][13] = 76.2354;	AAmatrixT[17][14] = 0;			AAmatrixT[17][15] = 74.0819;	
-	AAmatrixT[17][16] = 0;			AAmatrixT[17][17] = 0;			AAmatrixT[17][18] = 60.807;		AAmatrixT[17][19] = 0;	
-	AAmatrixT[18][0] = 24.4139;		AAmatrixT[18][1] = 7.8012;		AAmatrixT[18][2] = 94.694;		AAmatrixT[18][3] = 0;	
-	AAmatrixT[18][4] = 95.3164;		AAmatrixT[18][5] = 0;			AAmatrixT[18][6] = 21.4717;		AAmatrixT[18][7] = 0;	
-	AAmatrixT[18][8] = 126.54;		AAmatrixT[18][9] = 37.4834;		AAmatrixT[18][10] = 28.6572;	AAmatrixT[18][11] = 13.2142;	
-	AAmatrixT[18][12] = 0;			AAmatrixT[18][13] = 695.263;	AAmatrixT[18][14] = 0;			AAmatrixT[18][15] = 33.6289;	
-	AAmatrixT[18][16] = 41.7839;	AAmatrixT[18][17] = 60.807;		AAmatrixT[18][18] = 0;			AAmatrixT[18][19] = 27.9379;	
-	AAmatrixT[19][0] = 205.956;		AAmatrixT[19][1] = 24.0368;		AAmatrixT[19][2] = 15.8067;		AAmatrixT[19][3] = 17.8316;	
-	AAmatrixT[19][4] = 48.4678;		AAmatrixT[19][5] = 34.6983;		AAmatrixT[19][6] = 36.725;		AAmatrixT[19][7] = 53.8165;	
-	AAmatrixT[19][8] = 43.8715;		AAmatrixT[19][9] = 881.004;		AAmatrixT[19][10] = 174.516;	AAmatrixT[19][11] = 10.385;	
-	AAmatrixT[19][12] = 256.596;	AAmatrixT[19][13] = 12.3606;	AAmatrixT[19][14] = 48.5026;	AAmatrixT[19][15] = 30.3836;	
-	AAmatrixT[19][16] = 156.2;		AAmatrixT[19][17] = 0;			AAmatrixT[19][18] = 27.9379;	AAmatrixT[19][19] = 0;	
+	AAmatrixT[0][0] = 0;			AAmatrixT[0][1] = 26.7828;		AAmatrixT[0][2] = 98.4474;		AAmatrixT[0][3] = 119.981;
+	AAmatrixT[0][4] = 36.0016;		AAmatrixT[0][5] = 88.7753;		AAmatrixT[0][6] = 196.117;		AAmatrixT[0][7] = 238.611;
+	AAmatrixT[0][8] = 22.8116;		AAmatrixT[0][9] = 65.3416;		AAmatrixT[0][10] = 40.6431;		AAmatrixT[0][11] = 25.8635;
+	AAmatrixT[0][12] = 71.784;		AAmatrixT[0][13] = 18.3641;		AAmatrixT[0][14] = 248.592;		AAmatrixT[0][15] = 405.187;
+	AAmatrixT[0][16] = 368.036;		AAmatrixT[0][17] = 0;			AAmatrixT[0][18] = 24.4139;		AAmatrixT[0][19] = 205.956;
+	AAmatrixT[1][0] = 26.7828;		AAmatrixT[1][1] = 0;			AAmatrixT[1][2] = 32.7059;		AAmatrixT[1][3] = 0;
+	AAmatrixT[1][4] = 23.2374;		AAmatrixT[1][5] = 243.994;		AAmatrixT[1][6] = 0;			AAmatrixT[1][7] = 8.7791;
+	AAmatrixT[1][8] = 238.315;		AAmatrixT[1][9] = 63.2629;		AAmatrixT[1][10] = 15.4924;		AAmatrixT[1][11] = 461.012;
+	AAmatrixT[1][12] = 89.6321;		AAmatrixT[1][13] = 13.6906;		AAmatrixT[1][14] = 102.831;		AAmatrixT[1][15] = 153.159;
+	AAmatrixT[1][16] = 26.5745;		AAmatrixT[1][17] = 200.137;		AAmatrixT[1][18] = 7.8012;		AAmatrixT[1][19] = 24.0368;
+	AAmatrixT[2][0] = 98.4474;		AAmatrixT[2][1] = 32.7059;		AAmatrixT[2][2] = 0;			AAmatrixT[2][3] = 893.152;
+	AAmatrixT[2][4] = 0;			AAmatrixT[2][5] = 102.851;		AAmatrixT[2][6] = 149.341;		AAmatrixT[2][7] = 138.535;
+	AAmatrixT[2][8] = 529.002;		AAmatrixT[2][9] = 76.8024;		AAmatrixT[2][10] = 34.1113;		AAmatrixT[2][11] = 314.837;
+	AAmatrixT[2][12] = 0;			AAmatrixT[2][13] = 13.8503;		AAmatrixT[2][14] = 41.9244;		AAmatrixT[2][15] = 488.589;
+	AAmatrixT[2][16] = 227.17;		AAmatrixT[2][17] = 22.4968;		AAmatrixT[2][18] = 94.694;		AAmatrixT[2][19] = 15.8067;
+	AAmatrixT[3][0] = 119.981;		AAmatrixT[3][1] = 0;			AAmatrixT[3][2] = 893.152;		AAmatrixT[3][3] = 0;
+	AAmatrixT[3][4] = 0;			AAmatrixT[3][5] = 134.855;		AAmatrixT[3][6] = 1138.87;		AAmatrixT[3][7] = 124.098;
+	AAmatrixT[3][8] = 86.8241;		AAmatrixT[3][9] = 23.9248;		AAmatrixT[3][10] = 0;			AAmatrixT[3][11] = 71.6913;
+	AAmatrixT[3][12] = 0;			AAmatrixT[3][13] = 0;			AAmatrixT[3][14] = 13.394;		AAmatrixT[3][15] = 95.6097;
+	AAmatrixT[3][16] = 66.093;		AAmatrixT[3][17] = 0;			AAmatrixT[3][18] = 0;			AAmatrixT[3][19] = 17.8316;
+	AAmatrixT[4][0] = 36.0016;		AAmatrixT[4][1] = 23.2374;		AAmatrixT[4][2] = 0;			AAmatrixT[4][3] = 0;
+	AAmatrixT[4][4] = 0;			AAmatrixT[4][5] = 0;			AAmatrixT[4][6] = 0;			AAmatrixT[4][7] = 10.7278;
+	AAmatrixT[4][8] = 28.2729;		AAmatrixT[4][9] = 43.8074;		AAmatrixT[4][10] = 0;			AAmatrixT[4][11] = 0;
+	AAmatrixT[4][12] = 0;			AAmatrixT[4][13] = 0;			AAmatrixT[4][14] = 18.755;		AAmatrixT[4][15] = 159.836;
+	AAmatrixT[4][16] = 16.2366;		AAmatrixT[4][17] = 0;			AAmatrixT[4][18] = 95.3164;		AAmatrixT[4][19] = 48.4678;
+	AAmatrixT[5][0] = 88.7753;		AAmatrixT[5][1] = 243.994;		AAmatrixT[5][2] = 102.851;		AAmatrixT[5][3] = 134.855;
+	AAmatrixT[5][4] = 0;			AAmatrixT[5][5] = 0;			AAmatrixT[5][6] = 708.602;		AAmatrixT[5][7] = 28.1581;
+	AAmatrixT[5][8] = 601.161;		AAmatrixT[5][9] = 18.0393;		AAmatrixT[5][10] = 73.0772;		AAmatrixT[5][11] = 151.908;
+	AAmatrixT[5][12] = 112.75;		AAmatrixT[5][13] = 0;			AAmatrixT[5][14] = 152.619;		AAmatrixT[5][15] = 56.1828;
+	AAmatrixT[5][16] = 52.5651;		AAmatrixT[5][17] = 0;			AAmatrixT[5][18] = 0;			AAmatrixT[5][19] = 34.6983;
+	AAmatrixT[6][0] = 196.117;		AAmatrixT[6][1] = 0;			AAmatrixT[6][2] = 149.341;		AAmatrixT[6][3] = 1138.87;
+	AAmatrixT[6][4] = 0;			AAmatrixT[6][5] = 708.602;		AAmatrixT[6][6] = 0;			AAmatrixT[6][7] = 81.1907;
+	AAmatrixT[6][8] = 43.9469;		AAmatrixT[6][9] = 60.9526;		AAmatrixT[6][10] = 11.288;		AAmatrixT[6][11] = 83.0078;
+	AAmatrixT[6][12] = 30.4803;		AAmatrixT[6][13] = 0;			AAmatrixT[6][14] = 50.7003;		AAmatrixT[6][15] = 79.3999;
+	AAmatrixT[6][16] = 34.0156;		AAmatrixT[6][17] = 0;			AAmatrixT[6][18] = 21.4717;		AAmatrixT[6][19] = 36.725;
+	AAmatrixT[7][0] = 238.611;		AAmatrixT[7][1] = 8.7791;		AAmatrixT[7][2] = 138.535;		AAmatrixT[7][3] = 124.098;
+	AAmatrixT[7][4] = 10.7278;		AAmatrixT[7][5] = 28.1581;		AAmatrixT[7][6] = 81.1907;		AAmatrixT[7][7] = 0;
+	AAmatrixT[7][8] = 10.6802;		AAmatrixT[7][9] = 0;			AAmatrixT[7][10] = 7.1514;		AAmatrixT[7][11] = 26.7683;
+	AAmatrixT[7][12] = 17.0372;		AAmatrixT[7][13] = 15.3478;		AAmatrixT[7][14] = 34.7153;		AAmatrixT[7][15] = 232.224;
+	AAmatrixT[7][16] = 30.6662;		AAmatrixT[7][17] = 0;			AAmatrixT[7][18] = 0;			AAmatrixT[7][19] = 53.8165;
+	AAmatrixT[8][0] = 22.8116;		AAmatrixT[8][1] = 238.315;		AAmatrixT[8][2] = 529.002;		AAmatrixT[8][3] = 86.8241;
+	AAmatrixT[8][4] = 28.2729;		AAmatrixT[8][5] = 601.161;		AAmatrixT[8][6] = 43.9469;		AAmatrixT[8][7] = 10.6802;
+	AAmatrixT[8][8] = 0;			AAmatrixT[8][9] = 7.6981;		AAmatrixT[8][10] = 44.3504;		AAmatrixT[8][11] = 27.0475;
+	AAmatrixT[8][12] = 0;			AAmatrixT[8][13] = 47.5927;		AAmatrixT[8][14] = 93.3709;		AAmatrixT[8][15] = 35.3643;
+	AAmatrixT[8][16] = 22.6333;		AAmatrixT[8][17] = 27.0564;		AAmatrixT[8][18] = 126.54;		AAmatrixT[8][19] = 43.8715;
+	AAmatrixT[9][0] = 65.3416;		AAmatrixT[9][1] = 63.2629;		AAmatrixT[9][2] = 76.8024;		AAmatrixT[9][3] = 23.9248;
+	AAmatrixT[9][4] = 43.8074;		AAmatrixT[9][5] = 18.0393;		AAmatrixT[9][6] = 60.9526;		AAmatrixT[9][7] = 0;
+	AAmatrixT[9][8] = 7.6981;		AAmatrixT[9][9] = 0;			AAmatrixT[9][10] = 255.668;		AAmatrixT[9][11] = 46.0857;
+	AAmatrixT[9][12] = 333.273;		AAmatrixT[9][13] = 195.195;		AAmatrixT[9][14] = 11.9152;		AAmatrixT[9][15] = 24.7955;
+	AAmatrixT[9][16] = 190.074;		AAmatrixT[9][17] = 0;			AAmatrixT[9][18] = 37.4834;		AAmatrixT[9][19] = 881.004;
+	AAmatrixT[10][0] = 40.6431;		AAmatrixT[10][1] = 15.4924;		AAmatrixT[10][2] = 34.1113;		AAmatrixT[10][3] = 0;
+	AAmatrixT[10][4] = 0;			AAmatrixT[10][5] = 73.0772;		AAmatrixT[10][6] = 11.288;		AAmatrixT[10][7] = 7.1514;
+	AAmatrixT[10][8] = 44.3504;		AAmatrixT[10][9] = 255.668;		AAmatrixT[10][10] = 0;			AAmatrixT[10][11] = 18.0629;
+	AAmatrixT[10][12] = 523.011;	AAmatrixT[10][13] = 156.516;	AAmatrixT[10][14] = 31.6258;	AAmatrixT[10][15] = 17.1432;
+	AAmatrixT[10][16] = 33.109;		AAmatrixT[10][17] = 46.1776;	AAmatrixT[10][18] = 28.6572;	AAmatrixT[10][19] = 174.516;
+	AAmatrixT[11][0] = 25.8635;		AAmatrixT[11][1] = 461.012;		AAmatrixT[11][2] = 314.837;		AAmatrixT[11][3] = 71.6913;
+	AAmatrixT[11][4] = 0;			AAmatrixT[11][5] = 151.908;		AAmatrixT[11][6] = 83.0078;		AAmatrixT[11][7] = 26.7683;
+	AAmatrixT[11][8] = 27.0475;		AAmatrixT[11][9] = 46.0857;		AAmatrixT[11][10] = 18.0629;	AAmatrixT[11][11] = 0;
+	AAmatrixT[11][12] = 241.174;	AAmatrixT[11][13] = 0;			AAmatrixT[11][14] = 33.5419;	AAmatrixT[11][15] = 95.4557;
+	AAmatrixT[11][16] = 135.06;		AAmatrixT[11][17] = 0;			AAmatrixT[11][18] = 13.2142;	AAmatrixT[11][19] = 10.385;
+	AAmatrixT[12][0] = 71.784;		AAmatrixT[12][1] = 89.6321;		AAmatrixT[12][2] = 0;			AAmatrixT[12][3] = 0;
+	AAmatrixT[12][4] = 0;			AAmatrixT[12][5] = 112.75;		AAmatrixT[12][6] = 30.4803;		AAmatrixT[12][7] = 17.0372;
+	AAmatrixT[12][8] = 0;			AAmatrixT[12][9] = 333.273;		AAmatrixT[12][10] = 523.011;	AAmatrixT[12][11] = 241.174;
+	AAmatrixT[12][12] = 0;			AAmatrixT[12][13] = 92.186;		AAmatrixT[12][14] = 17.0205;	AAmatrixT[12][15] = 61.9951;
+	AAmatrixT[12][16] = 103.153;	AAmatrixT[12][17] = 0;			AAmatrixT[12][18] = 0;			AAmatrixT[12][19] = 256.596;
+	AAmatrixT[13][0] = 18.3641;		AAmatrixT[13][1] = 13.6906;		AAmatrixT[13][2] = 13.8503;		AAmatrixT[13][3] = 0;
+	AAmatrixT[13][4] = 0;			AAmatrixT[13][5] = 0;			AAmatrixT[13][6] = 0;			AAmatrixT[13][7] = 15.3478;
+	AAmatrixT[13][8] = 47.5927;		AAmatrixT[13][9] = 195.195;		AAmatrixT[13][10] = 156.516;	AAmatrixT[13][11] = 0;
+	AAmatrixT[13][12] = 92.186;		AAmatrixT[13][13] = 0;			AAmatrixT[13][14] = 11.0506;	AAmatrixT[13][15] = 45.9901;
+	AAmatrixT[13][16] = 13.6655;	AAmatrixT[13][17] = 76.2354;	AAmatrixT[13][18] = 695.263;	AAmatrixT[13][19] = 12.3606;
+	AAmatrixT[14][0] = 248.592;		AAmatrixT[14][1] = 102.831;		AAmatrixT[14][2] = 41.9244;		AAmatrixT[14][3] = 13.394;
+	AAmatrixT[14][4] = 18.755;		AAmatrixT[14][5] = 152.619;		AAmatrixT[14][6] = 50.7003;		AAmatrixT[14][7] = 34.7153;
+	AAmatrixT[14][8] = 93.3709;		AAmatrixT[14][9] = 11.9152;		AAmatrixT[14][10] = 31.6258;	AAmatrixT[14][11] = 33.5419;
+	AAmatrixT[14][12] = 17.0205;	AAmatrixT[14][13] = 11.0506;	AAmatrixT[14][14] = 0;			AAmatrixT[14][15] = 242.72;
+	AAmatrixT[14][16] = 78.2857;	AAmatrixT[14][17] = 0;			AAmatrixT[14][18] = 0;			AAmatrixT[14][19] = 48.5026;
+	AAmatrixT[15][0] = 405.187;		AAmatrixT[15][1] = 153.159;		AAmatrixT[15][2] = 488.589;		AAmatrixT[15][3] = 95.6097;
+	AAmatrixT[15][4] = 159.836;		AAmatrixT[15][5] = 56.1828;		AAmatrixT[15][6] = 79.3999;		AAmatrixT[15][7] = 232.224;
+	AAmatrixT[15][8] = 35.3643;		AAmatrixT[15][9] = 24.7955;		AAmatrixT[15][10] = 17.1432;	AAmatrixT[15][11] = 95.4557;
+	AAmatrixT[15][12] = 61.9951;	AAmatrixT[15][13] = 45.9901;	AAmatrixT[15][14] = 242.72;		AAmatrixT[15][15] = 0;
+	AAmatrixT[15][16] = 543.667;	AAmatrixT[15][17] = 74.0819;	AAmatrixT[15][18] = 33.6289;	AAmatrixT[15][19] = 30.3836;
+	AAmatrixT[16][0] = 368.036;		AAmatrixT[16][1] = 26.5745;		AAmatrixT[16][2] = 227.17;		AAmatrixT[16][3] = 66.093;
+	AAmatrixT[16][4] = 16.2366;		AAmatrixT[16][5] = 52.5651;		AAmatrixT[16][6] = 34.0156;		AAmatrixT[16][7] = 30.6662;
+	AAmatrixT[16][8] = 22.6333;		AAmatrixT[16][9] = 190.074;		AAmatrixT[16][10] = 33.109;		AAmatrixT[16][11] = 135.06;
+	AAmatrixT[16][12] = 103.153;	AAmatrixT[16][13] = 13.6655;	AAmatrixT[16][14] = 78.2857;	AAmatrixT[16][15] = 543.667;
+	AAmatrixT[16][16] = 0;			AAmatrixT[16][17] = 0;			AAmatrixT[16][18] = 41.7839;	AAmatrixT[16][19] = 156.2;
+	AAmatrixT[17][0] = 0;			AAmatrixT[17][1] = 200.137;		AAmatrixT[17][2] = 22.4968;		AAmatrixT[17][3] = 0;
+	AAmatrixT[17][4] = 0;			AAmatrixT[17][5] = 0;			AAmatrixT[17][6] = 0;			AAmatrixT[17][7] = 0;
+	AAmatrixT[17][8] = 27.0564;		AAmatrixT[17][9] = 0;			AAmatrixT[17][10] = 46.1776;	AAmatrixT[17][11] = 0;
+	AAmatrixT[17][12] = 0;			AAmatrixT[17][13] = 76.2354;	AAmatrixT[17][14] = 0;			AAmatrixT[17][15] = 74.0819;
+	AAmatrixT[17][16] = 0;			AAmatrixT[17][17] = 0;			AAmatrixT[17][18] = 60.807;		AAmatrixT[17][19] = 0;
+	AAmatrixT[18][0] = 24.4139;		AAmatrixT[18][1] = 7.8012;		AAmatrixT[18][2] = 94.694;		AAmatrixT[18][3] = 0;
+	AAmatrixT[18][4] = 95.3164;		AAmatrixT[18][5] = 0;			AAmatrixT[18][6] = 21.4717;		AAmatrixT[18][7] = 0;
+	AAmatrixT[18][8] = 126.54;		AAmatrixT[18][9] = 37.4834;		AAmatrixT[18][10] = 28.6572;	AAmatrixT[18][11] = 13.2142;
+	AAmatrixT[18][12] = 0;			AAmatrixT[18][13] = 695.263;	AAmatrixT[18][14] = 0;			AAmatrixT[18][15] = 33.6289;
+	AAmatrixT[18][16] = 41.7839;	AAmatrixT[18][17] = 60.807;		AAmatrixT[18][18] = 0;			AAmatrixT[18][19] = 27.9379;
+	AAmatrixT[19][0] = 205.956;		AAmatrixT[19][1] = 24.0368;		AAmatrixT[19][2] = 15.8067;		AAmatrixT[19][3] = 17.8316;
+	AAmatrixT[19][4] = 48.4678;		AAmatrixT[19][5] = 34.6983;		AAmatrixT[19][6] = 36.725;		AAmatrixT[19][7] = 53.8165;
+	AAmatrixT[19][8] = 43.8715;		AAmatrixT[19][9] = 881.004;		AAmatrixT[19][10] = 174.516;	AAmatrixT[19][11] = 10.385;
+	AAmatrixT[19][12] = 256.596;	AAmatrixT[19][13] = 12.3606;	AAmatrixT[19][14] = 48.5026;	AAmatrixT[19][15] = 30.3836;
+	AAmatrixT[19][16] = 156.2;		AAmatrixT[19][17] = 0;			AAmatrixT[19][18] = 27.9379;	AAmatrixT[19][19] = 0;
 
 	AAPiT[0] = 0.087127;
 	AAPiT[1] = 0.040904;
@@ -1760,11 +1760,11 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPiT[17] = 0.010494;
 	AAPiT[18] = 0.029916;
 	AAPiT[19] = 0.064718;
-	
+
 		for(int gb1=0; gb1<20; gb1++)
 		{
 			if(AAPiT[gb1]!=AAPiT[gb1]) {cout<<"ERROR in base frequency translation check in Jones-DCMUT model"<<endl; gb1--;}
-			
+
 			for(int gb2=0; gb2<20; gb2++)
 			{
 				if(AAmatrix[gb1][gb2]-AAmatrixT[gb1][gb2]/100>0.0001) {cout<<"ERROR in substitution matrix translation check in Jones-DCMUT model"<<endl; gb2--;}
@@ -1772,98 +1772,98 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 		}
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	else
 	if(modelnumber==5)
 	{
 
-	/* 
-		wag 
-		
-		Whelan, S. and Goldman, N. (2001)  A general empirical model of protein evolution derived from multiple protein families using a 
+	/*
+		wag
+
+		Whelan, S. and Goldman, N. (2001)  A general empirical model of protein evolution derived from multiple protein families using a
 		maximum-likelihood approach. Molecular Biology and Evolution 18:691-699
 	*/
-	AAmatrix[ 0][ 0] = 0.0000000; AAmatrix[ 1][ 0] = 0.5515710; AAmatrix[ 2][ 0] = 0.5098480; AAmatrix[ 3][ 0] = 0.7389980; AAmatrix[ 4][ 0] = 1.0270400; 
-	AAmatrix[ 5][ 0] = 0.9085980; AAmatrix[ 6][ 0] = 1.5828500; AAmatrix[ 7][ 0] = 1.4167200; AAmatrix[ 8][ 0] = 0.3169540; AAmatrix[ 9][ 0] = 0.1933350; 
-	AAmatrix[10][ 0] = 0.3979150; AAmatrix[11][ 0] = 0.9062650; AAmatrix[12][ 0] = 0.8934960; AAmatrix[13][ 0] = 0.2104940; AAmatrix[14][ 0] = 1.4385500; 
+	AAmatrix[ 0][ 0] = 0.0000000; AAmatrix[ 1][ 0] = 0.5515710; AAmatrix[ 2][ 0] = 0.5098480; AAmatrix[ 3][ 0] = 0.7389980; AAmatrix[ 4][ 0] = 1.0270400;
+	AAmatrix[ 5][ 0] = 0.9085980; AAmatrix[ 6][ 0] = 1.5828500; AAmatrix[ 7][ 0] = 1.4167200; AAmatrix[ 8][ 0] = 0.3169540; AAmatrix[ 9][ 0] = 0.1933350;
+	AAmatrix[10][ 0] = 0.3979150; AAmatrix[11][ 0] = 0.9062650; AAmatrix[12][ 0] = 0.8934960; AAmatrix[13][ 0] = 0.2104940; AAmatrix[14][ 0] = 1.4385500;
 	AAmatrix[15][ 0] = 3.3707900; AAmatrix[16][ 0] = 2.1211100; AAmatrix[17][ 0] = 0.1131330; AAmatrix[18][ 0] = 0.2407350; AAmatrix[19][ 0] = 2.0060100;
-	AAmatrix[ 0][ 1] = 0.5515710; AAmatrix[ 1][ 1] = 0.0000000; AAmatrix[ 2][ 1] = 0.6353460; AAmatrix[ 3][ 1] = 0.1473040; AAmatrix[ 4][ 1] = 0.5281910;  
-	AAmatrix[ 5][ 1] = 3.0355000; AAmatrix[ 6][ 1] = 0.4391570; AAmatrix[ 7][ 1] = 0.5846650; AAmatrix[ 8][ 1] = 2.1371500; AAmatrix[ 9][ 1] = 0.1869790;  
-	AAmatrix[10][ 1] = 0.4976710; AAmatrix[11][ 1] = 5.3514200; AAmatrix[12][ 1] = 0.6831620; AAmatrix[13][ 1] = 0.1027110; AAmatrix[14][ 1] = 0.6794890;  
+	AAmatrix[ 0][ 1] = 0.5515710; AAmatrix[ 1][ 1] = 0.0000000; AAmatrix[ 2][ 1] = 0.6353460; AAmatrix[ 3][ 1] = 0.1473040; AAmatrix[ 4][ 1] = 0.5281910;
+	AAmatrix[ 5][ 1] = 3.0355000; AAmatrix[ 6][ 1] = 0.4391570; AAmatrix[ 7][ 1] = 0.5846650; AAmatrix[ 8][ 1] = 2.1371500; AAmatrix[ 9][ 1] = 0.1869790;
+	AAmatrix[10][ 1] = 0.4976710; AAmatrix[11][ 1] = 5.3514200; AAmatrix[12][ 1] = 0.6831620; AAmatrix[13][ 1] = 0.1027110; AAmatrix[14][ 1] = 0.6794890;
 	AAmatrix[15][ 1] = 1.2241900; AAmatrix[16][ 1] = 0.5544130; AAmatrix[17][ 1] = 1.1639200; AAmatrix[18][ 1] = 0.3815330; AAmatrix[19][ 1] = 0.2518490;
-	AAmatrix[ 0][ 2] = 0.5098480; AAmatrix[ 1][ 2] = 0.6353460; AAmatrix[ 2][ 2] = 0.0000000; AAmatrix[ 3][ 2] = 5.4294200; AAmatrix[ 4][ 2] = 0.2652560;  
-	AAmatrix[ 5][ 2] = 1.5436400; AAmatrix[ 6][ 2] = 0.9471980; AAmatrix[ 7][ 2] = 1.1255600; AAmatrix[ 8][ 2] = 3.9562900; AAmatrix[ 9][ 2] = 0.5542360;  
-	AAmatrix[10][ 2] = 0.1315280; AAmatrix[11][ 2] = 3.0120100; AAmatrix[12][ 2] = 0.1982210; AAmatrix[13][ 2] = 0.0961621; AAmatrix[14][ 2] = 0.1950810;  
+	AAmatrix[ 0][ 2] = 0.5098480; AAmatrix[ 1][ 2] = 0.6353460; AAmatrix[ 2][ 2] = 0.0000000; AAmatrix[ 3][ 2] = 5.4294200; AAmatrix[ 4][ 2] = 0.2652560;
+	AAmatrix[ 5][ 2] = 1.5436400; AAmatrix[ 6][ 2] = 0.9471980; AAmatrix[ 7][ 2] = 1.1255600; AAmatrix[ 8][ 2] = 3.9562900; AAmatrix[ 9][ 2] = 0.5542360;
+	AAmatrix[10][ 2] = 0.1315280; AAmatrix[11][ 2] = 3.0120100; AAmatrix[12][ 2] = 0.1982210; AAmatrix[13][ 2] = 0.0961621; AAmatrix[14][ 2] = 0.1950810;
 	AAmatrix[15][ 2] = 3.9742300; AAmatrix[16][ 2] = 2.0300600; AAmatrix[17][ 2] = 0.0719167; AAmatrix[18][ 2] = 1.0860000; AAmatrix[19][ 2] = 0.1962460;
-	AAmatrix[ 0][ 3] = 0.7389980; AAmatrix[ 1][ 3] = 0.1473040; AAmatrix[ 2][ 3] = 5.4294200; AAmatrix[ 3][ 3] = 0.0000000; AAmatrix[ 4][ 3] = 0.0302949;  
-	AAmatrix[ 5][ 3] = 0.6167830; AAmatrix[ 6][ 3] = 6.1741600; AAmatrix[ 7][ 3] = 0.8655840; AAmatrix[ 8][ 3] = 0.9306760; AAmatrix[ 9][ 3] = 0.0394370;  
-	AAmatrix[10][ 3] = 0.0848047; AAmatrix[11][ 3] = 0.4798550; AAmatrix[12][ 3] = 0.1037540; AAmatrix[13][ 3] = 0.0467304; AAmatrix[14][ 3] = 0.4239840;  
+	AAmatrix[ 0][ 3] = 0.7389980; AAmatrix[ 1][ 3] = 0.1473040; AAmatrix[ 2][ 3] = 5.4294200; AAmatrix[ 3][ 3] = 0.0000000; AAmatrix[ 4][ 3] = 0.0302949;
+	AAmatrix[ 5][ 3] = 0.6167830; AAmatrix[ 6][ 3] = 6.1741600; AAmatrix[ 7][ 3] = 0.8655840; AAmatrix[ 8][ 3] = 0.9306760; AAmatrix[ 9][ 3] = 0.0394370;
+	AAmatrix[10][ 3] = 0.0848047; AAmatrix[11][ 3] = 0.4798550; AAmatrix[12][ 3] = 0.1037540; AAmatrix[13][ 3] = 0.0467304; AAmatrix[14][ 3] = 0.4239840;
 	AAmatrix[15][ 3] = 1.0717600; AAmatrix[16][ 3] = 0.3748660; AAmatrix[17][ 3] = 0.1297670; AAmatrix[18][ 3] = 0.3257110; AAmatrix[19][ 3] = 0.1523350;
-	AAmatrix[ 0][ 4] = 1.0270400; AAmatrix[ 1][ 4] = 0.5281910; AAmatrix[ 2][ 4] = 0.2652560; AAmatrix[ 3][ 4] = 0.0302949; AAmatrix[ 4][ 4] = 0.0000000;  
-	AAmatrix[ 5][ 4] = 0.0988179; AAmatrix[ 6][ 4] = 0.0213520; AAmatrix[ 7][ 4] = 0.3066740; AAmatrix[ 8][ 4] = 0.2489720; AAmatrix[ 9][ 4] = 0.1701350;  
-	AAmatrix[10][ 4] = 0.3842870; AAmatrix[11][ 4] = 0.0740339; AAmatrix[12][ 4] = 0.3904820; AAmatrix[13][ 4] = 0.3980200; AAmatrix[14][ 4] = 0.1094040;  
+	AAmatrix[ 0][ 4] = 1.0270400; AAmatrix[ 1][ 4] = 0.5281910; AAmatrix[ 2][ 4] = 0.2652560; AAmatrix[ 3][ 4] = 0.0302949; AAmatrix[ 4][ 4] = 0.0000000;
+	AAmatrix[ 5][ 4] = 0.0988179; AAmatrix[ 6][ 4] = 0.0213520; AAmatrix[ 7][ 4] = 0.3066740; AAmatrix[ 8][ 4] = 0.2489720; AAmatrix[ 9][ 4] = 0.1701350;
+	AAmatrix[10][ 4] = 0.3842870; AAmatrix[11][ 4] = 0.0740339; AAmatrix[12][ 4] = 0.3904820; AAmatrix[13][ 4] = 0.3980200; AAmatrix[14][ 4] = 0.1094040;
 	AAmatrix[15][ 4] = 1.4076600; AAmatrix[16][ 4] = 0.5129840; AAmatrix[17][ 4] = 0.7170700; AAmatrix[18][ 4] = 0.5438330; AAmatrix[19][ 4] = 1.0021400;
-	AAmatrix[ 0][ 5] = 0.9085980; AAmatrix[ 1][ 5] = 3.0355000; AAmatrix[ 2][ 5] = 1.5436400; AAmatrix[ 3][ 5] = 0.6167830; AAmatrix[ 4][ 5] = 0.0988179;  
-	AAmatrix[ 5][ 5] = 0.0000000; AAmatrix[ 6][ 5] = 5.4694700; AAmatrix[ 7][ 5] = 0.3300520; AAmatrix[ 8][ 5] = 4.2941100; AAmatrix[ 9][ 5] = 0.1139170;  
-	AAmatrix[10][ 5] = 0.8694890; AAmatrix[11][ 5] = 3.8949000; AAmatrix[12][ 5] = 1.5452600; AAmatrix[13][ 5] = 0.0999208; AAmatrix[14][ 5] = 0.9333720;  
+	AAmatrix[ 0][ 5] = 0.9085980; AAmatrix[ 1][ 5] = 3.0355000; AAmatrix[ 2][ 5] = 1.5436400; AAmatrix[ 3][ 5] = 0.6167830; AAmatrix[ 4][ 5] = 0.0988179;
+	AAmatrix[ 5][ 5] = 0.0000000; AAmatrix[ 6][ 5] = 5.4694700; AAmatrix[ 7][ 5] = 0.3300520; AAmatrix[ 8][ 5] = 4.2941100; AAmatrix[ 9][ 5] = 0.1139170;
+	AAmatrix[10][ 5] = 0.8694890; AAmatrix[11][ 5] = 3.8949000; AAmatrix[12][ 5] = 1.5452600; AAmatrix[13][ 5] = 0.0999208; AAmatrix[14][ 5] = 0.9333720;
 	AAmatrix[15][ 5] = 1.0288700; AAmatrix[16][ 5] = 0.8579280; AAmatrix[17][ 5] = 0.2157370; AAmatrix[18][ 5] = 0.2277100; AAmatrix[19][ 5] = 0.3012810;
-	AAmatrix[ 0][ 6] = 1.5828500; AAmatrix[ 1][ 6] = 0.4391570; AAmatrix[ 2][ 6] = 0.9471980; AAmatrix[ 3][ 6] = 6.1741600; AAmatrix[ 4][ 6] = 0.0213520;  
-	AAmatrix[ 5][ 6] = 5.4694700; AAmatrix[ 6][ 6] = 0.0000000; AAmatrix[ 7][ 6] = 0.5677170; AAmatrix[ 8][ 6] = 0.5700250; AAmatrix[ 9][ 6] = 0.1273950;  
-	AAmatrix[10][ 6] = 0.1542630; AAmatrix[11][ 6] = 2.5844300; AAmatrix[12][ 6] = 0.3151240; AAmatrix[13][ 6] = 0.0811339; AAmatrix[14][ 6] = 0.6823550;  
+	AAmatrix[ 0][ 6] = 1.5828500; AAmatrix[ 1][ 6] = 0.4391570; AAmatrix[ 2][ 6] = 0.9471980; AAmatrix[ 3][ 6] = 6.1741600; AAmatrix[ 4][ 6] = 0.0213520;
+	AAmatrix[ 5][ 6] = 5.4694700; AAmatrix[ 6][ 6] = 0.0000000; AAmatrix[ 7][ 6] = 0.5677170; AAmatrix[ 8][ 6] = 0.5700250; AAmatrix[ 9][ 6] = 0.1273950;
+	AAmatrix[10][ 6] = 0.1542630; AAmatrix[11][ 6] = 2.5844300; AAmatrix[12][ 6] = 0.3151240; AAmatrix[13][ 6] = 0.0811339; AAmatrix[14][ 6] = 0.6823550;
 	AAmatrix[15][ 6] = 0.7049390; AAmatrix[16][ 6] = 0.8227650; AAmatrix[17][ 6] = 0.1565570; AAmatrix[18][ 6] = 0.1963030; AAmatrix[19][ 6] = 0.5887310;
-	AAmatrix[ 0][ 7] = 1.4167200; AAmatrix[ 1][ 7] = 0.5846650; AAmatrix[ 2][ 7] = 1.1255600; AAmatrix[ 3][ 7] = 0.8655840; AAmatrix[ 4][ 7] = 0.3066740;  
-	AAmatrix[ 5][ 7] = 0.3300520; AAmatrix[ 6][ 7] = 0.5677170; AAmatrix[ 7][ 7] = 0.0000000; AAmatrix[ 8][ 7] = 0.2494100; AAmatrix[ 9][ 7] = 0.0304501;  
-	AAmatrix[10][ 7] = 0.0613037; AAmatrix[11][ 7] = 0.3735580; AAmatrix[12][ 7] = 0.1741000; AAmatrix[13][ 7] = 0.0499310; AAmatrix[14][ 7] = 0.2435700;  
+	AAmatrix[ 0][ 7] = 1.4167200; AAmatrix[ 1][ 7] = 0.5846650; AAmatrix[ 2][ 7] = 1.1255600; AAmatrix[ 3][ 7] = 0.8655840; AAmatrix[ 4][ 7] = 0.3066740;
+	AAmatrix[ 5][ 7] = 0.3300520; AAmatrix[ 6][ 7] = 0.5677170; AAmatrix[ 7][ 7] = 0.0000000; AAmatrix[ 8][ 7] = 0.2494100; AAmatrix[ 9][ 7] = 0.0304501;
+	AAmatrix[10][ 7] = 0.0613037; AAmatrix[11][ 7] = 0.3735580; AAmatrix[12][ 7] = 0.1741000; AAmatrix[13][ 7] = 0.0499310; AAmatrix[14][ 7] = 0.2435700;
 	AAmatrix[15][ 7] = 1.3418200; AAmatrix[16][ 7] = 0.2258330; AAmatrix[17][ 7] = 0.3369830; AAmatrix[18][ 7] = 0.1036040; AAmatrix[19][ 7] = 0.1872470;
-	AAmatrix[ 0][ 8] = 0.3169540; AAmatrix[ 1][ 8] = 2.1371500; AAmatrix[ 2][ 8] = 3.9562900; AAmatrix[ 3][ 8] = 0.9306760; AAmatrix[ 4][ 8] = 0.2489720;  
-	AAmatrix[ 5][ 8] = 4.2941100; AAmatrix[ 6][ 8] = 0.5700250; AAmatrix[ 7][ 8] = 0.2494100; AAmatrix[ 8][ 8] = 0.0000000; AAmatrix[ 9][ 8] = 0.1381900;  
-	AAmatrix[10][ 8] = 0.4994620; AAmatrix[11][ 8] = 0.8904320; AAmatrix[12][ 8] = 0.4041410; AAmatrix[13][ 8] = 0.6793710; AAmatrix[14][ 8] = 0.6961980;  
+	AAmatrix[ 0][ 8] = 0.3169540; AAmatrix[ 1][ 8] = 2.1371500; AAmatrix[ 2][ 8] = 3.9562900; AAmatrix[ 3][ 8] = 0.9306760; AAmatrix[ 4][ 8] = 0.2489720;
+	AAmatrix[ 5][ 8] = 4.2941100; AAmatrix[ 6][ 8] = 0.5700250; AAmatrix[ 7][ 8] = 0.2494100; AAmatrix[ 8][ 8] = 0.0000000; AAmatrix[ 9][ 8] = 0.1381900;
+	AAmatrix[10][ 8] = 0.4994620; AAmatrix[11][ 8] = 0.8904320; AAmatrix[12][ 8] = 0.4041410; AAmatrix[13][ 8] = 0.6793710; AAmatrix[14][ 8] = 0.6961980;
 	AAmatrix[15][ 8] = 0.7401690; AAmatrix[16][ 8] = 0.4733070; AAmatrix[17][ 8] = 0.2625690; AAmatrix[18][ 8] = 3.8734400; AAmatrix[19][ 8] = 0.1183580;
-	AAmatrix[ 0][ 9] = 0.1933350; AAmatrix[ 1][ 9] = 0.1869790; AAmatrix[ 2][ 9] = 0.5542360; AAmatrix[ 3][ 9] = 0.0394370; AAmatrix[ 4][ 9] = 0.1701350;  
-	AAmatrix[ 5][ 9] = 0.1139170; AAmatrix[ 6][ 9] = 0.1273950; AAmatrix[ 7][ 9] = 0.0304501; AAmatrix[ 8][ 9] = 0.1381900; AAmatrix[ 9][ 9] = 0.0000000;  
-	AAmatrix[10][ 9] = 3.1709700; AAmatrix[11][ 9] = 0.3238320; AAmatrix[12][ 9] = 4.2574600; AAmatrix[13][ 9] = 1.0594700; AAmatrix[14][ 9] = 0.0999288;  
+	AAmatrix[ 0][ 9] = 0.1933350; AAmatrix[ 1][ 9] = 0.1869790; AAmatrix[ 2][ 9] = 0.5542360; AAmatrix[ 3][ 9] = 0.0394370; AAmatrix[ 4][ 9] = 0.1701350;
+	AAmatrix[ 5][ 9] = 0.1139170; AAmatrix[ 6][ 9] = 0.1273950; AAmatrix[ 7][ 9] = 0.0304501; AAmatrix[ 8][ 9] = 0.1381900; AAmatrix[ 9][ 9] = 0.0000000;
+	AAmatrix[10][ 9] = 3.1709700; AAmatrix[11][ 9] = 0.3238320; AAmatrix[12][ 9] = 4.2574600; AAmatrix[13][ 9] = 1.0594700; AAmatrix[14][ 9] = 0.0999288;
 	AAmatrix[15][ 9] = 0.3194400; AAmatrix[16][ 9] = 1.4581600; AAmatrix[17][ 9] = 0.2124830; AAmatrix[18][ 9] = 0.4201700; AAmatrix[19][ 9] = 7.8213000;
-	AAmatrix[ 0][10] = 0.3979150; AAmatrix[ 1][10] = 0.4976710; AAmatrix[ 2][10] = 0.1315280; AAmatrix[ 3][10] = 0.0848047; AAmatrix[ 4][10] = 0.3842870;  
-	AAmatrix[ 5][10] = 0.8694890; AAmatrix[ 6][10] = 0.1542630; AAmatrix[ 7][10] = 0.0613037; AAmatrix[ 8][10] = 0.4994620; AAmatrix[ 9][10] = 3.1709700;  
-	AAmatrix[10][10] = 0.0000000; AAmatrix[11][10] = 0.2575550; AAmatrix[12][10] = 4.8540200; AAmatrix[13][10] = 2.1151700; AAmatrix[14][10] = 0.4158440;  
+	AAmatrix[ 0][10] = 0.3979150; AAmatrix[ 1][10] = 0.4976710; AAmatrix[ 2][10] = 0.1315280; AAmatrix[ 3][10] = 0.0848047; AAmatrix[ 4][10] = 0.3842870;
+	AAmatrix[ 5][10] = 0.8694890; AAmatrix[ 6][10] = 0.1542630; AAmatrix[ 7][10] = 0.0613037; AAmatrix[ 8][10] = 0.4994620; AAmatrix[ 9][10] = 3.1709700;
+	AAmatrix[10][10] = 0.0000000; AAmatrix[11][10] = 0.2575550; AAmatrix[12][10] = 4.8540200; AAmatrix[13][10] = 2.1151700; AAmatrix[14][10] = 0.4158440;
 	AAmatrix[15][10] = 0.3447390; AAmatrix[16][10] = 0.3266220; AAmatrix[17][10] = 0.6653090; AAmatrix[18][10] = 0.3986180; AAmatrix[19][10] = 1.8003400;
-	AAmatrix[ 0][11] = 0.9062650; AAmatrix[ 1][11] = 5.3514200; AAmatrix[ 2][11] = 3.0120100; AAmatrix[ 3][11] = 0.4798550; AAmatrix[ 4][11] = 0.0740339;  
-	AAmatrix[ 5][11] = 3.8949000; AAmatrix[ 6][11] = 2.5844300; AAmatrix[ 7][11] = 0.3735580; AAmatrix[ 8][11] = 0.8904320; AAmatrix[ 9][11] = 0.3238320;  
-	AAmatrix[10][11] = 0.2575550; AAmatrix[11][11] = 0.0000000; AAmatrix[12][11] = 0.9342760; AAmatrix[13][11] = 0.0888360; AAmatrix[14][11] = 0.5568960;  
+	AAmatrix[ 0][11] = 0.9062650; AAmatrix[ 1][11] = 5.3514200; AAmatrix[ 2][11] = 3.0120100; AAmatrix[ 3][11] = 0.4798550; AAmatrix[ 4][11] = 0.0740339;
+	AAmatrix[ 5][11] = 3.8949000; AAmatrix[ 6][11] = 2.5844300; AAmatrix[ 7][11] = 0.3735580; AAmatrix[ 8][11] = 0.8904320; AAmatrix[ 9][11] = 0.3238320;
+	AAmatrix[10][11] = 0.2575550; AAmatrix[11][11] = 0.0000000; AAmatrix[12][11] = 0.9342760; AAmatrix[13][11] = 0.0888360; AAmatrix[14][11] = 0.5568960;
 	AAmatrix[15][11] = 0.9671300; AAmatrix[16][11] = 1.3869800; AAmatrix[17][11] = 0.1375050; AAmatrix[18][11] = 0.1332640; AAmatrix[19][11] = 0.3054340;
-	AAmatrix[ 0][12] = 0.8934960; AAmatrix[ 1][12] = 0.6831620; AAmatrix[ 2][12] = 0.1982210; AAmatrix[ 3][12] = 0.1037540; AAmatrix[ 4][12] = 0.3904820;  
-	AAmatrix[ 5][12] = 1.5452600; AAmatrix[ 6][12] = 0.3151240; AAmatrix[ 7][12] = 0.1741000; AAmatrix[ 8][12] = 0.4041410; AAmatrix[ 9][12] = 4.2574600;  
-	AAmatrix[10][12] = 4.8540200; AAmatrix[11][12] = 0.9342760; AAmatrix[12][12] = 0.0000000; AAmatrix[13][12] = 1.1906300; AAmatrix[14][12] = 0.1713290;  
+	AAmatrix[ 0][12] = 0.8934960; AAmatrix[ 1][12] = 0.6831620; AAmatrix[ 2][12] = 0.1982210; AAmatrix[ 3][12] = 0.1037540; AAmatrix[ 4][12] = 0.3904820;
+	AAmatrix[ 5][12] = 1.5452600; AAmatrix[ 6][12] = 0.3151240; AAmatrix[ 7][12] = 0.1741000; AAmatrix[ 8][12] = 0.4041410; AAmatrix[ 9][12] = 4.2574600;
+	AAmatrix[10][12] = 4.8540200; AAmatrix[11][12] = 0.9342760; AAmatrix[12][12] = 0.0000000; AAmatrix[13][12] = 1.1906300; AAmatrix[14][12] = 0.1713290;
 	AAmatrix[15][12] = 0.4939050; AAmatrix[16][12] = 1.5161200; AAmatrix[17][12] = 0.5157060; AAmatrix[18][12] = 0.4284370; AAmatrix[19][12] = 2.0584500;
-	AAmatrix[ 0][13] = 0.2104940; AAmatrix[ 1][13] = 0.1027110; AAmatrix[ 2][13] = 0.0961621; AAmatrix[ 3][13] = 0.0467304; AAmatrix[ 4][13] = 0.3980200;  
-	AAmatrix[ 5][13] = 0.0999208; AAmatrix[ 6][13] = 0.0811339; AAmatrix[ 7][13] = 0.0499310; AAmatrix[ 8][13] = 0.6793710; AAmatrix[ 9][13] = 1.0594700;  
-	AAmatrix[10][13] = 2.1151700; AAmatrix[11][13] = 0.0888360; AAmatrix[12][13] = 1.1906300; AAmatrix[13][13] = 0.0000000; AAmatrix[14][13] = 0.1614440;  
+	AAmatrix[ 0][13] = 0.2104940; AAmatrix[ 1][13] = 0.1027110; AAmatrix[ 2][13] = 0.0961621; AAmatrix[ 3][13] = 0.0467304; AAmatrix[ 4][13] = 0.3980200;
+	AAmatrix[ 5][13] = 0.0999208; AAmatrix[ 6][13] = 0.0811339; AAmatrix[ 7][13] = 0.0499310; AAmatrix[ 8][13] = 0.6793710; AAmatrix[ 9][13] = 1.0594700;
+	AAmatrix[10][13] = 2.1151700; AAmatrix[11][13] = 0.0888360; AAmatrix[12][13] = 1.1906300; AAmatrix[13][13] = 0.0000000; AAmatrix[14][13] = 0.1614440;
 	AAmatrix[15][13] = 0.5459310; AAmatrix[16][13] = 0.1719030; AAmatrix[17][13] = 1.5296400; AAmatrix[18][13] = 6.4542800; AAmatrix[19][13] = 0.6498920;
-	AAmatrix[ 0][14] = 1.4385500; AAmatrix[ 1][14] = 0.6794890; AAmatrix[ 2][14] = 0.1950810; AAmatrix[ 3][14] = 0.4239840; AAmatrix[ 4][14] = 0.1094040;  
-	AAmatrix[ 5][14] = 0.9333720; AAmatrix[ 6][14] = 0.6823550; AAmatrix[ 7][14] = 0.2435700; AAmatrix[ 8][14] = 0.6961980; AAmatrix[ 9][14] = 0.0999288;  
-	AAmatrix[10][14] = 0.4158440; AAmatrix[11][14] = 0.5568960; AAmatrix[12][14] = 0.1713290; AAmatrix[13][14] = 0.1614440; AAmatrix[14][14] = 0.0000000;  
+	AAmatrix[ 0][14] = 1.4385500; AAmatrix[ 1][14] = 0.6794890; AAmatrix[ 2][14] = 0.1950810; AAmatrix[ 3][14] = 0.4239840; AAmatrix[ 4][14] = 0.1094040;
+	AAmatrix[ 5][14] = 0.9333720; AAmatrix[ 6][14] = 0.6823550; AAmatrix[ 7][14] = 0.2435700; AAmatrix[ 8][14] = 0.6961980; AAmatrix[ 9][14] = 0.0999288;
+	AAmatrix[10][14] = 0.4158440; AAmatrix[11][14] = 0.5568960; AAmatrix[12][14] = 0.1713290; AAmatrix[13][14] = 0.1614440; AAmatrix[14][14] = 0.0000000;
 	AAmatrix[15][14] = 1.6132800; AAmatrix[16][14] = 0.7953840; AAmatrix[17][14] = 0.1394050; AAmatrix[18][14] = 0.2160460; AAmatrix[19][14] = 0.3148870;
-	AAmatrix[ 0][15] = 3.3707900; AAmatrix[ 1][15] = 1.2241900; AAmatrix[ 2][15] = 3.9742300; AAmatrix[ 3][15] = 1.0717600; AAmatrix[ 4][15] = 1.4076600;  
-	AAmatrix[ 5][15] = 1.0288700; AAmatrix[ 6][15] = 0.7049390; AAmatrix[ 7][15] = 1.3418200; AAmatrix[ 8][15] = 0.7401690; AAmatrix[ 9][15] = 0.3194400;  
-	AAmatrix[10][15] = 0.3447390; AAmatrix[11][15] = 0.9671300; AAmatrix[12][15] = 0.4939050; AAmatrix[13][15] = 0.5459310; AAmatrix[14][15] = 1.6132800;  
+	AAmatrix[ 0][15] = 3.3707900; AAmatrix[ 1][15] = 1.2241900; AAmatrix[ 2][15] = 3.9742300; AAmatrix[ 3][15] = 1.0717600; AAmatrix[ 4][15] = 1.4076600;
+	AAmatrix[ 5][15] = 1.0288700; AAmatrix[ 6][15] = 0.7049390; AAmatrix[ 7][15] = 1.3418200; AAmatrix[ 8][15] = 0.7401690; AAmatrix[ 9][15] = 0.3194400;
+	AAmatrix[10][15] = 0.3447390; AAmatrix[11][15] = 0.9671300; AAmatrix[12][15] = 0.4939050; AAmatrix[13][15] = 0.5459310; AAmatrix[14][15] = 1.6132800;
 	AAmatrix[15][15] = 0.0000000; AAmatrix[16][15] = 4.3780200; AAmatrix[17][15] = 0.5237420; AAmatrix[18][15] = 0.7869930; AAmatrix[19][15] = 0.2327390;
-	AAmatrix[ 0][16] = 2.1211100; AAmatrix[ 1][16] = 0.5544130; AAmatrix[ 2][16] = 2.0300600; AAmatrix[ 3][16] = 0.3748660; AAmatrix[ 4][16] = 0.5129840;  
-	AAmatrix[ 5][16] = 0.8579280; AAmatrix[ 6][16] = 0.8227650; AAmatrix[ 7][16] = 0.2258330; AAmatrix[ 8][16] = 0.4733070; AAmatrix[ 9][16] = 1.4581600;  
-	AAmatrix[10][16] = 0.3266220; AAmatrix[11][16] = 1.3869800; AAmatrix[12][16] = 1.5161200; AAmatrix[13][16] = 0.1719030; AAmatrix[14][16] = 0.7953840;  
+	AAmatrix[ 0][16] = 2.1211100; AAmatrix[ 1][16] = 0.5544130; AAmatrix[ 2][16] = 2.0300600; AAmatrix[ 3][16] = 0.3748660; AAmatrix[ 4][16] = 0.5129840;
+	AAmatrix[ 5][16] = 0.8579280; AAmatrix[ 6][16] = 0.8227650; AAmatrix[ 7][16] = 0.2258330; AAmatrix[ 8][16] = 0.4733070; AAmatrix[ 9][16] = 1.4581600;
+	AAmatrix[10][16] = 0.3266220; AAmatrix[11][16] = 1.3869800; AAmatrix[12][16] = 1.5161200; AAmatrix[13][16] = 0.1719030; AAmatrix[14][16] = 0.7953840;
 	AAmatrix[15][16] = 4.3780200; AAmatrix[16][16] = 0.0000000; AAmatrix[17][16] = 0.1108640; AAmatrix[18][16] = 0.2911480; AAmatrix[19][16] = 1.3882300;
-	AAmatrix[ 0][17] = 0.1131330; AAmatrix[ 1][17] = 1.1639200; AAmatrix[ 2][17] = 0.0719167; AAmatrix[ 3][17] = 0.1297670; AAmatrix[ 4][17] = 0.7170700;  
-	AAmatrix[ 5][17] = 0.2157370; AAmatrix[ 6][17] = 0.1565570; AAmatrix[ 7][17] = 0.3369830; AAmatrix[ 8][17] = 0.2625690; AAmatrix[ 9][17] = 0.2124830;  
-	AAmatrix[10][17] = 0.6653090; AAmatrix[11][17] = 0.1375050; AAmatrix[12][17] = 0.5157060; AAmatrix[13][17] = 1.5296400; AAmatrix[14][17] = 0.1394050;  
+	AAmatrix[ 0][17] = 0.1131330; AAmatrix[ 1][17] = 1.1639200; AAmatrix[ 2][17] = 0.0719167; AAmatrix[ 3][17] = 0.1297670; AAmatrix[ 4][17] = 0.7170700;
+	AAmatrix[ 5][17] = 0.2157370; AAmatrix[ 6][17] = 0.1565570; AAmatrix[ 7][17] = 0.3369830; AAmatrix[ 8][17] = 0.2625690; AAmatrix[ 9][17] = 0.2124830;
+	AAmatrix[10][17] = 0.6653090; AAmatrix[11][17] = 0.1375050; AAmatrix[12][17] = 0.5157060; AAmatrix[13][17] = 1.5296400; AAmatrix[14][17] = 0.1394050;
 	AAmatrix[15][17] = 0.5237420; AAmatrix[16][17] = 0.1108640; AAmatrix[17][17] = 0.0000000; AAmatrix[18][17] = 2.4853900; AAmatrix[19][17] = 0.3653690;
-	AAmatrix[ 0][18] = 0.2407350; AAmatrix[ 1][18] = 0.3815330; AAmatrix[ 2][18] = 1.0860000; AAmatrix[ 3][18] = 0.3257110; AAmatrix[ 4][18] = 0.5438330;  
-	AAmatrix[ 5][18] = 0.2277100; AAmatrix[ 6][18] = 0.1963030; AAmatrix[ 7][18] = 0.1036040; AAmatrix[ 8][18] = 3.8734400; AAmatrix[ 9][18] = 0.4201700;  
-	AAmatrix[10][18] = 0.3986180; AAmatrix[11][18] = 0.1332640; AAmatrix[12][18] = 0.4284370; AAmatrix[13][18] = 6.4542800; AAmatrix[14][18] = 0.2160460;  
+	AAmatrix[ 0][18] = 0.2407350; AAmatrix[ 1][18] = 0.3815330; AAmatrix[ 2][18] = 1.0860000; AAmatrix[ 3][18] = 0.3257110; AAmatrix[ 4][18] = 0.5438330;
+	AAmatrix[ 5][18] = 0.2277100; AAmatrix[ 6][18] = 0.1963030; AAmatrix[ 7][18] = 0.1036040; AAmatrix[ 8][18] = 3.8734400; AAmatrix[ 9][18] = 0.4201700;
+	AAmatrix[10][18] = 0.3986180; AAmatrix[11][18] = 0.1332640; AAmatrix[12][18] = 0.4284370; AAmatrix[13][18] = 6.4542800; AAmatrix[14][18] = 0.2160460;
 	AAmatrix[15][18] = 0.7869930; AAmatrix[16][18] = 0.2911480; AAmatrix[17][18] = 2.4853900; AAmatrix[18][18] = 0.0000000; AAmatrix[19][18] = 0.3147300;
-	AAmatrix[ 0][19] = 2.0060100; AAmatrix[ 1][19] = 0.2518490; AAmatrix[ 2][19] = 0.1962460; AAmatrix[ 3][19] = 0.1523350; AAmatrix[ 4][19] = 1.0021400;  
-	AAmatrix[ 5][19] = 0.3012810; AAmatrix[ 6][19] = 0.5887310; AAmatrix[ 7][19] = 0.1872470; AAmatrix[ 8][19] = 0.1183580; AAmatrix[ 9][19] = 7.8213000;  
-	AAmatrix[10][19] = 1.8003400; AAmatrix[11][19] = 0.3054340; AAmatrix[12][19] = 2.0584500; AAmatrix[13][19] = 0.6498920; AAmatrix[14][19] = 0.3148870;  
+	AAmatrix[ 0][19] = 2.0060100; AAmatrix[ 1][19] = 0.2518490; AAmatrix[ 2][19] = 0.1962460; AAmatrix[ 3][19] = 0.1523350; AAmatrix[ 4][19] = 1.0021400;
+	AAmatrix[ 5][19] = 0.3012810; AAmatrix[ 6][19] = 0.5887310; AAmatrix[ 7][19] = 0.1872470; AAmatrix[ 8][19] = 0.1183580; AAmatrix[ 9][19] = 7.8213000;
+	AAmatrix[10][19] = 1.8003400; AAmatrix[11][19] = 0.3054340; AAmatrix[12][19] = 2.0584500; AAmatrix[13][19] = 0.6498920; AAmatrix[14][19] = 0.3148870;
 	AAmatrix[15][19] = 0.2327390; AAmatrix[16][19] = 1.3882300; AAmatrix[17][19] = 0.3653690; AAmatrix[18][19] = 0.3147300; AAmatrix[19][19] = 0.0000000;
 	AAPi[ 0] = 0.08662790;
 	AAPi[ 1] = 0.04397200;
@@ -1887,17 +1887,17 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[19] = 0.07089560;
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
 	if(modelnumber==6)
 	{
 
-	/* 
-		mtmam 
-		
-		Yang, Z., Nielsen, R. and Hasegawa, M. (1998) Models of amino acid substitution and applications to Mitochondrial 
+	/*
+		mtmam
+
+		Yang, Z., Nielsen, R. and Hasegawa, M. (1998) Models of amino acid substitution and applications to Mitochondrial
 		protein evolution, Molecular Biology and Evolution 15:1600-1611.
 	*/
 	AAmatrix[ 0][ 0] =   0; AAmatrix[ 0][ 1] =  32; AAmatrix[ 0][ 2] =   2; AAmatrix[ 0][ 3] =  11; AAmatrix[ 0][ 4] =   0;
@@ -2001,9 +2001,9 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[17] = 0.0293;
 	AAPi[18] = 0.0340;
 	AAPi[19] = 0.0428;
-	
+
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
@@ -2012,109 +2012,109 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 
 	/*
 		Mtart
-		
-		Abascal, F., D. Posada, and R. Zardoya. (2007) MtArt: A new Model of amino acid replacement for Arthropoda. Mol. Biol. Evol. 24:1-5. 
+
+		Abascal, F., D. Posada, and R. Zardoya. (2007) MtArt: A new Model of amino acid replacement for Arthropoda. Mol. Biol. Evol. 24:1-5.
 	*/
-	AAmatrix[0][0] = 0;			AAmatrix[0][1] = 0.2;		AAmatrix[0][2] = 0.2;		AAmatrix[0][3] = 0.6;	
-	AAmatrix[0][4] = 253.5;		AAmatrix[0][5] = 0.2;		AAmatrix[0][6] = 0.2;		AAmatrix[0][7] = 199.8;	
-	AAmatrix[0][8] = 0.2;		AAmatrix[0][9] = 25.7;		AAmatrix[0][10] = 3.7;		AAmatrix[0][11] = 0.2;	
-	AAmatrix[0][12] = 120.6;	AAmatrix[0][13] = 13.1;		AAmatrix[0][14] = 49.3;		AAmatrix[0][15] = 673;	
-	AAmatrix[0][16] = 243.9;	AAmatrix[0][17] = 0.2;		AAmatrix[0][18] = 1.2;		AAmatrix[0][19] = 339.9;	
-	AAmatrix[1][0] = 0.2;		AAmatrix[1][1] = 0;			AAmatrix[1][2] = 0.2;		AAmatrix[1][3] = 4.3;	
-	AAmatrix[1][4] = 35.5;		AAmatrix[1][5] = 154;		AAmatrix[1][6] = 0.2;		AAmatrix[1][7] = 0.2;	
-	AAmatrix[1][8] = 41.3;		AAmatrix[1][9] = 1.8;		AAmatrix[1][10] = 1.8;		AAmatrix[1][11] = 208.6;	
-	AAmatrix[1][12] = 5.2;		AAmatrix[1][13] = 4.7;		AAmatrix[1][14] = 0.2;		AAmatrix[1][15] = 2.7;	
-	AAmatrix[1][16] = 0.2;		AAmatrix[1][17] = 0.2;		AAmatrix[1][18] = 3.9;		AAmatrix[1][19] = 0.2;	
-	AAmatrix[2][0] = 0.2;		AAmatrix[2][1] = 0.2;		AAmatrix[2][2] = 0;			AAmatrix[2][3] = 500.2;	
-	AAmatrix[2][4] = 98.2;		AAmatrix[2][5] = 261.8;		AAmatrix[2][6] = 183;		AAmatrix[2][7] = 120.5;	
-	AAmatrix[2][8] = 179.5;		AAmatrix[2][9] = 21.3;		AAmatrix[2][10] = 12.6;		AAmatrix[2][11] = 467.3;	
-	AAmatrix[2][12] = 78.8;		AAmatrix[2][13] = 19.7;		AAmatrix[2][14] = 16.5;		AAmatrix[2][15] = 398.4;	
-	AAmatrix[2][16] = 165.9;	AAmatrix[2][17] = 7.7;		AAmatrix[2][18] = 251.2;	AAmatrix[2][19] = 22.6;	
-	AAmatrix[3][0] = 0.6;		AAmatrix[3][1] = 4.3;		AAmatrix[3][2] = 500.2;		AAmatrix[3][3] = 0;	
-	AAmatrix[3][4] = 10.6;		AAmatrix[3][5] = 0.2;		AAmatrix[3][6] = 861.8;		AAmatrix[3][7] = 12.5;	
-	AAmatrix[3][8] = 0.2;		AAmatrix[3][9] = 6.6;		AAmatrix[3][10] = 1.2;		AAmatrix[3][11] = 1.7;	
-	AAmatrix[3][12] = 0.2;		AAmatrix[3][13] = 0.2;		AAmatrix[3][14] = 0.2;		AAmatrix[3][15] = 44.4;	
-	AAmatrix[3][16] = 0.2;		AAmatrix[3][17] = 0.2;		AAmatrix[3][18] = 0.2;		AAmatrix[3][19] = 0.2;	
-	AAmatrix[4][0] = 253.5;		AAmatrix[4][1] = 35.5;		AAmatrix[4][2] = 98.2;		AAmatrix[4][3] = 10.6;	
-	AAmatrix[4][4] = 0;			AAmatrix[4][5] = 0.2;		AAmatrix[4][6] = 0.2;		AAmatrix[4][7] = 80.5;	
-	AAmatrix[4][8] = 12.4;		AAmatrix[4][9] = 63;		AAmatrix[4][10] = 78.7;		AAmatrix[4][11] = 0.2;	
-	AAmatrix[4][12] = 312.3;	AAmatrix[4][13] = 184.1;	AAmatrix[4][14] = 0.2;		AAmatrix[4][15] = 664.2;	
-	AAmatrix[4][16] = 182.8;	AAmatrix[4][17] = 21.6;		AAmatrix[4][18] = 72;		AAmatrix[4][19] = 350.4;	
-	AAmatrix[5][0] = 0.2;		AAmatrix[5][1] = 154;		AAmatrix[5][2] = 261.8;		AAmatrix[5][3] = 0.2;	
-	AAmatrix[5][4] = 0.2;		AAmatrix[5][5] = 0;			AAmatrix[5][6] = 261.6;		AAmatrix[5][7] = 2.6;	
-	AAmatrix[5][8] = 313.5;		AAmatrix[5][9] = 10.5;		AAmatrix[5][10] = 16.3;		AAmatrix[5][11] = 349.3;	
-	AAmatrix[5][12] = 67.3;		AAmatrix[5][13] = 0.2;		AAmatrix[5][14] = 39.3;		AAmatrix[5][15] = 52.4;	
-	AAmatrix[5][16] = 43.7;		AAmatrix[5][17] = 6.7;		AAmatrix[5][18] = 86.7;		AAmatrix[5][19] = 0.2;	
-	AAmatrix[6][0] = 0.2;		AAmatrix[6][1] = 0.2;		AAmatrix[6][2] = 183;		AAmatrix[6][3] = 861.8;	
-	AAmatrix[6][4] = 0.2;		AAmatrix[6][5] = 261.6;		AAmatrix[6][6] = 0;			AAmatrix[6][7] = 43.9;	
-	AAmatrix[6][8] = 15.2;		AAmatrix[6][9] = 6.8;		AAmatrix[6][10] = 1.7;		AAmatrix[6][11] = 106.3;	
-	AAmatrix[6][12] = 0.2;		AAmatrix[6][13] = 0.2;		AAmatrix[6][14] = 7.9;		AAmatrix[6][15] = 31.5;	
-	AAmatrix[6][16] = 43.4;		AAmatrix[6][17] = 11;		AAmatrix[6][18] = 7.7;		AAmatrix[6][19] = 13.6;	
-	AAmatrix[7][0] = 199.8;		AAmatrix[7][1] = 0.2;		AAmatrix[7][2] = 120.5;		AAmatrix[7][3] = 12.5;	
-	AAmatrix[7][4] = 80.5;		AAmatrix[7][5] = 2.6;		AAmatrix[7][6] = 43.9;		AAmatrix[7][7] = 0;	
-	AAmatrix[7][8] = 0.2;		AAmatrix[7][9] = 2.7;		AAmatrix[7][10] = 1.4;		AAmatrix[7][11] = 0.2;	
-	AAmatrix[7][12] = 55.7;		AAmatrix[7][13] = 0.8;		AAmatrix[7][14] = 0.2;		AAmatrix[7][15] = 226;	
-	AAmatrix[7][16] = 0.2;		AAmatrix[7][17] = 1.9;		AAmatrix[7][18] = 8.6;		AAmatrix[7][19] = 2.6;	
-	AAmatrix[8][0] = 0.2;		AAmatrix[8][1] = 41.3;		AAmatrix[8][2] = 179.5;		AAmatrix[8][3] = 0.2;	
-	AAmatrix[8][4] = 12.4;		AAmatrix[8][5] = 313.5;		AAmatrix[8][6] = 15.2;		AAmatrix[8][7] = 0.2;	
-	AAmatrix[8][8] = 0;			AAmatrix[8][9] = 0.2;		AAmatrix[8][10] = 5.5;		AAmatrix[8][11] = 0.2;	
-	AAmatrix[8][12] = 0.2;		AAmatrix[8][13] = 13.8;		AAmatrix[8][14] = 0.8;		AAmatrix[8][15] = 10.6;	
-	AAmatrix[8][16] = 18.6;		AAmatrix[8][17] = 0.2;		AAmatrix[8][18] = 191.4;	AAmatrix[8][19] = 0.2;	
-	AAmatrix[9][0] = 25.7;		AAmatrix[9][1] = 1.8;		AAmatrix[9][2] = 21.3;		AAmatrix[9][3] = 6.6;	
-	AAmatrix[9][4] = 63;		AAmatrix[9][5] = 10.5;		AAmatrix[9][6] = 6.8;		AAmatrix[9][7] = 2.7;	
-	AAmatrix[9][8] = 0.2;		AAmatrix[9][9] = 0;			AAmatrix[9][10] = 514.5;	AAmatrix[9][11] = 3.5;	
-	AAmatrix[9][12] = 514.8;	AAmatrix[9][13] = 117.9;	AAmatrix[9][14] = 0.2;		AAmatrix[9][15] = 7.2;	
-	AAmatrix[9][16] = 203.7;	AAmatrix[9][17] = 0.2;		AAmatrix[9][18] = 12.3;		AAmatrix[9][19] = 1854.5;	
-	AAmatrix[10][0] = 3.7;		AAmatrix[10][1] = 1.8;		AAmatrix[10][2] = 12.6;		AAmatrix[10][3] = 1.2;	
-	AAmatrix[10][4] = 78.7;		AAmatrix[10][5] = 16.3;		AAmatrix[10][6] = 1.7;		AAmatrix[10][7] = 1.4;	
-	AAmatrix[10][8] = 5.5;		AAmatrix[10][9] = 514.5;	AAmatrix[10][10] = 0;		AAmatrix[10][11] = 3.8;	
-	AAmatrix[10][12] = 885.5;	AAmatrix[10][13] = 262.6;	AAmatrix[10][14] = 12.2;	AAmatrix[10][15] = 8.2;	
-	AAmatrix[10][16] = 47.8;	AAmatrix[10][17] = 21.1;	AAmatrix[10][18] = 19.8;	AAmatrix[10][19] = 84.7;	
-	AAmatrix[11][0] = 0.2;		AAmatrix[11][1] = 208.6;	AAmatrix[11][2] = 467.3;	AAmatrix[11][3] = 1.7;	
-	AAmatrix[11][4] = 0.2;		AAmatrix[11][5] = 349.3;	AAmatrix[11][6] = 106.3;	AAmatrix[11][7] = 0.2;	
-	AAmatrix[11][8] = 0.2;		AAmatrix[11][9] = 3.5;		AAmatrix[11][10] = 3.8;		AAmatrix[11][11] = 0;	
-	AAmatrix[11][12] = 105.6;	AAmatrix[11][13] = 10.7;	AAmatrix[11][14] = 16.8;	AAmatrix[11][15] = 144.2;	
-	AAmatrix[11][16] = 69.5;	AAmatrix[11][17] = 16;		AAmatrix[11][18] = 117.1;	AAmatrix[11][19] = 26.1;	
-	AAmatrix[12][0] = 120.6;	AAmatrix[12][1] = 5.2;		AAmatrix[12][2] = 78.8;		AAmatrix[12][3] = 0.2;	
-	AAmatrix[12][4] = 312.3;	AAmatrix[12][5] = 67.3;		AAmatrix[12][6] = 0.2;		AAmatrix[12][7] = 55.7;	
-	AAmatrix[12][8] = 0.2;		AAmatrix[12][9] = 514.8;	AAmatrix[12][10] = 885.5;	AAmatrix[12][11] = 105.6;	
-	AAmatrix[12][12] = 0;		AAmatrix[12][13] = 321.6;	AAmatrix[12][14] = 5.3;		AAmatrix[12][15] = 111.7;	
-	AAmatrix[12][16] = 288.6;	AAmatrix[12][17] = 70.7;	AAmatrix[12][18] = 70.9;	AAmatrix[12][19] = 281.3;	
-	AAmatrix[13][0] = 13.1;		AAmatrix[13][1] = 4.7;		AAmatrix[13][2] = 19.7;		AAmatrix[13][3] = 0.2;	
-	AAmatrix[13][4] = 184.1;	AAmatrix[13][5] = 0.2;		AAmatrix[13][6] = 0.2;		AAmatrix[13][7] = 0.8;	
-	AAmatrix[13][8] = 13.8;		AAmatrix[13][9] = 117.9;	AAmatrix[13][10] = 262.6;	AAmatrix[13][11] = 10.7;	
-	AAmatrix[13][12] = 321.6;	AAmatrix[13][13] = 0;		AAmatrix[13][14] = 14.6;	AAmatrix[13][15] = 36.1;	
-	AAmatrix[13][16] = 13.5;	AAmatrix[13][17] = 53.7;	AAmatrix[13][18] = 791.6;	AAmatrix[13][19] = 51.9;	
-	AAmatrix[14][0] = 49.3;		AAmatrix[14][1] = 0.2;		AAmatrix[14][2] = 16.5;		AAmatrix[14][3] = 0.2;	
-	AAmatrix[14][4] = 0.2;		AAmatrix[14][5] = 39.3;		AAmatrix[14][6] = 7.9;		AAmatrix[14][7] = 0.2;	
-	AAmatrix[14][8] = 0.8;		AAmatrix[14][9] = 0.2;		AAmatrix[14][10] = 12.2;	AAmatrix[14][11] = 16.8;	
-	AAmatrix[14][12] = 5.3;		AAmatrix[14][13] = 14.6;	AAmatrix[14][14] = 0;		AAmatrix[14][15] = 86.5;	
-	AAmatrix[14][16] = 46.8;	AAmatrix[14][17] = 0.2;		AAmatrix[14][18] = 18.4;	AAmatrix[14][19] = 31.7;	
-	AAmatrix[15][0] = 673;		AAmatrix[15][1] = 2.7;		AAmatrix[15][2] = 398.4;	AAmatrix[15][3] = 44.4;	
-	AAmatrix[15][4] = 664.2;	AAmatrix[15][5] = 52.4;		AAmatrix[15][6] = 31.5;		AAmatrix[15][7] = 226;	
-	AAmatrix[15][8] = 10.6;		AAmatrix[15][9] = 7.2;		AAmatrix[15][10] = 8.2;		AAmatrix[15][11] = 144.2;	
-	AAmatrix[15][12] = 111.7;	AAmatrix[15][13] = 36.1;	AAmatrix[15][14] = 86.5;	AAmatrix[15][15] = 0;	
-	AAmatrix[15][16] = 660.4;	AAmatrix[15][17] = 2.4;		AAmatrix[15][18] = 30.5;	AAmatrix[15][19] = 60.6;	
-	AAmatrix[16][0] = 243.9;	AAmatrix[16][1] = 0.2;		AAmatrix[16][2] = 165.9;	AAmatrix[16][3] = 0.2;	
-	AAmatrix[16][4] = 182.8;	AAmatrix[16][5] = 43.7;		AAmatrix[16][6] = 43.4;		AAmatrix[16][7] = 0.2;	
-	AAmatrix[16][8] = 18.6;		AAmatrix[16][9] = 203.7;	AAmatrix[16][10] = 47.8;	AAmatrix[16][11] = 69.5;	
-	AAmatrix[16][12] = 288.6;	AAmatrix[16][13] = 13.5;	AAmatrix[16][14] = 46.8;	AAmatrix[16][15] = 660.4;	
-	AAmatrix[16][16] = 0;		AAmatrix[16][17] = 0.2;		AAmatrix[16][18] = 46;		AAmatrix[16][19] = 544.1;	
-	AAmatrix[17][0] = 0.2;		AAmatrix[17][1] = 0.2;		AAmatrix[17][2] = 7.7;		AAmatrix[17][3] = 0.2;	
-	AAmatrix[17][4] = 21.6;		AAmatrix[17][5] = 6.7;		AAmatrix[17][6] = 11;		AAmatrix[17][7] = 1.9;	
-	AAmatrix[17][8] = 0.2;		AAmatrix[17][9] = 0.2;		AAmatrix[17][10] = 21.1;	AAmatrix[17][11] = 16;	
-	AAmatrix[17][12] = 70.7;	AAmatrix[17][13] = 53.7;	AAmatrix[17][14] = 0.2;		AAmatrix[17][15] = 2.4;	
-	AAmatrix[17][16] = 0.2;		AAmatrix[17][17] = 0;		AAmatrix[17][18] = 37.7;	AAmatrix[17][19] = 0.2;	
-	AAmatrix[18][0] = 1.2;		AAmatrix[18][1] = 3.9;		AAmatrix[18][2] = 251.2;	AAmatrix[18][3] = 0.2;	
-	AAmatrix[18][4] = 72;		AAmatrix[18][5] = 86.7;		AAmatrix[18][6] = 7.7;		AAmatrix[18][7] = 8.6;	
-	AAmatrix[18][8] = 191.4;	AAmatrix[18][9] = 12.3;		AAmatrix[18][10] = 19.8;	AAmatrix[18][11] = 117.1;	
-	AAmatrix[18][12] = 70.9;	AAmatrix[18][13] = 791.6;	AAmatrix[18][14] = 18.4;	AAmatrix[18][15] = 30.5;	
-	AAmatrix[18][16] = 46;		AAmatrix[18][17] = 37.7;	AAmatrix[18][18] = 0;		AAmatrix[18][19] = 1.6;	
-	AAmatrix[19][0] = 339.9;	AAmatrix[19][1] = 0.2;		AAmatrix[19][2] = 22.6;		AAmatrix[19][3] = 0.2;	
-	AAmatrix[19][4] = 350.4;	AAmatrix[19][5] = 0.2;		AAmatrix[19][6] = 13.6;		AAmatrix[19][7] = 2.6;	
-	AAmatrix[19][8] = 0.2;		AAmatrix[19][9] = 1854.5;	AAmatrix[19][10] = 84.7;	AAmatrix[19][11] = 26.1;	
-	AAmatrix[19][12] = 281.3;	AAmatrix[19][13] = 51.9;	AAmatrix[19][14] = 31.7;	AAmatrix[19][15] = 60.6;	
-	AAmatrix[19][16] = 544.1;	AAmatrix[19][17] = 0.2;		AAmatrix[19][18] = 1.6;		AAmatrix[19][19] = 0;	
+	AAmatrix[0][0] = 0;			AAmatrix[0][1] = 0.2;		AAmatrix[0][2] = 0.2;		AAmatrix[0][3] = 0.6;
+	AAmatrix[0][4] = 253.5;		AAmatrix[0][5] = 0.2;		AAmatrix[0][6] = 0.2;		AAmatrix[0][7] = 199.8;
+	AAmatrix[0][8] = 0.2;		AAmatrix[0][9] = 25.7;		AAmatrix[0][10] = 3.7;		AAmatrix[0][11] = 0.2;
+	AAmatrix[0][12] = 120.6;	AAmatrix[0][13] = 13.1;		AAmatrix[0][14] = 49.3;		AAmatrix[0][15] = 673;
+	AAmatrix[0][16] = 243.9;	AAmatrix[0][17] = 0.2;		AAmatrix[0][18] = 1.2;		AAmatrix[0][19] = 339.9;
+	AAmatrix[1][0] = 0.2;		AAmatrix[1][1] = 0;			AAmatrix[1][2] = 0.2;		AAmatrix[1][3] = 4.3;
+	AAmatrix[1][4] = 35.5;		AAmatrix[1][5] = 154;		AAmatrix[1][6] = 0.2;		AAmatrix[1][7] = 0.2;
+	AAmatrix[1][8] = 41.3;		AAmatrix[1][9] = 1.8;		AAmatrix[1][10] = 1.8;		AAmatrix[1][11] = 208.6;
+	AAmatrix[1][12] = 5.2;		AAmatrix[1][13] = 4.7;		AAmatrix[1][14] = 0.2;		AAmatrix[1][15] = 2.7;
+	AAmatrix[1][16] = 0.2;		AAmatrix[1][17] = 0.2;		AAmatrix[1][18] = 3.9;		AAmatrix[1][19] = 0.2;
+	AAmatrix[2][0] = 0.2;		AAmatrix[2][1] = 0.2;		AAmatrix[2][2] = 0;			AAmatrix[2][3] = 500.2;
+	AAmatrix[2][4] = 98.2;		AAmatrix[2][5] = 261.8;		AAmatrix[2][6] = 183;		AAmatrix[2][7] = 120.5;
+	AAmatrix[2][8] = 179.5;		AAmatrix[2][9] = 21.3;		AAmatrix[2][10] = 12.6;		AAmatrix[2][11] = 467.3;
+	AAmatrix[2][12] = 78.8;		AAmatrix[2][13] = 19.7;		AAmatrix[2][14] = 16.5;		AAmatrix[2][15] = 398.4;
+	AAmatrix[2][16] = 165.9;	AAmatrix[2][17] = 7.7;		AAmatrix[2][18] = 251.2;	AAmatrix[2][19] = 22.6;
+	AAmatrix[3][0] = 0.6;		AAmatrix[3][1] = 4.3;		AAmatrix[3][2] = 500.2;		AAmatrix[3][3] = 0;
+	AAmatrix[3][4] = 10.6;		AAmatrix[3][5] = 0.2;		AAmatrix[3][6] = 861.8;		AAmatrix[3][7] = 12.5;
+	AAmatrix[3][8] = 0.2;		AAmatrix[3][9] = 6.6;		AAmatrix[3][10] = 1.2;		AAmatrix[3][11] = 1.7;
+	AAmatrix[3][12] = 0.2;		AAmatrix[3][13] = 0.2;		AAmatrix[3][14] = 0.2;		AAmatrix[3][15] = 44.4;
+	AAmatrix[3][16] = 0.2;		AAmatrix[3][17] = 0.2;		AAmatrix[3][18] = 0.2;		AAmatrix[3][19] = 0.2;
+	AAmatrix[4][0] = 253.5;		AAmatrix[4][1] = 35.5;		AAmatrix[4][2] = 98.2;		AAmatrix[4][3] = 10.6;
+	AAmatrix[4][4] = 0;			AAmatrix[4][5] = 0.2;		AAmatrix[4][6] = 0.2;		AAmatrix[4][7] = 80.5;
+	AAmatrix[4][8] = 12.4;		AAmatrix[4][9] = 63;		AAmatrix[4][10] = 78.7;		AAmatrix[4][11] = 0.2;
+	AAmatrix[4][12] = 312.3;	AAmatrix[4][13] = 184.1;	AAmatrix[4][14] = 0.2;		AAmatrix[4][15] = 664.2;
+	AAmatrix[4][16] = 182.8;	AAmatrix[4][17] = 21.6;		AAmatrix[4][18] = 72;		AAmatrix[4][19] = 350.4;
+	AAmatrix[5][0] = 0.2;		AAmatrix[5][1] = 154;		AAmatrix[5][2] = 261.8;		AAmatrix[5][3] = 0.2;
+	AAmatrix[5][4] = 0.2;		AAmatrix[5][5] = 0;			AAmatrix[5][6] = 261.6;		AAmatrix[5][7] = 2.6;
+	AAmatrix[5][8] = 313.5;		AAmatrix[5][9] = 10.5;		AAmatrix[5][10] = 16.3;		AAmatrix[5][11] = 349.3;
+	AAmatrix[5][12] = 67.3;		AAmatrix[5][13] = 0.2;		AAmatrix[5][14] = 39.3;		AAmatrix[5][15] = 52.4;
+	AAmatrix[5][16] = 43.7;		AAmatrix[5][17] = 6.7;		AAmatrix[5][18] = 86.7;		AAmatrix[5][19] = 0.2;
+	AAmatrix[6][0] = 0.2;		AAmatrix[6][1] = 0.2;		AAmatrix[6][2] = 183;		AAmatrix[6][3] = 861.8;
+	AAmatrix[6][4] = 0.2;		AAmatrix[6][5] = 261.6;		AAmatrix[6][6] = 0;			AAmatrix[6][7] = 43.9;
+	AAmatrix[6][8] = 15.2;		AAmatrix[6][9] = 6.8;		AAmatrix[6][10] = 1.7;		AAmatrix[6][11] = 106.3;
+	AAmatrix[6][12] = 0.2;		AAmatrix[6][13] = 0.2;		AAmatrix[6][14] = 7.9;		AAmatrix[6][15] = 31.5;
+	AAmatrix[6][16] = 43.4;		AAmatrix[6][17] = 11;		AAmatrix[6][18] = 7.7;		AAmatrix[6][19] = 13.6;
+	AAmatrix[7][0] = 199.8;		AAmatrix[7][1] = 0.2;		AAmatrix[7][2] = 120.5;		AAmatrix[7][3] = 12.5;
+	AAmatrix[7][4] = 80.5;		AAmatrix[7][5] = 2.6;		AAmatrix[7][6] = 43.9;		AAmatrix[7][7] = 0;
+	AAmatrix[7][8] = 0.2;		AAmatrix[7][9] = 2.7;		AAmatrix[7][10] = 1.4;		AAmatrix[7][11] = 0.2;
+	AAmatrix[7][12] = 55.7;		AAmatrix[7][13] = 0.8;		AAmatrix[7][14] = 0.2;		AAmatrix[7][15] = 226;
+	AAmatrix[7][16] = 0.2;		AAmatrix[7][17] = 1.9;		AAmatrix[7][18] = 8.6;		AAmatrix[7][19] = 2.6;
+	AAmatrix[8][0] = 0.2;		AAmatrix[8][1] = 41.3;		AAmatrix[8][2] = 179.5;		AAmatrix[8][3] = 0.2;
+	AAmatrix[8][4] = 12.4;		AAmatrix[8][5] = 313.5;		AAmatrix[8][6] = 15.2;		AAmatrix[8][7] = 0.2;
+	AAmatrix[8][8] = 0;			AAmatrix[8][9] = 0.2;		AAmatrix[8][10] = 5.5;		AAmatrix[8][11] = 0.2;
+	AAmatrix[8][12] = 0.2;		AAmatrix[8][13] = 13.8;		AAmatrix[8][14] = 0.8;		AAmatrix[8][15] = 10.6;
+	AAmatrix[8][16] = 18.6;		AAmatrix[8][17] = 0.2;		AAmatrix[8][18] = 191.4;	AAmatrix[8][19] = 0.2;
+	AAmatrix[9][0] = 25.7;		AAmatrix[9][1] = 1.8;		AAmatrix[9][2] = 21.3;		AAmatrix[9][3] = 6.6;
+	AAmatrix[9][4] = 63;		AAmatrix[9][5] = 10.5;		AAmatrix[9][6] = 6.8;		AAmatrix[9][7] = 2.7;
+	AAmatrix[9][8] = 0.2;		AAmatrix[9][9] = 0;			AAmatrix[9][10] = 514.5;	AAmatrix[9][11] = 3.5;
+	AAmatrix[9][12] = 514.8;	AAmatrix[9][13] = 117.9;	AAmatrix[9][14] = 0.2;		AAmatrix[9][15] = 7.2;
+	AAmatrix[9][16] = 203.7;	AAmatrix[9][17] = 0.2;		AAmatrix[9][18] = 12.3;		AAmatrix[9][19] = 1854.5;
+	AAmatrix[10][0] = 3.7;		AAmatrix[10][1] = 1.8;		AAmatrix[10][2] = 12.6;		AAmatrix[10][3] = 1.2;
+	AAmatrix[10][4] = 78.7;		AAmatrix[10][5] = 16.3;		AAmatrix[10][6] = 1.7;		AAmatrix[10][7] = 1.4;
+	AAmatrix[10][8] = 5.5;		AAmatrix[10][9] = 514.5;	AAmatrix[10][10] = 0;		AAmatrix[10][11] = 3.8;
+	AAmatrix[10][12] = 885.5;	AAmatrix[10][13] = 262.6;	AAmatrix[10][14] = 12.2;	AAmatrix[10][15] = 8.2;
+	AAmatrix[10][16] = 47.8;	AAmatrix[10][17] = 21.1;	AAmatrix[10][18] = 19.8;	AAmatrix[10][19] = 84.7;
+	AAmatrix[11][0] = 0.2;		AAmatrix[11][1] = 208.6;	AAmatrix[11][2] = 467.3;	AAmatrix[11][3] = 1.7;
+	AAmatrix[11][4] = 0.2;		AAmatrix[11][5] = 349.3;	AAmatrix[11][6] = 106.3;	AAmatrix[11][7] = 0.2;
+	AAmatrix[11][8] = 0.2;		AAmatrix[11][9] = 3.5;		AAmatrix[11][10] = 3.8;		AAmatrix[11][11] = 0;
+	AAmatrix[11][12] = 105.6;	AAmatrix[11][13] = 10.7;	AAmatrix[11][14] = 16.8;	AAmatrix[11][15] = 144.2;
+	AAmatrix[11][16] = 69.5;	AAmatrix[11][17] = 16;		AAmatrix[11][18] = 117.1;	AAmatrix[11][19] = 26.1;
+	AAmatrix[12][0] = 120.6;	AAmatrix[12][1] = 5.2;		AAmatrix[12][2] = 78.8;		AAmatrix[12][3] = 0.2;
+	AAmatrix[12][4] = 312.3;	AAmatrix[12][5] = 67.3;		AAmatrix[12][6] = 0.2;		AAmatrix[12][7] = 55.7;
+	AAmatrix[12][8] = 0.2;		AAmatrix[12][9] = 514.8;	AAmatrix[12][10] = 885.5;	AAmatrix[12][11] = 105.6;
+	AAmatrix[12][12] = 0;		AAmatrix[12][13] = 321.6;	AAmatrix[12][14] = 5.3;		AAmatrix[12][15] = 111.7;
+	AAmatrix[12][16] = 288.6;	AAmatrix[12][17] = 70.7;	AAmatrix[12][18] = 70.9;	AAmatrix[12][19] = 281.3;
+	AAmatrix[13][0] = 13.1;		AAmatrix[13][1] = 4.7;		AAmatrix[13][2] = 19.7;		AAmatrix[13][3] = 0.2;
+	AAmatrix[13][4] = 184.1;	AAmatrix[13][5] = 0.2;		AAmatrix[13][6] = 0.2;		AAmatrix[13][7] = 0.8;
+	AAmatrix[13][8] = 13.8;		AAmatrix[13][9] = 117.9;	AAmatrix[13][10] = 262.6;	AAmatrix[13][11] = 10.7;
+	AAmatrix[13][12] = 321.6;	AAmatrix[13][13] = 0;		AAmatrix[13][14] = 14.6;	AAmatrix[13][15] = 36.1;
+	AAmatrix[13][16] = 13.5;	AAmatrix[13][17] = 53.7;	AAmatrix[13][18] = 791.6;	AAmatrix[13][19] = 51.9;
+	AAmatrix[14][0] = 49.3;		AAmatrix[14][1] = 0.2;		AAmatrix[14][2] = 16.5;		AAmatrix[14][3] = 0.2;
+	AAmatrix[14][4] = 0.2;		AAmatrix[14][5] = 39.3;		AAmatrix[14][6] = 7.9;		AAmatrix[14][7] = 0.2;
+	AAmatrix[14][8] = 0.8;		AAmatrix[14][9] = 0.2;		AAmatrix[14][10] = 12.2;	AAmatrix[14][11] = 16.8;
+	AAmatrix[14][12] = 5.3;		AAmatrix[14][13] = 14.6;	AAmatrix[14][14] = 0;		AAmatrix[14][15] = 86.5;
+	AAmatrix[14][16] = 46.8;	AAmatrix[14][17] = 0.2;		AAmatrix[14][18] = 18.4;	AAmatrix[14][19] = 31.7;
+	AAmatrix[15][0] = 673;		AAmatrix[15][1] = 2.7;		AAmatrix[15][2] = 398.4;	AAmatrix[15][3] = 44.4;
+	AAmatrix[15][4] = 664.2;	AAmatrix[15][5] = 52.4;		AAmatrix[15][6] = 31.5;		AAmatrix[15][7] = 226;
+	AAmatrix[15][8] = 10.6;		AAmatrix[15][9] = 7.2;		AAmatrix[15][10] = 8.2;		AAmatrix[15][11] = 144.2;
+	AAmatrix[15][12] = 111.7;	AAmatrix[15][13] = 36.1;	AAmatrix[15][14] = 86.5;	AAmatrix[15][15] = 0;
+	AAmatrix[15][16] = 660.4;	AAmatrix[15][17] = 2.4;		AAmatrix[15][18] = 30.5;	AAmatrix[15][19] = 60.6;
+	AAmatrix[16][0] = 243.9;	AAmatrix[16][1] = 0.2;		AAmatrix[16][2] = 165.9;	AAmatrix[16][3] = 0.2;
+	AAmatrix[16][4] = 182.8;	AAmatrix[16][5] = 43.7;		AAmatrix[16][6] = 43.4;		AAmatrix[16][7] = 0.2;
+	AAmatrix[16][8] = 18.6;		AAmatrix[16][9] = 203.7;	AAmatrix[16][10] = 47.8;	AAmatrix[16][11] = 69.5;
+	AAmatrix[16][12] = 288.6;	AAmatrix[16][13] = 13.5;	AAmatrix[16][14] = 46.8;	AAmatrix[16][15] = 660.4;
+	AAmatrix[16][16] = 0;		AAmatrix[16][17] = 0.2;		AAmatrix[16][18] = 46;		AAmatrix[16][19] = 544.1;
+	AAmatrix[17][0] = 0.2;		AAmatrix[17][1] = 0.2;		AAmatrix[17][2] = 7.7;		AAmatrix[17][3] = 0.2;
+	AAmatrix[17][4] = 21.6;		AAmatrix[17][5] = 6.7;		AAmatrix[17][6] = 11;		AAmatrix[17][7] = 1.9;
+	AAmatrix[17][8] = 0.2;		AAmatrix[17][9] = 0.2;		AAmatrix[17][10] = 21.1;	AAmatrix[17][11] = 16;
+	AAmatrix[17][12] = 70.7;	AAmatrix[17][13] = 53.7;	AAmatrix[17][14] = 0.2;		AAmatrix[17][15] = 2.4;
+	AAmatrix[17][16] = 0.2;		AAmatrix[17][17] = 0;		AAmatrix[17][18] = 37.7;	AAmatrix[17][19] = 0.2;
+	AAmatrix[18][0] = 1.2;		AAmatrix[18][1] = 3.9;		AAmatrix[18][2] = 251.2;	AAmatrix[18][3] = 0.2;
+	AAmatrix[18][4] = 72;		AAmatrix[18][5] = 86.7;		AAmatrix[18][6] = 7.7;		AAmatrix[18][7] = 8.6;
+	AAmatrix[18][8] = 191.4;	AAmatrix[18][9] = 12.3;		AAmatrix[18][10] = 19.8;	AAmatrix[18][11] = 117.1;
+	AAmatrix[18][12] = 70.9;	AAmatrix[18][13] = 791.6;	AAmatrix[18][14] = 18.4;	AAmatrix[18][15] = 30.5;
+	AAmatrix[18][16] = 46;		AAmatrix[18][17] = 37.7;	AAmatrix[18][18] = 0;		AAmatrix[18][19] = 1.6;
+	AAmatrix[19][0] = 339.9;	AAmatrix[19][1] = 0.2;		AAmatrix[19][2] = 22.6;		AAmatrix[19][3] = 0.2;
+	AAmatrix[19][4] = 350.4;	AAmatrix[19][5] = 0.2;		AAmatrix[19][6] = 13.6;		AAmatrix[19][7] = 2.6;
+	AAmatrix[19][8] = 0.2;		AAmatrix[19][9] = 1854.5;	AAmatrix[19][10] = 84.7;	AAmatrix[19][11] = 26.1;
+	AAmatrix[19][12] = 281.3;	AAmatrix[19][13] = 51.9;	AAmatrix[19][14] = 31.7;	AAmatrix[19][15] = 60.6;
+	AAmatrix[19][16] = 544.1;	AAmatrix[19][17] = 0.2;		AAmatrix[19][18] = 1.6;		AAmatrix[19][19] = 0;
 
 	AAPi[0] = 0.054116;
 	AAPi[1] = 0.018227;
@@ -2139,17 +2139,17 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	else
 	if(modelnumber==8)
 	{
 
-	/* 
-		mtrev24 
-		
-		Adachi, J. and Hasegawa, M. (1996) MOLPHY version 2.3: programs for molecular phylogenetics based on maximum likelihood.  
+	/*
+		mtrev24
+
+		Adachi, J. and Hasegawa, M. (1996) MOLPHY version 2.3: programs for molecular phylogenetics based on maximum likelihood.
 		Computer Science Monographs of Institute of Statistical Mathematics 28:1-150.
 
 	*/
@@ -2254,19 +2254,19 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[17] = 0.029;
 	AAPi[18] = 0.033;
 	AAPi[19] = 0.043;
-	
+
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	else
 	if(modelnumber==9)
 	{
 
-	/* 
+	/*
 		rtRev
-		
-		Dimmic M.W., J.S. Rest, D.P. Mindell, and D. Goldstein. (2002) RArtREV: An amino acid substitution matrix for inference 
+
+		Dimmic M.W., J.S. Rest, D.P. Mindell, and D. Goldstein. (2002) RArtREV: An amino acid substitution matrix for inference
 		of retrovirus and reverse transcriptase phylogeny. Journal of Molecular Evolution 55: 65-73.
 	*/
 	AAmatrix[ 0][ 0] =   0; AAmatrix[ 1][ 0] =  34; AAmatrix[ 2][ 0] =  51; AAmatrix[ 3][ 0] =  10; AAmatrix[ 4][ 0] = 439;
@@ -2369,101 +2369,101 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[17] = 0.0251;
 	AAPi[18] = 0.0318;
 	AAPi[19] = 0.0619;
-	
+
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	else
 	if(modelnumber==10)
 	{
 
-	/* 
-		cpRev 
-		
-		Adachi, J., P. J. Waddell, W. Martin, and M. Hasegawa. (2000) Plastid genome phylogeny and a model of amino acid 
+	/*
+		cpRev
+
+		Adachi, J., P. J. Waddell, W. Martin, and M. Hasegawa. (2000) Plastid genome phylogeny and a model of amino acid
 		substitution for proteins encoded by chloroplast DNA. Journal of Molecular Evolution 50:348-358.
 	*/
-	AAmatrix[ 0][ 0] =    0; AAmatrix[ 0][ 1] =  105; AAmatrix[ 0][ 2] =  227; AAmatrix[ 0][ 3] =  175; AAmatrix[ 0][ 4] =  669; 
-	AAmatrix[ 0][ 5] =  157; AAmatrix[ 0][ 6] =  499; AAmatrix[ 0][ 7] =  665; AAmatrix[ 0][ 8] =   66; AAmatrix[ 0][ 9] =  145; 
-	AAmatrix[ 0][10] =  197; AAmatrix[ 0][11] =  236; AAmatrix[ 0][12] =  185; AAmatrix[ 0][13] =   68; AAmatrix[ 0][14] =  490; 
-	AAmatrix[ 0][15] = 2440; AAmatrix[ 0][16] = 1340; AAmatrix[ 0][17] =   14; AAmatrix[ 0][18] =   56; AAmatrix[ 0][19] =  968; 
-	AAmatrix[ 1][ 0] =  105; AAmatrix[ 1][ 1] =    0; AAmatrix[ 1][ 2] =  357; AAmatrix[ 1][ 3] =   43; AAmatrix[ 1][ 4] =  823; 
-	AAmatrix[ 1][ 5] = 1745; AAmatrix[ 1][ 6] =  152; AAmatrix[ 1][ 7] =  243; AAmatrix[ 1][ 8] =  715; AAmatrix[ 1][ 9] =  136; 
-	AAmatrix[ 1][10] =  203; AAmatrix[ 1][11] = 4482; AAmatrix[ 1][12] =  125; AAmatrix[ 1][13] =   53; AAmatrix[ 1][14] =   87; 
-	AAmatrix[ 1][15] =  385; AAmatrix[ 1][16] =  314; AAmatrix[ 1][17] =  230; AAmatrix[ 1][18] =  323; AAmatrix[ 1][19] =   92; 
-	AAmatrix[ 2][ 0] =  227; AAmatrix[ 2][ 1] =  357; AAmatrix[ 2][ 2] =    0; AAmatrix[ 2][ 3] = 4435; AAmatrix[ 2][ 4] =  538; 
-	AAmatrix[ 2][ 5] =  768; AAmatrix[ 2][ 6] = 1055; AAmatrix[ 2][ 7] =  653; AAmatrix[ 2][ 8] = 1405; AAmatrix[ 2][ 9] =  168; 
-	AAmatrix[ 2][10] =  113; AAmatrix[ 2][11] = 2430; AAmatrix[ 2][12] =   61; AAmatrix[ 2][13] =   97; AAmatrix[ 2][14] =  173; 
-	AAmatrix[ 2][15] = 2085; AAmatrix[ 2][16] = 1393; AAmatrix[ 2][17] =   40; AAmatrix[ 2][18] =  754; AAmatrix[ 2][19] =   83; 
-	AAmatrix[ 3][ 0] =  175; AAmatrix[ 3][ 1] =   43; AAmatrix[ 3][ 2] = 4435; AAmatrix[ 3][ 3] =    0; AAmatrix[ 3][ 4] =   10; 
-	AAmatrix[ 3][ 5] =  400; AAmatrix[ 3][ 6] = 3691; AAmatrix[ 3][ 7] =  431; AAmatrix[ 3][ 8] =  331; AAmatrix[ 3][ 9] =   10; 
-	AAmatrix[ 3][10] =   10; AAmatrix[ 3][11] =  412; AAmatrix[ 3][12] =   47; AAmatrix[ 3][13] =   22; AAmatrix[ 3][14] =  170; 
-	AAmatrix[ 3][15] =  590; AAmatrix[ 3][16] =  266; AAmatrix[ 3][17] =   18; AAmatrix[ 3][18] =  281; AAmatrix[ 3][19] =   75; 
-	AAmatrix[ 4][ 0] =  669; AAmatrix[ 4][ 1] =  823; AAmatrix[ 4][ 2] =  538; AAmatrix[ 4][ 3] =   10; AAmatrix[ 4][ 4] =    0; 
-	AAmatrix[ 4][ 5] =   10; AAmatrix[ 4][ 6] =   10; AAmatrix[ 4][ 7] =  303; AAmatrix[ 4][ 8] =  441; AAmatrix[ 4][ 9] =  280; 
-	AAmatrix[ 4][10] =  396; AAmatrix[ 4][11] =   48; AAmatrix[ 4][12] =  159; AAmatrix[ 4][13] =  726; AAmatrix[ 4][14] =  285; 
-	AAmatrix[ 4][15] = 2331; AAmatrix[ 4][16] =  576; AAmatrix[ 4][17] =  435; AAmatrix[ 4][18] = 1466; AAmatrix[ 4][19] =  592; 
-	AAmatrix[ 5][ 0] =  157; AAmatrix[ 5][ 1] = 1745; AAmatrix[ 5][ 2] =  768; AAmatrix[ 5][ 3] =  400; AAmatrix[ 5][ 4] =   10; 
-	AAmatrix[ 5][ 5] =    0; AAmatrix[ 5][ 6] = 3122; AAmatrix[ 5][ 7] =  133; AAmatrix[ 5][ 8] = 1269; AAmatrix[ 5][ 9] =   92; 
-	AAmatrix[ 5][10] =  286; AAmatrix[ 5][11] = 3313; AAmatrix[ 5][12] =  202; AAmatrix[ 5][13] =   10; AAmatrix[ 5][14] =  323; 
-	AAmatrix[ 5][15] =  396; AAmatrix[ 5][16] =  241; AAmatrix[ 5][17] =   53; AAmatrix[ 5][18] =  391; AAmatrix[ 5][19] =   54; 
-	AAmatrix[ 6][ 0] =  499; AAmatrix[ 6][ 1] =  152; AAmatrix[ 6][ 2] = 1055; AAmatrix[ 6][ 3] = 3691; AAmatrix[ 6][ 4] =   10; 
-	AAmatrix[ 6][ 5] = 3122; AAmatrix[ 6][ 6] =    0; AAmatrix[ 6][ 7] =  379; AAmatrix[ 6][ 8] =  162; AAmatrix[ 6][ 9] =  148; 
-	AAmatrix[ 6][10] =   82; AAmatrix[ 6][11] = 2629; AAmatrix[ 6][12] =  113; AAmatrix[ 6][13] =  145; AAmatrix[ 6][14] =  185; 
-	AAmatrix[ 6][15] =  568; AAmatrix[ 6][16] =  369; AAmatrix[ 6][17] =   63; AAmatrix[ 6][18] =  142; AAmatrix[ 6][19] =  200; 
-	AAmatrix[ 7][ 0] =  665; AAmatrix[ 7][ 1] =  243; AAmatrix[ 7][ 2] =  653; AAmatrix[ 7][ 3] =  431; AAmatrix[ 7][ 4] =  303; 
-	AAmatrix[ 7][ 5] =  133; AAmatrix[ 7][ 6] =  379; AAmatrix[ 7][ 7] =    0; AAmatrix[ 7][ 8] =   19; AAmatrix[ 7][ 9] =   40; 
-	AAmatrix[ 7][10] =   20; AAmatrix[ 7][11] =  263; AAmatrix[ 7][12] =   21; AAmatrix[ 7][13] =   25; AAmatrix[ 7][14] =   28; 
-	AAmatrix[ 7][15] =  691; AAmatrix[ 7][16] =   92; AAmatrix[ 7][17] =   82; AAmatrix[ 7][18] =   10; AAmatrix[ 7][19] =   91; 
-	AAmatrix[ 8][ 0] =   66; AAmatrix[ 8][ 1] =  715; AAmatrix[ 8][ 2] = 1405; AAmatrix[ 8][ 3] =  331; AAmatrix[ 8][ 4] =  441; 
-	AAmatrix[ 8][ 5] = 1269; AAmatrix[ 8][ 6] =  162; AAmatrix[ 8][ 7] =   19; AAmatrix[ 8][ 8] =    0; AAmatrix[ 8][ 9] =   29; 
-	AAmatrix[ 8][10] =   66; AAmatrix[ 8][11] =  305; AAmatrix[ 8][12] =   10; AAmatrix[ 8][13] =  127; AAmatrix[ 8][14] =  152; 
-	AAmatrix[ 8][15] =  303; AAmatrix[ 8][16] =   32; AAmatrix[ 8][17] =   69; AAmatrix[ 8][18] = 1971; AAmatrix[ 8][19] =   25; 
-	AAmatrix[ 9][ 0] =  145; AAmatrix[ 9][ 1] =  136; AAmatrix[ 9][ 2] =  168; AAmatrix[ 9][ 3] =   10; AAmatrix[ 9][ 4] =  280; 
-	AAmatrix[ 9][ 5] =   92; AAmatrix[ 9][ 6] =  148; AAmatrix[ 9][ 7] =   40; AAmatrix[ 9][ 8] =   29; AAmatrix[ 9][ 9] =    0; 
-	AAmatrix[ 9][10] = 1745; AAmatrix[ 9][11] =  345; AAmatrix[ 9][12] = 1772; AAmatrix[ 9][13] =  454; AAmatrix[ 9][14] =  117; 
-	AAmatrix[ 9][15] =  216; AAmatrix[ 9][16] = 1040; AAmatrix[ 9][17] =   42; AAmatrix[ 9][18] =   89; AAmatrix[ 9][19] = 4797; 
-	AAmatrix[10][ 0] =  197; AAmatrix[10][ 1] =  203; AAmatrix[10][ 2] =  113; AAmatrix[10][ 3] =   10; AAmatrix[10][ 4] =  396; 
-	AAmatrix[10][ 5] =  286; AAmatrix[10][ 6] =   82; AAmatrix[10][ 7] =   20; AAmatrix[10][ 8] =   66; AAmatrix[10][ 9] = 1745; 
-	AAmatrix[10][10] =    0; AAmatrix[10][11] =  218; AAmatrix[10][12] = 1351; AAmatrix[10][13] = 1268; AAmatrix[10][14] =  219; 
-	AAmatrix[10][15] =  516; AAmatrix[10][16] =  156; AAmatrix[10][17] =  159; AAmatrix[10][18] =  189; AAmatrix[10][19] =  865; 
-	AAmatrix[11][ 0] =  236; AAmatrix[11][ 1] = 4482; AAmatrix[11][ 2] = 2430; AAmatrix[11][ 3] =  412; AAmatrix[11][ 4] =   48; 
-	AAmatrix[11][ 5] = 3313; AAmatrix[11][ 6] = 2629; AAmatrix[11][ 7] =  263; AAmatrix[11][ 8] =  305; AAmatrix[11][ 9] =  345; 
-	AAmatrix[11][10] =  218; AAmatrix[11][11] =    0; AAmatrix[11][12] =  193; AAmatrix[11][13] =   72; AAmatrix[11][14] =  302; 
-	AAmatrix[11][15] =  868; AAmatrix[11][16] =  918; AAmatrix[11][17] =   10; AAmatrix[11][18] =  247; AAmatrix[11][19] =  249; 
-	AAmatrix[12][ 0] =  185; AAmatrix[12][ 1] =  125; AAmatrix[12][ 2] =   61; AAmatrix[12][ 3] =   47; AAmatrix[12][ 4] =  159; 
-	AAmatrix[12][ 5] =  202; AAmatrix[12][ 6] =  113; AAmatrix[12][ 7] =   21; AAmatrix[12][ 8] =   10; AAmatrix[12][ 9] = 1772; 
-	AAmatrix[12][10] = 1351; AAmatrix[12][11] =  193; AAmatrix[12][12] =    0; AAmatrix[12][13] =  327; AAmatrix[12][14] =  100; 
-	AAmatrix[12][15] =   93; AAmatrix[12][16] =  645; AAmatrix[12][17] =   86; AAmatrix[12][18] =  215; AAmatrix[12][19] =  475; 
-	AAmatrix[13][ 0] =   68; AAmatrix[13][ 1] =   53; AAmatrix[13][ 2] =   97; AAmatrix[13][ 3] =   22; AAmatrix[13][ 4] =  726; 
-	AAmatrix[13][ 5] =   10; AAmatrix[13][ 6] =  145; AAmatrix[13][ 7] =   25; AAmatrix[13][ 8] =  127; AAmatrix[13][ 9] =  454; 
-	AAmatrix[13][10] = 1268; AAmatrix[13][11] =   72; AAmatrix[13][12] =  327; AAmatrix[13][13] =    0; AAmatrix[13][14] =   43; 
-	AAmatrix[13][15] =  487; AAmatrix[13][16] =  148; AAmatrix[13][17] =  468; AAmatrix[13][18] = 2370; AAmatrix[13][19] =  317; 
-	AAmatrix[14][ 0] =  490; AAmatrix[14][ 1] =   87; AAmatrix[14][ 2] =  173; AAmatrix[14][ 3] =  170; AAmatrix[14][ 4] =  285; 
-	AAmatrix[14][ 5] =  323; AAmatrix[14][ 6] =  185; AAmatrix[14][ 7] =   28; AAmatrix[14][ 8] =  152; AAmatrix[14][ 9] =  117; 
-	AAmatrix[14][10] =  219; AAmatrix[14][11] =  302; AAmatrix[14][12] =  100; AAmatrix[14][13] =   43; AAmatrix[14][14] =    0; 
-	AAmatrix[14][15] = 1202; AAmatrix[14][16] =  260; AAmatrix[14][17] =   49; AAmatrix[14][18] =   97; AAmatrix[14][19] =  122; 
-	AAmatrix[15][ 0] = 2440; AAmatrix[15][ 1] =  385; AAmatrix[15][ 2] = 2085; AAmatrix[15][ 3] =  590; AAmatrix[15][ 4] = 2331; 
-	AAmatrix[15][ 5] =  396; AAmatrix[15][ 6] =  568; AAmatrix[15][ 7] =  691; AAmatrix[15][ 8] =  303; AAmatrix[15][ 9] =  216; 
-	AAmatrix[15][10] =  516; AAmatrix[15][11] =  868; AAmatrix[15][12] =   93; AAmatrix[15][13] =  487; AAmatrix[15][14] = 1202; 
-	AAmatrix[15][15] =    0; AAmatrix[15][16] = 2151; AAmatrix[15][17] =   73; AAmatrix[15][18] =  522; AAmatrix[15][19] =  167; 
-	AAmatrix[16][ 0] = 1340; AAmatrix[16][ 1] =  314; AAmatrix[16][ 2] = 1393; AAmatrix[16][ 3] =  266; AAmatrix[16][ 4] =  576; 
-	AAmatrix[16][ 5] =  241; AAmatrix[16][ 6] =  369; AAmatrix[16][ 7] =   92; AAmatrix[16][ 8] =   32; AAmatrix[16][ 9] = 1040; 
-	AAmatrix[16][10] =  156; AAmatrix[16][11] =  918; AAmatrix[16][12] =  645; AAmatrix[16][13] =  148; AAmatrix[16][14] =  260; 
-	AAmatrix[16][15] = 2151; AAmatrix[16][16] =    0; AAmatrix[16][17] =   29; AAmatrix[16][18] =   71; AAmatrix[16][19] =  760; 
-	AAmatrix[17][ 0] =   14; AAmatrix[17][ 1] =  230; AAmatrix[17][ 2] =   40; AAmatrix[17][ 3] =   18; AAmatrix[17][ 4] =  435; 
-	AAmatrix[17][ 5] =   53; AAmatrix[17][ 6] =   63; AAmatrix[17][ 7] =   82; AAmatrix[17][ 8] =   69; AAmatrix[17][ 9] =   42; 
-	AAmatrix[17][10] =  159; AAmatrix[17][11] =   10; AAmatrix[17][12] =   86; AAmatrix[17][13] =  468; AAmatrix[17][14] =   49; 
-	AAmatrix[17][15] =   73; AAmatrix[17][16] =   29; AAmatrix[17][17] =    0; AAmatrix[17][18] =  346; AAmatrix[17][19] =   10; 
-	AAmatrix[18][ 0] =   56; AAmatrix[18][ 1] =  323; AAmatrix[18][ 2] =  754; AAmatrix[18][ 3] =  281; AAmatrix[18][ 4] = 1466; 
-	AAmatrix[18][ 5] =  391; AAmatrix[18][ 6] =  142; AAmatrix[18][ 7] =   10; AAmatrix[18][ 8] = 1971; AAmatrix[18][ 9] =   89; 
-	AAmatrix[18][10] =  189; AAmatrix[18][11] =  247; AAmatrix[18][12] =  215; AAmatrix[18][13] = 2370; AAmatrix[18][14] =   97; 
-	AAmatrix[18][15] =  522; AAmatrix[18][16] =   71; AAmatrix[18][17] =  346; AAmatrix[18][18] =    0; AAmatrix[18][19] =  119; 
-	AAmatrix[19][ 0] =  968; AAmatrix[19][ 1] =   92; AAmatrix[19][ 2] =   83; AAmatrix[19][ 3] =   75; AAmatrix[19][ 4] =  592; 
-	AAmatrix[19][ 5] =   54; AAmatrix[19][ 6] =  200; AAmatrix[19][ 7] =   91; AAmatrix[19][ 8] =   25; AAmatrix[19][ 9] = 4797; 
-	AAmatrix[19][10] =  865; AAmatrix[19][11] =  249; AAmatrix[19][12] =  475; AAmatrix[19][13] =  317; AAmatrix[19][14] =  122; 
-	AAmatrix[19][15] =  167; AAmatrix[19][16] =  760; AAmatrix[19][17] =   10; AAmatrix[19][18] =  119; AAmatrix[19][19] =    0; 
+	AAmatrix[ 0][ 0] =    0; AAmatrix[ 0][ 1] =  105; AAmatrix[ 0][ 2] =  227; AAmatrix[ 0][ 3] =  175; AAmatrix[ 0][ 4] =  669;
+	AAmatrix[ 0][ 5] =  157; AAmatrix[ 0][ 6] =  499; AAmatrix[ 0][ 7] =  665; AAmatrix[ 0][ 8] =   66; AAmatrix[ 0][ 9] =  145;
+	AAmatrix[ 0][10] =  197; AAmatrix[ 0][11] =  236; AAmatrix[ 0][12] =  185; AAmatrix[ 0][13] =   68; AAmatrix[ 0][14] =  490;
+	AAmatrix[ 0][15] = 2440; AAmatrix[ 0][16] = 1340; AAmatrix[ 0][17] =   14; AAmatrix[ 0][18] =   56; AAmatrix[ 0][19] =  968;
+	AAmatrix[ 1][ 0] =  105; AAmatrix[ 1][ 1] =    0; AAmatrix[ 1][ 2] =  357; AAmatrix[ 1][ 3] =   43; AAmatrix[ 1][ 4] =  823;
+	AAmatrix[ 1][ 5] = 1745; AAmatrix[ 1][ 6] =  152; AAmatrix[ 1][ 7] =  243; AAmatrix[ 1][ 8] =  715; AAmatrix[ 1][ 9] =  136;
+	AAmatrix[ 1][10] =  203; AAmatrix[ 1][11] = 4482; AAmatrix[ 1][12] =  125; AAmatrix[ 1][13] =   53; AAmatrix[ 1][14] =   87;
+	AAmatrix[ 1][15] =  385; AAmatrix[ 1][16] =  314; AAmatrix[ 1][17] =  230; AAmatrix[ 1][18] =  323; AAmatrix[ 1][19] =   92;
+	AAmatrix[ 2][ 0] =  227; AAmatrix[ 2][ 1] =  357; AAmatrix[ 2][ 2] =    0; AAmatrix[ 2][ 3] = 4435; AAmatrix[ 2][ 4] =  538;
+	AAmatrix[ 2][ 5] =  768; AAmatrix[ 2][ 6] = 1055; AAmatrix[ 2][ 7] =  653; AAmatrix[ 2][ 8] = 1405; AAmatrix[ 2][ 9] =  168;
+	AAmatrix[ 2][10] =  113; AAmatrix[ 2][11] = 2430; AAmatrix[ 2][12] =   61; AAmatrix[ 2][13] =   97; AAmatrix[ 2][14] =  173;
+	AAmatrix[ 2][15] = 2085; AAmatrix[ 2][16] = 1393; AAmatrix[ 2][17] =   40; AAmatrix[ 2][18] =  754; AAmatrix[ 2][19] =   83;
+	AAmatrix[ 3][ 0] =  175; AAmatrix[ 3][ 1] =   43; AAmatrix[ 3][ 2] = 4435; AAmatrix[ 3][ 3] =    0; AAmatrix[ 3][ 4] =   10;
+	AAmatrix[ 3][ 5] =  400; AAmatrix[ 3][ 6] = 3691; AAmatrix[ 3][ 7] =  431; AAmatrix[ 3][ 8] =  331; AAmatrix[ 3][ 9] =   10;
+	AAmatrix[ 3][10] =   10; AAmatrix[ 3][11] =  412; AAmatrix[ 3][12] =   47; AAmatrix[ 3][13] =   22; AAmatrix[ 3][14] =  170;
+	AAmatrix[ 3][15] =  590; AAmatrix[ 3][16] =  266; AAmatrix[ 3][17] =   18; AAmatrix[ 3][18] =  281; AAmatrix[ 3][19] =   75;
+	AAmatrix[ 4][ 0] =  669; AAmatrix[ 4][ 1] =  823; AAmatrix[ 4][ 2] =  538; AAmatrix[ 4][ 3] =   10; AAmatrix[ 4][ 4] =    0;
+	AAmatrix[ 4][ 5] =   10; AAmatrix[ 4][ 6] =   10; AAmatrix[ 4][ 7] =  303; AAmatrix[ 4][ 8] =  441; AAmatrix[ 4][ 9] =  280;
+	AAmatrix[ 4][10] =  396; AAmatrix[ 4][11] =   48; AAmatrix[ 4][12] =  159; AAmatrix[ 4][13] =  726; AAmatrix[ 4][14] =  285;
+	AAmatrix[ 4][15] = 2331; AAmatrix[ 4][16] =  576; AAmatrix[ 4][17] =  435; AAmatrix[ 4][18] = 1466; AAmatrix[ 4][19] =  592;
+	AAmatrix[ 5][ 0] =  157; AAmatrix[ 5][ 1] = 1745; AAmatrix[ 5][ 2] =  768; AAmatrix[ 5][ 3] =  400; AAmatrix[ 5][ 4] =   10;
+	AAmatrix[ 5][ 5] =    0; AAmatrix[ 5][ 6] = 3122; AAmatrix[ 5][ 7] =  133; AAmatrix[ 5][ 8] = 1269; AAmatrix[ 5][ 9] =   92;
+	AAmatrix[ 5][10] =  286; AAmatrix[ 5][11] = 3313; AAmatrix[ 5][12] =  202; AAmatrix[ 5][13] =   10; AAmatrix[ 5][14] =  323;
+	AAmatrix[ 5][15] =  396; AAmatrix[ 5][16] =  241; AAmatrix[ 5][17] =   53; AAmatrix[ 5][18] =  391; AAmatrix[ 5][19] =   54;
+	AAmatrix[ 6][ 0] =  499; AAmatrix[ 6][ 1] =  152; AAmatrix[ 6][ 2] = 1055; AAmatrix[ 6][ 3] = 3691; AAmatrix[ 6][ 4] =   10;
+	AAmatrix[ 6][ 5] = 3122; AAmatrix[ 6][ 6] =    0; AAmatrix[ 6][ 7] =  379; AAmatrix[ 6][ 8] =  162; AAmatrix[ 6][ 9] =  148;
+	AAmatrix[ 6][10] =   82; AAmatrix[ 6][11] = 2629; AAmatrix[ 6][12] =  113; AAmatrix[ 6][13] =  145; AAmatrix[ 6][14] =  185;
+	AAmatrix[ 6][15] =  568; AAmatrix[ 6][16] =  369; AAmatrix[ 6][17] =   63; AAmatrix[ 6][18] =  142; AAmatrix[ 6][19] =  200;
+	AAmatrix[ 7][ 0] =  665; AAmatrix[ 7][ 1] =  243; AAmatrix[ 7][ 2] =  653; AAmatrix[ 7][ 3] =  431; AAmatrix[ 7][ 4] =  303;
+	AAmatrix[ 7][ 5] =  133; AAmatrix[ 7][ 6] =  379; AAmatrix[ 7][ 7] =    0; AAmatrix[ 7][ 8] =   19; AAmatrix[ 7][ 9] =   40;
+	AAmatrix[ 7][10] =   20; AAmatrix[ 7][11] =  263; AAmatrix[ 7][12] =   21; AAmatrix[ 7][13] =   25; AAmatrix[ 7][14] =   28;
+	AAmatrix[ 7][15] =  691; AAmatrix[ 7][16] =   92; AAmatrix[ 7][17] =   82; AAmatrix[ 7][18] =   10; AAmatrix[ 7][19] =   91;
+	AAmatrix[ 8][ 0] =   66; AAmatrix[ 8][ 1] =  715; AAmatrix[ 8][ 2] = 1405; AAmatrix[ 8][ 3] =  331; AAmatrix[ 8][ 4] =  441;
+	AAmatrix[ 8][ 5] = 1269; AAmatrix[ 8][ 6] =  162; AAmatrix[ 8][ 7] =   19; AAmatrix[ 8][ 8] =    0; AAmatrix[ 8][ 9] =   29;
+	AAmatrix[ 8][10] =   66; AAmatrix[ 8][11] =  305; AAmatrix[ 8][12] =   10; AAmatrix[ 8][13] =  127; AAmatrix[ 8][14] =  152;
+	AAmatrix[ 8][15] =  303; AAmatrix[ 8][16] =   32; AAmatrix[ 8][17] =   69; AAmatrix[ 8][18] = 1971; AAmatrix[ 8][19] =   25;
+	AAmatrix[ 9][ 0] =  145; AAmatrix[ 9][ 1] =  136; AAmatrix[ 9][ 2] =  168; AAmatrix[ 9][ 3] =   10; AAmatrix[ 9][ 4] =  280;
+	AAmatrix[ 9][ 5] =   92; AAmatrix[ 9][ 6] =  148; AAmatrix[ 9][ 7] =   40; AAmatrix[ 9][ 8] =   29; AAmatrix[ 9][ 9] =    0;
+	AAmatrix[ 9][10] = 1745; AAmatrix[ 9][11] =  345; AAmatrix[ 9][12] = 1772; AAmatrix[ 9][13] =  454; AAmatrix[ 9][14] =  117;
+	AAmatrix[ 9][15] =  216; AAmatrix[ 9][16] = 1040; AAmatrix[ 9][17] =   42; AAmatrix[ 9][18] =   89; AAmatrix[ 9][19] = 4797;
+	AAmatrix[10][ 0] =  197; AAmatrix[10][ 1] =  203; AAmatrix[10][ 2] =  113; AAmatrix[10][ 3] =   10; AAmatrix[10][ 4] =  396;
+	AAmatrix[10][ 5] =  286; AAmatrix[10][ 6] =   82; AAmatrix[10][ 7] =   20; AAmatrix[10][ 8] =   66; AAmatrix[10][ 9] = 1745;
+	AAmatrix[10][10] =    0; AAmatrix[10][11] =  218; AAmatrix[10][12] = 1351; AAmatrix[10][13] = 1268; AAmatrix[10][14] =  219;
+	AAmatrix[10][15] =  516; AAmatrix[10][16] =  156; AAmatrix[10][17] =  159; AAmatrix[10][18] =  189; AAmatrix[10][19] =  865;
+	AAmatrix[11][ 0] =  236; AAmatrix[11][ 1] = 4482; AAmatrix[11][ 2] = 2430; AAmatrix[11][ 3] =  412; AAmatrix[11][ 4] =   48;
+	AAmatrix[11][ 5] = 3313; AAmatrix[11][ 6] = 2629; AAmatrix[11][ 7] =  263; AAmatrix[11][ 8] =  305; AAmatrix[11][ 9] =  345;
+	AAmatrix[11][10] =  218; AAmatrix[11][11] =    0; AAmatrix[11][12] =  193; AAmatrix[11][13] =   72; AAmatrix[11][14] =  302;
+	AAmatrix[11][15] =  868; AAmatrix[11][16] =  918; AAmatrix[11][17] =   10; AAmatrix[11][18] =  247; AAmatrix[11][19] =  249;
+	AAmatrix[12][ 0] =  185; AAmatrix[12][ 1] =  125; AAmatrix[12][ 2] =   61; AAmatrix[12][ 3] =   47; AAmatrix[12][ 4] =  159;
+	AAmatrix[12][ 5] =  202; AAmatrix[12][ 6] =  113; AAmatrix[12][ 7] =   21; AAmatrix[12][ 8] =   10; AAmatrix[12][ 9] = 1772;
+	AAmatrix[12][10] = 1351; AAmatrix[12][11] =  193; AAmatrix[12][12] =    0; AAmatrix[12][13] =  327; AAmatrix[12][14] =  100;
+	AAmatrix[12][15] =   93; AAmatrix[12][16] =  645; AAmatrix[12][17] =   86; AAmatrix[12][18] =  215; AAmatrix[12][19] =  475;
+	AAmatrix[13][ 0] =   68; AAmatrix[13][ 1] =   53; AAmatrix[13][ 2] =   97; AAmatrix[13][ 3] =   22; AAmatrix[13][ 4] =  726;
+	AAmatrix[13][ 5] =   10; AAmatrix[13][ 6] =  145; AAmatrix[13][ 7] =   25; AAmatrix[13][ 8] =  127; AAmatrix[13][ 9] =  454;
+	AAmatrix[13][10] = 1268; AAmatrix[13][11] =   72; AAmatrix[13][12] =  327; AAmatrix[13][13] =    0; AAmatrix[13][14] =   43;
+	AAmatrix[13][15] =  487; AAmatrix[13][16] =  148; AAmatrix[13][17] =  468; AAmatrix[13][18] = 2370; AAmatrix[13][19] =  317;
+	AAmatrix[14][ 0] =  490; AAmatrix[14][ 1] =   87; AAmatrix[14][ 2] =  173; AAmatrix[14][ 3] =  170; AAmatrix[14][ 4] =  285;
+	AAmatrix[14][ 5] =  323; AAmatrix[14][ 6] =  185; AAmatrix[14][ 7] =   28; AAmatrix[14][ 8] =  152; AAmatrix[14][ 9] =  117;
+	AAmatrix[14][10] =  219; AAmatrix[14][11] =  302; AAmatrix[14][12] =  100; AAmatrix[14][13] =   43; AAmatrix[14][14] =    0;
+	AAmatrix[14][15] = 1202; AAmatrix[14][16] =  260; AAmatrix[14][17] =   49; AAmatrix[14][18] =   97; AAmatrix[14][19] =  122;
+	AAmatrix[15][ 0] = 2440; AAmatrix[15][ 1] =  385; AAmatrix[15][ 2] = 2085; AAmatrix[15][ 3] =  590; AAmatrix[15][ 4] = 2331;
+	AAmatrix[15][ 5] =  396; AAmatrix[15][ 6] =  568; AAmatrix[15][ 7] =  691; AAmatrix[15][ 8] =  303; AAmatrix[15][ 9] =  216;
+	AAmatrix[15][10] =  516; AAmatrix[15][11] =  868; AAmatrix[15][12] =   93; AAmatrix[15][13] =  487; AAmatrix[15][14] = 1202;
+	AAmatrix[15][15] =    0; AAmatrix[15][16] = 2151; AAmatrix[15][17] =   73; AAmatrix[15][18] =  522; AAmatrix[15][19] =  167;
+	AAmatrix[16][ 0] = 1340; AAmatrix[16][ 1] =  314; AAmatrix[16][ 2] = 1393; AAmatrix[16][ 3] =  266; AAmatrix[16][ 4] =  576;
+	AAmatrix[16][ 5] =  241; AAmatrix[16][ 6] =  369; AAmatrix[16][ 7] =   92; AAmatrix[16][ 8] =   32; AAmatrix[16][ 9] = 1040;
+	AAmatrix[16][10] =  156; AAmatrix[16][11] =  918; AAmatrix[16][12] =  645; AAmatrix[16][13] =  148; AAmatrix[16][14] =  260;
+	AAmatrix[16][15] = 2151; AAmatrix[16][16] =    0; AAmatrix[16][17] =   29; AAmatrix[16][18] =   71; AAmatrix[16][19] =  760;
+	AAmatrix[17][ 0] =   14; AAmatrix[17][ 1] =  230; AAmatrix[17][ 2] =   40; AAmatrix[17][ 3] =   18; AAmatrix[17][ 4] =  435;
+	AAmatrix[17][ 5] =   53; AAmatrix[17][ 6] =   63; AAmatrix[17][ 7] =   82; AAmatrix[17][ 8] =   69; AAmatrix[17][ 9] =   42;
+	AAmatrix[17][10] =  159; AAmatrix[17][11] =   10; AAmatrix[17][12] =   86; AAmatrix[17][13] =  468; AAmatrix[17][14] =   49;
+	AAmatrix[17][15] =   73; AAmatrix[17][16] =   29; AAmatrix[17][17] =    0; AAmatrix[17][18] =  346; AAmatrix[17][19] =   10;
+	AAmatrix[18][ 0] =   56; AAmatrix[18][ 1] =  323; AAmatrix[18][ 2] =  754; AAmatrix[18][ 3] =  281; AAmatrix[18][ 4] = 1466;
+	AAmatrix[18][ 5] =  391; AAmatrix[18][ 6] =  142; AAmatrix[18][ 7] =   10; AAmatrix[18][ 8] = 1971; AAmatrix[18][ 9] =   89;
+	AAmatrix[18][10] =  189; AAmatrix[18][11] =  247; AAmatrix[18][12] =  215; AAmatrix[18][13] = 2370; AAmatrix[18][14] =   97;
+	AAmatrix[18][15] =  522; AAmatrix[18][16] =   71; AAmatrix[18][17] =  346; AAmatrix[18][18] =    0; AAmatrix[18][19] =  119;
+	AAmatrix[19][ 0] =  968; AAmatrix[19][ 1] =   92; AAmatrix[19][ 2] =   83; AAmatrix[19][ 3] =   75; AAmatrix[19][ 4] =  592;
+	AAmatrix[19][ 5] =   54; AAmatrix[19][ 6] =  200; AAmatrix[19][ 7] =   91; AAmatrix[19][ 8] =   25; AAmatrix[19][ 9] = 4797;
+	AAmatrix[19][10] =  865; AAmatrix[19][11] =  249; AAmatrix[19][12] =  475; AAmatrix[19][13] =  317; AAmatrix[19][14] =  122;
+	AAmatrix[19][15] =  167; AAmatrix[19][16] =  760; AAmatrix[19][17] =   10; AAmatrix[19][18] =  119; AAmatrix[19][19] =    0;
 
 	AAPi[0] = 0.076;
 	AAPi[1] = 0.062;
@@ -2487,98 +2487,98 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[19] = 0.066;
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
 	if(modelnumber==11)
 	{
 
-	/* 
+	/*
 		VT model
-		
+
 		Müller T, Vingron M (2000). Modeling amino acid replacement. J Computat Biol 7(6), 761-776
 	*/
-	AAmatrix[ 0][ 0] = 0.000000; AAmatrix[ 0][ 1] = 0.233108; AAmatrix[ 0][ 2] = 0.199097; AAmatrix[ 0][ 3] = 0.265145; AAmatrix[ 0][ 4] = 0.227333; 
-	AAmatrix[ 0][ 5] = 0.310084; AAmatrix[ 0][ 6] = 0.567957; AAmatrix[ 0][ 7] = 0.876213; AAmatrix[ 0][ 8] = 0.078692; AAmatrix[ 0][ 9] = 0.222972; 
-	AAmatrix[ 0][10] = 0.424630; AAmatrix[ 0][11] = 0.393245; AAmatrix[ 0][12] = 0.211550; AAmatrix[ 0][13] = 0.116646; AAmatrix[ 0][14] = 0.399143; 
-	AAmatrix[ 0][15] = 1.817198; AAmatrix[ 0][16] = 0.877877; AAmatrix[ 0][17] = 0.030309; AAmatrix[ 0][18] = 0.087061; AAmatrix[ 0][19] = 1.230985; 
-	AAmatrix[ 1][ 0] = 0.233108; AAmatrix[ 1][ 1] = 0.000000; AAmatrix[ 1][ 2] = 0.210797; AAmatrix[ 1][ 3] = 0.105191; AAmatrix[ 1][ 4] = 0.031726; 
-	AAmatrix[ 1][ 5] = 0.493763; AAmatrix[ 1][ 6] = 0.255240; AAmatrix[ 1][ 7] = 0.156945; AAmatrix[ 1][ 8] = 0.213164; AAmatrix[ 1][ 9] = 0.081510; 
-	AAmatrix[ 1][10] = 0.192364; AAmatrix[ 1][11] = 1.755838; AAmatrix[ 1][12] = 0.087930; AAmatrix[ 1][13] = 0.042569; AAmatrix[ 1][14] = 0.128480; 
-	AAmatrix[ 1][15] = 0.292327; AAmatrix[ 1][16] = 0.204109; AAmatrix[ 1][17] = 0.046417; AAmatrix[ 1][18] = 0.097010; AAmatrix[ 1][19] = 0.113146; 
-	AAmatrix[ 2][ 0] = 0.199097; AAmatrix[ 2][ 1] = 0.210797; AAmatrix[ 2][ 2] = 0.000000; AAmatrix[ 2][ 3] = 0.883422; AAmatrix[ 2][ 4] = 0.027495; 
-	AAmatrix[ 2][ 5] = 0.275700; AAmatrix[ 2][ 6] = 0.270417; AAmatrix[ 2][ 7] = 0.362028; AAmatrix[ 2][ 8] = 0.290006; AAmatrix[ 2][ 9] = 0.087225; 
-	AAmatrix[ 2][10] = 0.069245; AAmatrix[ 2][11] = 0.503060; AAmatrix[ 2][12] = 0.057420; AAmatrix[ 2][13] = 0.039769; AAmatrix[ 2][14] = 0.083956; 
-	AAmatrix[ 2][15] = 0.847049; AAmatrix[ 2][16] = 0.471268; AAmatrix[ 2][17] = 0.010459; AAmatrix[ 2][18] = 0.093268; AAmatrix[ 2][19] = 0.049824; 
-	AAmatrix[ 3][ 0] = 0.265145; AAmatrix[ 3][ 1] = 0.105191; AAmatrix[ 3][ 2] = 0.883422; AAmatrix[ 3][ 3] = 0.000000; AAmatrix[ 3][ 4] = 0.010313; 
-	AAmatrix[ 3][ 5] = 0.205842; AAmatrix[ 3][ 6] = 1.599461; AAmatrix[ 3][ 7] = 0.311718; AAmatrix[ 3][ 8] = 0.134252; AAmatrix[ 3][ 9] = 0.011720; 
-	AAmatrix[ 3][10] = 0.060863; AAmatrix[ 3][11] = 0.261101; AAmatrix[ 3][12] = 0.012182; AAmatrix[ 3][13] = 0.016577; AAmatrix[ 3][14] = 0.160063; 
-	AAmatrix[ 3][15] = 0.461519; AAmatrix[ 3][16] = 0.178197; AAmatrix[ 3][17] = 0.011393; AAmatrix[ 3][18] = 0.051664; AAmatrix[ 3][19] = 0.048769; 
-	AAmatrix[ 4][ 0] = 0.227333; AAmatrix[ 4][ 1] = 0.031726; AAmatrix[ 4][ 2] = 0.027495; AAmatrix[ 4][ 3] = 0.010313; AAmatrix[ 4][ 4] = 0.000000; 
-	AAmatrix[ 4][ 5] = 0.004315; AAmatrix[ 4][ 6] = 0.005321; AAmatrix[ 4][ 7] = 0.050876; AAmatrix[ 4][ 8] = 0.016695; AAmatrix[ 4][ 9] = 0.046398; 
-	AAmatrix[ 4][10] = 0.091709; AAmatrix[ 4][11] = 0.004067; AAmatrix[ 4][12] = 0.023690; AAmatrix[ 4][13] = 0.051127; AAmatrix[ 4][14] = 0.011137; 
-	AAmatrix[ 4][15] = 0.175270; AAmatrix[ 4][16] = 0.079511; AAmatrix[ 4][17] = 0.007732; AAmatrix[ 4][18] = 0.042823; AAmatrix[ 4][19] = 0.163831; 
-	AAmatrix[ 5][ 0] = 0.310084; AAmatrix[ 5][ 1] = 0.493763; AAmatrix[ 5][ 2] = 0.275700; AAmatrix[ 5][ 3] = 0.205842; AAmatrix[ 5][ 4] = 0.004315; 
-	AAmatrix[ 5][ 5] = 0.000000; AAmatrix[ 5][ 6] = 0.960976; AAmatrix[ 5][ 7] = 0.128660; AAmatrix[ 5][ 8] = 0.315521; AAmatrix[ 5][ 9] = 0.054602; 
-	AAmatrix[ 5][10] = 0.243530; AAmatrix[ 5][11] = 0.738208; AAmatrix[ 5][12] = 0.120801; AAmatrix[ 5][13] = 0.026235; AAmatrix[ 5][14] = 0.156570; 
-	AAmatrix[ 5][15] = 0.358017; AAmatrix[ 5][16] = 0.248992; AAmatrix[ 5][17] = 0.021248; AAmatrix[ 5][18] = 0.062544; AAmatrix[ 5][19] = 0.112027; 
-	AAmatrix[ 6][ 0] = 0.567957; AAmatrix[ 6][ 1] = 0.255240; AAmatrix[ 6][ 2] = 0.270417; AAmatrix[ 6][ 3] = 1.599461; AAmatrix[ 6][ 4] = 0.005321; 
-	AAmatrix[ 6][ 5] = 0.960976; AAmatrix[ 6][ 6] = 0.000000; AAmatrix[ 6][ 7] = 0.250447; AAmatrix[ 6][ 8] = 0.104458; AAmatrix[ 6][ 9] = 0.046589; 
-	AAmatrix[ 6][10] = 0.151924; AAmatrix[ 6][11] = 0.888630; AAmatrix[ 6][12] = 0.058643; AAmatrix[ 6][13] = 0.028168; AAmatrix[ 6][14] = 0.205134; 
-	AAmatrix[ 6][15] = 0.406035; AAmatrix[ 6][16] = 0.321028; AAmatrix[ 6][17] = 0.018844; AAmatrix[ 6][18] = 0.055200; AAmatrix[ 6][19] = 0.205868; 
-	AAmatrix[ 7][ 0] = 0.876213; AAmatrix[ 7][ 1] = 0.156945; AAmatrix[ 7][ 2] = 0.362028; AAmatrix[ 7][ 3] = 0.311718; AAmatrix[ 7][ 4] = 0.050876; 
-	AAmatrix[ 7][ 5] = 0.128660; AAmatrix[ 7][ 6] = 0.250447; AAmatrix[ 7][ 7] = 0.000000; AAmatrix[ 7][ 8] = 0.058131; AAmatrix[ 7][ 9] = 0.051089; 
-	AAmatrix[ 7][10] = 0.087056; AAmatrix[ 7][11] = 0.193243; AAmatrix[ 7][12] = 0.046560; AAmatrix[ 7][13] = 0.050143; AAmatrix[ 7][14] = 0.124492; 
-	AAmatrix[ 7][15] = 0.612843; AAmatrix[ 7][16] = 0.136266; AAmatrix[ 7][17] = 0.023990; AAmatrix[ 7][18] = 0.037568; AAmatrix[ 7][19] = 0.082579; 
-	AAmatrix[ 8][ 0] = 0.078692; AAmatrix[ 8][ 1] = 0.213164; AAmatrix[ 8][ 2] = 0.290006; AAmatrix[ 8][ 3] = 0.134252; AAmatrix[ 8][ 4] = 0.016695; 
-	AAmatrix[ 8][ 5] = 0.315521; AAmatrix[ 8][ 6] = 0.104458; AAmatrix[ 8][ 7] = 0.058131; AAmatrix[ 8][ 8] = 0.000000; AAmatrix[ 8][ 9] = 0.020039; 
-	AAmatrix[ 8][10] = 0.103552; AAmatrix[ 8][11] = 0.153323; AAmatrix[ 8][12] = 0.021157; AAmatrix[ 8][13] = 0.079807; AAmatrix[ 8][14] = 0.078892; 
-	AAmatrix[ 8][15] = 0.167406; AAmatrix[ 8][16] = 0.101117; AAmatrix[ 8][17] = 0.020009; AAmatrix[ 8][18] = 0.286027; AAmatrix[ 8][19] = 0.068575; 
-	AAmatrix[ 9][ 0] = 0.222972; AAmatrix[ 9][ 1] = 0.081510; AAmatrix[ 9][ 2] = 0.087225; AAmatrix[ 9][ 3] = 0.011720; AAmatrix[ 9][ 4] = 0.046398; 
-	AAmatrix[ 9][ 5] = 0.054602; AAmatrix[ 9][ 6] = 0.046589; AAmatrix[ 9][ 7] = 0.051089; AAmatrix[ 9][ 8] = 0.020039; AAmatrix[ 9][ 9] = 0.000000; 
-	AAmatrix[ 9][10] = 2.089890; AAmatrix[ 9][11] = 0.093181; AAmatrix[ 9][12] = 0.493845; AAmatrix[ 9][13] = 0.321020; AAmatrix[ 9][14] = 0.054797; 
-	AAmatrix[ 9][15] = 0.081567; AAmatrix[ 9][16] = 0.376588; AAmatrix[ 9][17] = 0.034954; AAmatrix[ 9][18] = 0.086237; AAmatrix[ 9][19] = 3.654430; 
-	AAmatrix[10][ 0] = 0.424630; AAmatrix[10][ 1] = 0.192364; AAmatrix[10][ 2] = 0.069245; AAmatrix[10][ 3] = 0.060863; AAmatrix[10][ 4] = 0.091709; 
-	AAmatrix[10][ 5] = 0.243530; AAmatrix[10][ 6] = 0.151924; AAmatrix[10][ 7] = 0.087056; AAmatrix[10][ 8] = 0.103552; AAmatrix[10][ 9] = 2.089890; 
-	AAmatrix[10][10] = 0.000000; AAmatrix[10][11] = 0.201204; AAmatrix[10][12] = 1.105667; AAmatrix[10][13] = 0.946499; AAmatrix[10][14] = 0.169784; 
-	AAmatrix[10][15] = 0.214977; AAmatrix[10][16] = 0.243227; AAmatrix[10][17] = 0.083439; AAmatrix[10][18] = 0.189842; AAmatrix[10][19] = 1.337571; 
-	AAmatrix[11][ 0] = 0.393245; AAmatrix[11][ 1] = 1.755838; AAmatrix[11][ 2] = 0.503060; AAmatrix[11][ 3] = 0.261101; AAmatrix[11][ 4] = 0.004067; 
-	AAmatrix[11][ 5] = 0.738208; AAmatrix[11][ 6] = 0.888630; AAmatrix[11][ 7] = 0.193243; AAmatrix[11][ 8] = 0.153323; AAmatrix[11][ 9] = 0.093181; 
-	AAmatrix[11][10] = 0.201204; AAmatrix[11][11] = 0.000000; AAmatrix[11][12] = 0.096474; AAmatrix[11][13] = 0.038261; AAmatrix[11][14] = 0.212302; 
-	AAmatrix[11][15] = 0.400072; AAmatrix[11][16] = 0.446646; AAmatrix[11][17] = 0.023321; AAmatrix[11][18] = 0.068689; AAmatrix[11][19] = 0.144587; 
-	AAmatrix[12][ 0] = 0.211550; AAmatrix[12][ 1] = 0.087930; AAmatrix[12][ 2] = 0.057420; AAmatrix[12][ 3] = 0.012182; AAmatrix[12][ 4] = 0.023690; 
-	AAmatrix[12][ 5] = 0.120801; AAmatrix[12][ 6] = 0.058643; AAmatrix[12][ 7] = 0.046560; AAmatrix[12][ 8] = 0.021157; AAmatrix[12][ 9] = 0.493845; 
-	AAmatrix[12][10] = 1.105667; AAmatrix[12][11] = 0.096474; AAmatrix[12][12] = 0.000000; AAmatrix[12][13] = 0.173052; AAmatrix[12][14] = 0.010363; 
-	AAmatrix[12][15] = 0.090515; AAmatrix[12][16] = 0.184609; AAmatrix[12][17] = 0.022019; AAmatrix[12][18] = 0.073223; AAmatrix[12][19] = 0.307309; 
-	AAmatrix[13][ 0] = 0.116646; AAmatrix[13][ 1] = 0.042569; AAmatrix[13][ 2] = 0.039769; AAmatrix[13][ 3] = 0.016577; AAmatrix[13][ 4] = 0.051127; 
-	AAmatrix[13][ 5] = 0.026235; AAmatrix[13][ 6] = 0.028168; AAmatrix[13][ 7] = 0.050143; AAmatrix[13][ 8] = 0.079807; AAmatrix[13][ 9] = 0.321020; 
-	AAmatrix[13][10] = 0.946499; AAmatrix[13][11] = 0.038261; AAmatrix[13][12] = 0.173052; AAmatrix[13][13] = 0.000000; AAmatrix[13][14] = 0.042564; 
-	AAmatrix[13][15] = 0.138119; AAmatrix[13][16] = 0.085870; AAmatrix[13][17] = 0.128050; AAmatrix[13][18] = 0.898663; AAmatrix[13][19] = 0.247329; 
-	AAmatrix[14][ 0] = 0.399143; AAmatrix[14][ 1] = 0.128480; AAmatrix[14][ 2] = 0.083956; AAmatrix[14][ 3] = 0.160063; AAmatrix[14][ 4] = 0.011137; 
-	AAmatrix[14][ 5] = 0.156570; AAmatrix[14][ 6] = 0.205134; AAmatrix[14][ 7] = 0.124492; AAmatrix[14][ 8] = 0.078892; AAmatrix[14][ 9] = 0.054797; 
-	AAmatrix[14][10] = 0.169784; AAmatrix[14][11] = 0.212302; AAmatrix[14][12] = 0.010363; AAmatrix[14][13] = 0.042564; AAmatrix[14][14] = 0.000000; 
-	AAmatrix[14][15] = 0.430431; AAmatrix[14][16] = 0.207143; AAmatrix[14][17] = 0.014584; AAmatrix[14][18] = 0.032043; AAmatrix[14][19] = 0.129315; 
-	AAmatrix[15][ 0] = 1.817198; AAmatrix[15][ 1] = 0.292327; AAmatrix[15][ 2] = 0.847049; AAmatrix[15][ 3] = 0.461519; AAmatrix[15][ 4] = 0.175270; 
-	AAmatrix[15][ 5] = 0.358017; AAmatrix[15][ 6] = 0.406035; AAmatrix[15][ 7] = 0.612843; AAmatrix[15][ 8] = 0.167406; AAmatrix[15][ 9] = 0.081567; 
-	AAmatrix[15][10] = 0.214977; AAmatrix[15][11] = 0.400072; AAmatrix[15][12] = 0.090515; AAmatrix[15][13] = 0.138119; AAmatrix[15][14] = 0.430431; 
-	AAmatrix[15][15] = 0.000000; AAmatrix[15][16] = 1.767766; AAmatrix[15][17] = 0.035933; AAmatrix[15][18] = 0.121979; AAmatrix[15][19] = 0.127700; 
-	AAmatrix[16][ 0] = 0.877877; AAmatrix[16][ 1] = 0.204109; AAmatrix[16][ 2] = 0.471268; AAmatrix[16][ 3] = 0.178197; AAmatrix[16][ 4] = 0.079511; 
-	AAmatrix[16][ 5] = 0.248992; AAmatrix[16][ 6] = 0.321028; AAmatrix[16][ 7] = 0.136266; AAmatrix[16][ 8] = 0.101117; AAmatrix[16][ 9] = 0.376588; 
-	AAmatrix[16][10] = 0.243227; AAmatrix[16][11] = 0.446646; AAmatrix[16][12] = 0.184609; AAmatrix[16][13] = 0.085870; AAmatrix[16][14] = 0.207143; 
-	AAmatrix[16][15] = 1.767766; AAmatrix[16][16] = 0.000000; AAmatrix[16][17] = 0.020437; AAmatrix[16][18] = 0.094617; AAmatrix[16][19] = 0.740372; 
-	AAmatrix[17][ 0] = 0.030309; AAmatrix[17][ 1] = 0.046417; AAmatrix[17][ 2] = 0.010459; AAmatrix[17][ 3] = 0.011393; AAmatrix[17][ 4] = 0.007732; 
-	AAmatrix[17][ 5] = 0.021248; AAmatrix[17][ 6] = 0.018844; AAmatrix[17][ 7] = 0.023990; AAmatrix[17][ 8] = 0.020009; AAmatrix[17][ 9] = 0.034954; 
-	AAmatrix[17][10] = 0.083439; AAmatrix[17][11] = 0.023321; AAmatrix[17][12] = 0.022019; AAmatrix[17][13] = 0.128050; AAmatrix[17][14] = 0.014584; 
-	AAmatrix[17][15] = 0.035933; AAmatrix[17][16] = 0.020437; AAmatrix[17][17] = 0.000000; AAmatrix[17][18] = 0.124746; AAmatrix[17][19] = 0.022134; 
-	AAmatrix[18][ 0] = 0.087061; AAmatrix[18][ 1] = 0.097010; AAmatrix[18][ 2] = 0.093268; AAmatrix[18][ 3] = 0.051664; AAmatrix[18][ 4] = 0.042823; 
-	AAmatrix[18][ 5] = 0.062544; AAmatrix[18][ 6] = 0.055200; AAmatrix[18][ 7] = 0.037568; AAmatrix[18][ 8] = 0.286027; AAmatrix[18][ 9] = 0.086237; 
-	AAmatrix[18][10] = 0.189842; AAmatrix[18][11] = 0.068689; AAmatrix[18][12] = 0.073223; AAmatrix[18][13] = 0.898663; AAmatrix[18][14] = 0.032043; 
-	AAmatrix[18][15] = 0.121979; AAmatrix[18][16] = 0.094617; AAmatrix[18][17] = 0.124746; AAmatrix[18][18] = 0.000000; AAmatrix[18][19] = 0.125733; 
-	AAmatrix[19][ 0] = 1.230985; AAmatrix[19][ 1] = 0.113146; AAmatrix[19][ 2] = 0.049824; AAmatrix[19][ 3] = 0.048769; AAmatrix[19][ 4] = 0.163831; 
-	AAmatrix[19][ 5] = 0.112027; AAmatrix[19][ 6] = 0.205868; AAmatrix[19][ 7] = 0.082579; AAmatrix[19][ 8] = 0.068575; AAmatrix[19][ 9] = 3.654430; 
-	AAmatrix[19][10] = 1.337571; AAmatrix[19][11] = 0.144587; AAmatrix[19][12] = 0.307309; AAmatrix[19][13] = 0.247329; AAmatrix[19][14] = 0.129315; 
-	AAmatrix[19][15] = 0.127700; AAmatrix[19][16] = 0.740372; AAmatrix[19][17] = 0.022134; AAmatrix[19][18] = 0.125733; AAmatrix[19][19] = 0.000000; 
+	AAmatrix[ 0][ 0] = 0.000000; AAmatrix[ 0][ 1] = 0.233108; AAmatrix[ 0][ 2] = 0.199097; AAmatrix[ 0][ 3] = 0.265145; AAmatrix[ 0][ 4] = 0.227333;
+	AAmatrix[ 0][ 5] = 0.310084; AAmatrix[ 0][ 6] = 0.567957; AAmatrix[ 0][ 7] = 0.876213; AAmatrix[ 0][ 8] = 0.078692; AAmatrix[ 0][ 9] = 0.222972;
+	AAmatrix[ 0][10] = 0.424630; AAmatrix[ 0][11] = 0.393245; AAmatrix[ 0][12] = 0.211550; AAmatrix[ 0][13] = 0.116646; AAmatrix[ 0][14] = 0.399143;
+	AAmatrix[ 0][15] = 1.817198; AAmatrix[ 0][16] = 0.877877; AAmatrix[ 0][17] = 0.030309; AAmatrix[ 0][18] = 0.087061; AAmatrix[ 0][19] = 1.230985;
+	AAmatrix[ 1][ 0] = 0.233108; AAmatrix[ 1][ 1] = 0.000000; AAmatrix[ 1][ 2] = 0.210797; AAmatrix[ 1][ 3] = 0.105191; AAmatrix[ 1][ 4] = 0.031726;
+	AAmatrix[ 1][ 5] = 0.493763; AAmatrix[ 1][ 6] = 0.255240; AAmatrix[ 1][ 7] = 0.156945; AAmatrix[ 1][ 8] = 0.213164; AAmatrix[ 1][ 9] = 0.081510;
+	AAmatrix[ 1][10] = 0.192364; AAmatrix[ 1][11] = 1.755838; AAmatrix[ 1][12] = 0.087930; AAmatrix[ 1][13] = 0.042569; AAmatrix[ 1][14] = 0.128480;
+	AAmatrix[ 1][15] = 0.292327; AAmatrix[ 1][16] = 0.204109; AAmatrix[ 1][17] = 0.046417; AAmatrix[ 1][18] = 0.097010; AAmatrix[ 1][19] = 0.113146;
+	AAmatrix[ 2][ 0] = 0.199097; AAmatrix[ 2][ 1] = 0.210797; AAmatrix[ 2][ 2] = 0.000000; AAmatrix[ 2][ 3] = 0.883422; AAmatrix[ 2][ 4] = 0.027495;
+	AAmatrix[ 2][ 5] = 0.275700; AAmatrix[ 2][ 6] = 0.270417; AAmatrix[ 2][ 7] = 0.362028; AAmatrix[ 2][ 8] = 0.290006; AAmatrix[ 2][ 9] = 0.087225;
+	AAmatrix[ 2][10] = 0.069245; AAmatrix[ 2][11] = 0.503060; AAmatrix[ 2][12] = 0.057420; AAmatrix[ 2][13] = 0.039769; AAmatrix[ 2][14] = 0.083956;
+	AAmatrix[ 2][15] = 0.847049; AAmatrix[ 2][16] = 0.471268; AAmatrix[ 2][17] = 0.010459; AAmatrix[ 2][18] = 0.093268; AAmatrix[ 2][19] = 0.049824;
+	AAmatrix[ 3][ 0] = 0.265145; AAmatrix[ 3][ 1] = 0.105191; AAmatrix[ 3][ 2] = 0.883422; AAmatrix[ 3][ 3] = 0.000000; AAmatrix[ 3][ 4] = 0.010313;
+	AAmatrix[ 3][ 5] = 0.205842; AAmatrix[ 3][ 6] = 1.599461; AAmatrix[ 3][ 7] = 0.311718; AAmatrix[ 3][ 8] = 0.134252; AAmatrix[ 3][ 9] = 0.011720;
+	AAmatrix[ 3][10] = 0.060863; AAmatrix[ 3][11] = 0.261101; AAmatrix[ 3][12] = 0.012182; AAmatrix[ 3][13] = 0.016577; AAmatrix[ 3][14] = 0.160063;
+	AAmatrix[ 3][15] = 0.461519; AAmatrix[ 3][16] = 0.178197; AAmatrix[ 3][17] = 0.011393; AAmatrix[ 3][18] = 0.051664; AAmatrix[ 3][19] = 0.048769;
+	AAmatrix[ 4][ 0] = 0.227333; AAmatrix[ 4][ 1] = 0.031726; AAmatrix[ 4][ 2] = 0.027495; AAmatrix[ 4][ 3] = 0.010313; AAmatrix[ 4][ 4] = 0.000000;
+	AAmatrix[ 4][ 5] = 0.004315; AAmatrix[ 4][ 6] = 0.005321; AAmatrix[ 4][ 7] = 0.050876; AAmatrix[ 4][ 8] = 0.016695; AAmatrix[ 4][ 9] = 0.046398;
+	AAmatrix[ 4][10] = 0.091709; AAmatrix[ 4][11] = 0.004067; AAmatrix[ 4][12] = 0.023690; AAmatrix[ 4][13] = 0.051127; AAmatrix[ 4][14] = 0.011137;
+	AAmatrix[ 4][15] = 0.175270; AAmatrix[ 4][16] = 0.079511; AAmatrix[ 4][17] = 0.007732; AAmatrix[ 4][18] = 0.042823; AAmatrix[ 4][19] = 0.163831;
+	AAmatrix[ 5][ 0] = 0.310084; AAmatrix[ 5][ 1] = 0.493763; AAmatrix[ 5][ 2] = 0.275700; AAmatrix[ 5][ 3] = 0.205842; AAmatrix[ 5][ 4] = 0.004315;
+	AAmatrix[ 5][ 5] = 0.000000; AAmatrix[ 5][ 6] = 0.960976; AAmatrix[ 5][ 7] = 0.128660; AAmatrix[ 5][ 8] = 0.315521; AAmatrix[ 5][ 9] = 0.054602;
+	AAmatrix[ 5][10] = 0.243530; AAmatrix[ 5][11] = 0.738208; AAmatrix[ 5][12] = 0.120801; AAmatrix[ 5][13] = 0.026235; AAmatrix[ 5][14] = 0.156570;
+	AAmatrix[ 5][15] = 0.358017; AAmatrix[ 5][16] = 0.248992; AAmatrix[ 5][17] = 0.021248; AAmatrix[ 5][18] = 0.062544; AAmatrix[ 5][19] = 0.112027;
+	AAmatrix[ 6][ 0] = 0.567957; AAmatrix[ 6][ 1] = 0.255240; AAmatrix[ 6][ 2] = 0.270417; AAmatrix[ 6][ 3] = 1.599461; AAmatrix[ 6][ 4] = 0.005321;
+	AAmatrix[ 6][ 5] = 0.960976; AAmatrix[ 6][ 6] = 0.000000; AAmatrix[ 6][ 7] = 0.250447; AAmatrix[ 6][ 8] = 0.104458; AAmatrix[ 6][ 9] = 0.046589;
+	AAmatrix[ 6][10] = 0.151924; AAmatrix[ 6][11] = 0.888630; AAmatrix[ 6][12] = 0.058643; AAmatrix[ 6][13] = 0.028168; AAmatrix[ 6][14] = 0.205134;
+	AAmatrix[ 6][15] = 0.406035; AAmatrix[ 6][16] = 0.321028; AAmatrix[ 6][17] = 0.018844; AAmatrix[ 6][18] = 0.055200; AAmatrix[ 6][19] = 0.205868;
+	AAmatrix[ 7][ 0] = 0.876213; AAmatrix[ 7][ 1] = 0.156945; AAmatrix[ 7][ 2] = 0.362028; AAmatrix[ 7][ 3] = 0.311718; AAmatrix[ 7][ 4] = 0.050876;
+	AAmatrix[ 7][ 5] = 0.128660; AAmatrix[ 7][ 6] = 0.250447; AAmatrix[ 7][ 7] = 0.000000; AAmatrix[ 7][ 8] = 0.058131; AAmatrix[ 7][ 9] = 0.051089;
+	AAmatrix[ 7][10] = 0.087056; AAmatrix[ 7][11] = 0.193243; AAmatrix[ 7][12] = 0.046560; AAmatrix[ 7][13] = 0.050143; AAmatrix[ 7][14] = 0.124492;
+	AAmatrix[ 7][15] = 0.612843; AAmatrix[ 7][16] = 0.136266; AAmatrix[ 7][17] = 0.023990; AAmatrix[ 7][18] = 0.037568; AAmatrix[ 7][19] = 0.082579;
+	AAmatrix[ 8][ 0] = 0.078692; AAmatrix[ 8][ 1] = 0.213164; AAmatrix[ 8][ 2] = 0.290006; AAmatrix[ 8][ 3] = 0.134252; AAmatrix[ 8][ 4] = 0.016695;
+	AAmatrix[ 8][ 5] = 0.315521; AAmatrix[ 8][ 6] = 0.104458; AAmatrix[ 8][ 7] = 0.058131; AAmatrix[ 8][ 8] = 0.000000; AAmatrix[ 8][ 9] = 0.020039;
+	AAmatrix[ 8][10] = 0.103552; AAmatrix[ 8][11] = 0.153323; AAmatrix[ 8][12] = 0.021157; AAmatrix[ 8][13] = 0.079807; AAmatrix[ 8][14] = 0.078892;
+	AAmatrix[ 8][15] = 0.167406; AAmatrix[ 8][16] = 0.101117; AAmatrix[ 8][17] = 0.020009; AAmatrix[ 8][18] = 0.286027; AAmatrix[ 8][19] = 0.068575;
+	AAmatrix[ 9][ 0] = 0.222972; AAmatrix[ 9][ 1] = 0.081510; AAmatrix[ 9][ 2] = 0.087225; AAmatrix[ 9][ 3] = 0.011720; AAmatrix[ 9][ 4] = 0.046398;
+	AAmatrix[ 9][ 5] = 0.054602; AAmatrix[ 9][ 6] = 0.046589; AAmatrix[ 9][ 7] = 0.051089; AAmatrix[ 9][ 8] = 0.020039; AAmatrix[ 9][ 9] = 0.000000;
+	AAmatrix[ 9][10] = 2.089890; AAmatrix[ 9][11] = 0.093181; AAmatrix[ 9][12] = 0.493845; AAmatrix[ 9][13] = 0.321020; AAmatrix[ 9][14] = 0.054797;
+	AAmatrix[ 9][15] = 0.081567; AAmatrix[ 9][16] = 0.376588; AAmatrix[ 9][17] = 0.034954; AAmatrix[ 9][18] = 0.086237; AAmatrix[ 9][19] = 3.654430;
+	AAmatrix[10][ 0] = 0.424630; AAmatrix[10][ 1] = 0.192364; AAmatrix[10][ 2] = 0.069245; AAmatrix[10][ 3] = 0.060863; AAmatrix[10][ 4] = 0.091709;
+	AAmatrix[10][ 5] = 0.243530; AAmatrix[10][ 6] = 0.151924; AAmatrix[10][ 7] = 0.087056; AAmatrix[10][ 8] = 0.103552; AAmatrix[10][ 9] = 2.089890;
+	AAmatrix[10][10] = 0.000000; AAmatrix[10][11] = 0.201204; AAmatrix[10][12] = 1.105667; AAmatrix[10][13] = 0.946499; AAmatrix[10][14] = 0.169784;
+	AAmatrix[10][15] = 0.214977; AAmatrix[10][16] = 0.243227; AAmatrix[10][17] = 0.083439; AAmatrix[10][18] = 0.189842; AAmatrix[10][19] = 1.337571;
+	AAmatrix[11][ 0] = 0.393245; AAmatrix[11][ 1] = 1.755838; AAmatrix[11][ 2] = 0.503060; AAmatrix[11][ 3] = 0.261101; AAmatrix[11][ 4] = 0.004067;
+	AAmatrix[11][ 5] = 0.738208; AAmatrix[11][ 6] = 0.888630; AAmatrix[11][ 7] = 0.193243; AAmatrix[11][ 8] = 0.153323; AAmatrix[11][ 9] = 0.093181;
+	AAmatrix[11][10] = 0.201204; AAmatrix[11][11] = 0.000000; AAmatrix[11][12] = 0.096474; AAmatrix[11][13] = 0.038261; AAmatrix[11][14] = 0.212302;
+	AAmatrix[11][15] = 0.400072; AAmatrix[11][16] = 0.446646; AAmatrix[11][17] = 0.023321; AAmatrix[11][18] = 0.068689; AAmatrix[11][19] = 0.144587;
+	AAmatrix[12][ 0] = 0.211550; AAmatrix[12][ 1] = 0.087930; AAmatrix[12][ 2] = 0.057420; AAmatrix[12][ 3] = 0.012182; AAmatrix[12][ 4] = 0.023690;
+	AAmatrix[12][ 5] = 0.120801; AAmatrix[12][ 6] = 0.058643; AAmatrix[12][ 7] = 0.046560; AAmatrix[12][ 8] = 0.021157; AAmatrix[12][ 9] = 0.493845;
+	AAmatrix[12][10] = 1.105667; AAmatrix[12][11] = 0.096474; AAmatrix[12][12] = 0.000000; AAmatrix[12][13] = 0.173052; AAmatrix[12][14] = 0.010363;
+	AAmatrix[12][15] = 0.090515; AAmatrix[12][16] = 0.184609; AAmatrix[12][17] = 0.022019; AAmatrix[12][18] = 0.073223; AAmatrix[12][19] = 0.307309;
+	AAmatrix[13][ 0] = 0.116646; AAmatrix[13][ 1] = 0.042569; AAmatrix[13][ 2] = 0.039769; AAmatrix[13][ 3] = 0.016577; AAmatrix[13][ 4] = 0.051127;
+	AAmatrix[13][ 5] = 0.026235; AAmatrix[13][ 6] = 0.028168; AAmatrix[13][ 7] = 0.050143; AAmatrix[13][ 8] = 0.079807; AAmatrix[13][ 9] = 0.321020;
+	AAmatrix[13][10] = 0.946499; AAmatrix[13][11] = 0.038261; AAmatrix[13][12] = 0.173052; AAmatrix[13][13] = 0.000000; AAmatrix[13][14] = 0.042564;
+	AAmatrix[13][15] = 0.138119; AAmatrix[13][16] = 0.085870; AAmatrix[13][17] = 0.128050; AAmatrix[13][18] = 0.898663; AAmatrix[13][19] = 0.247329;
+	AAmatrix[14][ 0] = 0.399143; AAmatrix[14][ 1] = 0.128480; AAmatrix[14][ 2] = 0.083956; AAmatrix[14][ 3] = 0.160063; AAmatrix[14][ 4] = 0.011137;
+	AAmatrix[14][ 5] = 0.156570; AAmatrix[14][ 6] = 0.205134; AAmatrix[14][ 7] = 0.124492; AAmatrix[14][ 8] = 0.078892; AAmatrix[14][ 9] = 0.054797;
+	AAmatrix[14][10] = 0.169784; AAmatrix[14][11] = 0.212302; AAmatrix[14][12] = 0.010363; AAmatrix[14][13] = 0.042564; AAmatrix[14][14] = 0.000000;
+	AAmatrix[14][15] = 0.430431; AAmatrix[14][16] = 0.207143; AAmatrix[14][17] = 0.014584; AAmatrix[14][18] = 0.032043; AAmatrix[14][19] = 0.129315;
+	AAmatrix[15][ 0] = 1.817198; AAmatrix[15][ 1] = 0.292327; AAmatrix[15][ 2] = 0.847049; AAmatrix[15][ 3] = 0.461519; AAmatrix[15][ 4] = 0.175270;
+	AAmatrix[15][ 5] = 0.358017; AAmatrix[15][ 6] = 0.406035; AAmatrix[15][ 7] = 0.612843; AAmatrix[15][ 8] = 0.167406; AAmatrix[15][ 9] = 0.081567;
+	AAmatrix[15][10] = 0.214977; AAmatrix[15][11] = 0.400072; AAmatrix[15][12] = 0.090515; AAmatrix[15][13] = 0.138119; AAmatrix[15][14] = 0.430431;
+	AAmatrix[15][15] = 0.000000; AAmatrix[15][16] = 1.767766; AAmatrix[15][17] = 0.035933; AAmatrix[15][18] = 0.121979; AAmatrix[15][19] = 0.127700;
+	AAmatrix[16][ 0] = 0.877877; AAmatrix[16][ 1] = 0.204109; AAmatrix[16][ 2] = 0.471268; AAmatrix[16][ 3] = 0.178197; AAmatrix[16][ 4] = 0.079511;
+	AAmatrix[16][ 5] = 0.248992; AAmatrix[16][ 6] = 0.321028; AAmatrix[16][ 7] = 0.136266; AAmatrix[16][ 8] = 0.101117; AAmatrix[16][ 9] = 0.376588;
+	AAmatrix[16][10] = 0.243227; AAmatrix[16][11] = 0.446646; AAmatrix[16][12] = 0.184609; AAmatrix[16][13] = 0.085870; AAmatrix[16][14] = 0.207143;
+	AAmatrix[16][15] = 1.767766; AAmatrix[16][16] = 0.000000; AAmatrix[16][17] = 0.020437; AAmatrix[16][18] = 0.094617; AAmatrix[16][19] = 0.740372;
+	AAmatrix[17][ 0] = 0.030309; AAmatrix[17][ 1] = 0.046417; AAmatrix[17][ 2] = 0.010459; AAmatrix[17][ 3] = 0.011393; AAmatrix[17][ 4] = 0.007732;
+	AAmatrix[17][ 5] = 0.021248; AAmatrix[17][ 6] = 0.018844; AAmatrix[17][ 7] = 0.023990; AAmatrix[17][ 8] = 0.020009; AAmatrix[17][ 9] = 0.034954;
+	AAmatrix[17][10] = 0.083439; AAmatrix[17][11] = 0.023321; AAmatrix[17][12] = 0.022019; AAmatrix[17][13] = 0.128050; AAmatrix[17][14] = 0.014584;
+	AAmatrix[17][15] = 0.035933; AAmatrix[17][16] = 0.020437; AAmatrix[17][17] = 0.000000; AAmatrix[17][18] = 0.124746; AAmatrix[17][19] = 0.022134;
+	AAmatrix[18][ 0] = 0.087061; AAmatrix[18][ 1] = 0.097010; AAmatrix[18][ 2] = 0.093268; AAmatrix[18][ 3] = 0.051664; AAmatrix[18][ 4] = 0.042823;
+	AAmatrix[18][ 5] = 0.062544; AAmatrix[18][ 6] = 0.055200; AAmatrix[18][ 7] = 0.037568; AAmatrix[18][ 8] = 0.286027; AAmatrix[18][ 9] = 0.086237;
+	AAmatrix[18][10] = 0.189842; AAmatrix[18][11] = 0.068689; AAmatrix[18][12] = 0.073223; AAmatrix[18][13] = 0.898663; AAmatrix[18][14] = 0.032043;
+	AAmatrix[18][15] = 0.121979; AAmatrix[18][16] = 0.094617; AAmatrix[18][17] = 0.124746; AAmatrix[18][18] = 0.000000; AAmatrix[18][19] = 0.125733;
+	AAmatrix[19][ 0] = 1.230985; AAmatrix[19][ 1] = 0.113146; AAmatrix[19][ 2] = 0.049824; AAmatrix[19][ 3] = 0.048769; AAmatrix[19][ 4] = 0.163831;
+	AAmatrix[19][ 5] = 0.112027; AAmatrix[19][ 6] = 0.205868; AAmatrix[19][ 7] = 0.082579; AAmatrix[19][ 8] = 0.068575; AAmatrix[19][ 9] = 3.654430;
+	AAmatrix[19][10] = 1.337571; AAmatrix[19][11] = 0.144587; AAmatrix[19][12] = 0.307309; AAmatrix[19][13] = 0.247329; AAmatrix[19][14] = 0.129315;
+	AAmatrix[19][15] = 0.127700; AAmatrix[19][16] = 0.740372; AAmatrix[19][17] = 0.022134; AAmatrix[19][18] = 0.125733; AAmatrix[19][19] = 0.000000;
 
 	AAPi[ 0] = 0.078837;
 	AAPi[ 1] = 0.051238;
@@ -2602,133 +2602,133 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[19] = 0.073101;
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
 	if(modelnumber==12)
 	{
 
-	/* 
-		Blosum62 
-		
-		Henikoff, S., and J. G. Henikoff. (1992) Amino acid substitution matrices from protein blocks. Proc. Natl. Acad. Sci., U.S.A. 89:10915-10919.    
+	/*
+		Blosum62
+
+		Henikoff, S., and J. G. Henikoff. (1992) Amino acid substitution matrices from protein blocks. Proc. Natl. Acad. Sci., U.S.A. 89:10915-10919.
 
 	*/
-	AAmatrix[ 0][ 0] = 0.000000000000; AAmatrix[ 0][ 1] = 0.735790389698; AAmatrix[ 0][ 2] = 0.485391055466; AAmatrix[ 0][ 3] = 0.543161820899; AAmatrix[ 0][ 4] = 1.459995310470; 
-	AAmatrix[ 0][ 5] = 1.199705704602; AAmatrix[ 0][ 6] = 1.170949042800; AAmatrix[ 0][ 7] = 1.955883574960; AAmatrix[ 0][ 8] = 0.716241444998; AAmatrix[ 0][ 9] = 0.605899003687; 
-	AAmatrix[ 0][10] = 0.800016530518; AAmatrix[ 0][11] = 1.295201266783; AAmatrix[ 0][12] = 1.253758266664; AAmatrix[ 0][13] = 0.492964679748; AAmatrix[ 0][14] = 1.173275900924; 
-	AAmatrix[ 0][15] = 4.325092687057; AAmatrix[ 0][16] = 1.729178019485; AAmatrix[ 0][17] = 0.465839367725; AAmatrix[ 0][18] = 0.718206697586; AAmatrix[ 0][19] = 2.187774522005; 
-	AAmatrix[ 1][ 0] = 0.735790389698; AAmatrix[ 1][ 1] = 0.000000000000; AAmatrix[ 1][ 2] = 1.297446705134; AAmatrix[ 1][ 3] = 0.500964408555; AAmatrix[ 1][ 4] = 0.227826574209; 
-	AAmatrix[ 1][ 5] = 3.020833610064; AAmatrix[ 1][ 6] = 1.360574190420; AAmatrix[ 1][ 7] = 0.418763308518; AAmatrix[ 1][ 8] = 1.456141166336; AAmatrix[ 1][ 9] = 0.232036445142; 
-	AAmatrix[ 1][10] = 0.622711669692; AAmatrix[ 1][11] = 5.411115141489; AAmatrix[ 1][12] = 0.983692987457; AAmatrix[ 1][13] = 0.371644693209; AAmatrix[ 1][14] = 0.448133661718; 
-	AAmatrix[ 1][15] = 1.122783104210; AAmatrix[ 1][16] = 0.914665954563; AAmatrix[ 1][17] = 0.426382310122; AAmatrix[ 1][18] = 0.720517441216; AAmatrix[ 1][19] = 0.438388343772; 
-	AAmatrix[ 2][ 0] = 0.485391055466; AAmatrix[ 2][ 1] = 1.297446705134; AAmatrix[ 2][ 2] = 0.000000000000; AAmatrix[ 2][ 3] = 3.180100048216; AAmatrix[ 2][ 4] = 0.397358949897; 
-	AAmatrix[ 2][ 5] = 1.839216146992; AAmatrix[ 2][ 6] = 1.240488508640; AAmatrix[ 2][ 7] = 1.355872344485; AAmatrix[ 2][ 8] = 2.414501434208; AAmatrix[ 2][ 9] = 0.283017326278; 
-	AAmatrix[ 2][10] = 0.211888159615; AAmatrix[ 2][11] = 1.593137043457; AAmatrix[ 2][12] = 0.648441278787; AAmatrix[ 2][13] = 0.354861249223; AAmatrix[ 2][14] = 0.494887043702; 
-	AAmatrix[ 2][15] = 2.904101656456; AAmatrix[ 2][16] = 1.898173634533; AAmatrix[ 2][17] = 0.191482046247; AAmatrix[ 2][18] = 0.538222519037; AAmatrix[ 2][19] = 0.312858797993; 
-	AAmatrix[ 3][ 0] = 0.543161820899; AAmatrix[ 3][ 1] = 0.500964408555; AAmatrix[ 3][ 2] = 3.180100048216; AAmatrix[ 3][ 3] = 0.000000000000; AAmatrix[ 3][ 4] = 0.240836614802; 
-	AAmatrix[ 3][ 5] = 1.190945703396; AAmatrix[ 3][ 6] = 3.761625208368; AAmatrix[ 3][ 7] = 0.798473248968; AAmatrix[ 3][ 8] = 0.778142664022; AAmatrix[ 3][ 9] = 0.418555732462; 
-	AAmatrix[ 3][10] = 0.218131577594; AAmatrix[ 3][11] = 1.032447924952; AAmatrix[ 3][12] = 0.222621897958; AAmatrix[ 3][13] = 0.281730694207; AAmatrix[ 3][14] = 0.730628272998; 
-	AAmatrix[ 3][15] = 1.582754142065; AAmatrix[ 3][16] = 0.934187509431; AAmatrix[ 3][17] = 0.145345046279; AAmatrix[ 3][18] = 0.261422208965; AAmatrix[ 3][19] = 0.258129289418; 
-	AAmatrix[ 4][ 0] = 1.459995310470; AAmatrix[ 4][ 1] = 0.227826574209; AAmatrix[ 4][ 2] = 0.397358949897; AAmatrix[ 4][ 3] = 0.240836614802; AAmatrix[ 4][ 4] = 0.000000000000; 
-	AAmatrix[ 4][ 5] = 0.329801504630; AAmatrix[ 4][ 6] = 0.140748891814; AAmatrix[ 4][ 7] = 0.418203192284; AAmatrix[ 4][ 8] = 0.354058109831; AAmatrix[ 4][ 9] = 0.774894022794; 
-	AAmatrix[ 4][10] = 0.831842640142; AAmatrix[ 4][11] = 0.285078800906; AAmatrix[ 4][12] = 0.767688823480; AAmatrix[ 4][13] = 0.441337471187; AAmatrix[ 4][14] = 0.356008498769; 
-	AAmatrix[ 4][15] = 1.197188415094; AAmatrix[ 4][16] = 1.119831358516; AAmatrix[ 4][17] = 0.527664418872; AAmatrix[ 4][18] = 0.470237733696; AAmatrix[ 4][19] = 1.116352478606; 
-	AAmatrix[ 5][ 0] = 1.199705704602; AAmatrix[ 5][ 1] = 3.020833610064; AAmatrix[ 5][ 2] = 1.839216146992; AAmatrix[ 5][ 3] = 1.190945703396; AAmatrix[ 5][ 4] = 0.329801504630; 
-	AAmatrix[ 5][ 5] = 0.000000000000; AAmatrix[ 5][ 6] = 5.528919177928; AAmatrix[ 5][ 7] = 0.609846305383; AAmatrix[ 5][ 8] = 2.435341131140; AAmatrix[ 5][ 9] = 0.236202451204; 
-	AAmatrix[ 5][10] = 0.580737093181; AAmatrix[ 5][11] = 3.945277674515; AAmatrix[ 5][12] = 2.494896077113; AAmatrix[ 5][13] = 0.144356959750; AAmatrix[ 5][14] = 0.858570575674; 
-	AAmatrix[ 5][15] = 1.934870924596; AAmatrix[ 5][16] = 1.277480294596; AAmatrix[ 5][17] = 0.758653808642; AAmatrix[ 5][18] = 0.958989742850; AAmatrix[ 5][19] = 0.530785790125; 
-	AAmatrix[ 6][ 0] = 1.170949042800; AAmatrix[ 6][ 1] = 1.360574190420; AAmatrix[ 6][ 2] = 1.240488508640; AAmatrix[ 6][ 3] = 3.761625208368; AAmatrix[ 6][ 4] = 0.140748891814; 
-	AAmatrix[ 6][ 5] = 5.528919177928; AAmatrix[ 6][ 6] = 0.000000000000; AAmatrix[ 6][ 7] = 0.423579992176; AAmatrix[ 6][ 8] = 1.626891056982; AAmatrix[ 6][ 9] = 0.186848046932; 
-	AAmatrix[ 6][10] = 0.372625175087; AAmatrix[ 6][11] = 2.802427151679; AAmatrix[ 6][12] = 0.555415397470; AAmatrix[ 6][13] = 0.291409084165; AAmatrix[ 6][14] = 0.926563934846; 
-	AAmatrix[ 6][15] = 1.769893238937; AAmatrix[ 6][16] = 1.071097236007; AAmatrix[ 6][17] = 0.407635648938; AAmatrix[ 6][18] = 0.596719300346; AAmatrix[ 6][19] = 0.524253846338; 
-	AAmatrix[ 7][ 0] = 1.955883574960; AAmatrix[ 7][ 1] = 0.418763308518; AAmatrix[ 7][ 2] = 1.355872344485; AAmatrix[ 7][ 3] = 0.798473248968; AAmatrix[ 7][ 4] = 0.418203192284; 
-	AAmatrix[ 7][ 5] = 0.609846305383; AAmatrix[ 7][ 6] = 0.423579992176; AAmatrix[ 7][ 7] = 0.000000000000; AAmatrix[ 7][ 8] = 0.539859124954; AAmatrix[ 7][ 9] = 0.189296292376; 
-	AAmatrix[ 7][10] = 0.217721159236; AAmatrix[ 7][11] = 0.752042440303; AAmatrix[ 7][12] = 0.459436173579; AAmatrix[ 7][13] = 0.368166464453; AAmatrix[ 7][14] = 0.504086599527; 
-	AAmatrix[ 7][15] = 1.509326253224; AAmatrix[ 7][16] = 0.641436011405; AAmatrix[ 7][17] = 0.508358924638; AAmatrix[ 7][18] = 0.308055737035; AAmatrix[ 7][19] = 0.253340790190; 
-	AAmatrix[ 8][ 0] = 0.716241444998; AAmatrix[ 8][ 1] = 1.456141166336; AAmatrix[ 8][ 2] = 2.414501434208; AAmatrix[ 8][ 3] = 0.778142664022; AAmatrix[ 8][ 4] = 0.354058109831; 
-	AAmatrix[ 8][ 5] = 2.435341131140; AAmatrix[ 8][ 6] = 1.626891056982; AAmatrix[ 8][ 7] = 0.539859124954; AAmatrix[ 8][ 8] = 0.000000000000; AAmatrix[ 8][ 9] = 0.252718447885; 
-	AAmatrix[ 8][10] = 0.348072209797; AAmatrix[ 8][11] = 1.022507035889; AAmatrix[ 8][12] = 0.984311525359; AAmatrix[ 8][13] = 0.714533703928; AAmatrix[ 8][14] = 0.527007339151; 
-	AAmatrix[ 8][15] = 1.117029762910; AAmatrix[ 8][16] = 0.585407090225; AAmatrix[ 8][17] = 0.301248600780; AAmatrix[ 8][18] = 4.218953969389; AAmatrix[ 8][19] = 0.201555971750; 
-	AAmatrix[ 9][ 0] = 0.605899003687; AAmatrix[ 9][ 1] = 0.232036445142; AAmatrix[ 9][ 2] = 0.283017326278; AAmatrix[ 9][ 3] = 0.418555732462; AAmatrix[ 9][ 4] = 0.774894022794; 
-	AAmatrix[ 9][ 5] = 0.236202451204; AAmatrix[ 9][ 6] = 0.186848046932; AAmatrix[ 9][ 7] = 0.189296292376; AAmatrix[ 9][ 8] = 0.252718447885; AAmatrix[ 9][ 9] = 0.000000000000; 
-	AAmatrix[ 9][10] = 3.890963773304; AAmatrix[ 9][11] = 0.406193586642; AAmatrix[ 9][12] = 3.364797763104; AAmatrix[ 9][13] = 1.517359325954; AAmatrix[ 9][14] = 0.388355409206; 
-	AAmatrix[ 9][15] = 0.357544412460; AAmatrix[ 9][16] = 1.179091197260; AAmatrix[ 9][17] = 0.341985787540; AAmatrix[ 9][18] = 0.674617093228; AAmatrix[ 9][19] = 8.311839405458; 
-	AAmatrix[10][ 0] = 0.800016530518; AAmatrix[10][ 1] = 0.622711669692; AAmatrix[10][ 2] = 0.211888159615; AAmatrix[10][ 3] = 0.218131577594; AAmatrix[10][ 4] = 0.831842640142; 
-	AAmatrix[10][ 5] = 0.580737093181; AAmatrix[10][ 6] = 0.372625175087; AAmatrix[10][ 7] = 0.217721159236; AAmatrix[10][ 8] = 0.348072209797; AAmatrix[10][ 9] = 3.890963773304; 
-	AAmatrix[10][10] = 0.000000000000; AAmatrix[10][11] = 0.445570274261; AAmatrix[10][12] = 6.030559379572; AAmatrix[10][13] = 2.064839703237; AAmatrix[10][14] = 0.374555687471; 
-	AAmatrix[10][15] = 0.352969184527; AAmatrix[10][16] = 0.915259857694; AAmatrix[10][17] = 0.691474634600; AAmatrix[10][18] = 0.811245856323; AAmatrix[10][19] = 2.231405688913; 
-	AAmatrix[11][ 0] = 1.295201266783; AAmatrix[11][ 1] = 5.411115141489; AAmatrix[11][ 2] = 1.593137043457; AAmatrix[11][ 3] = 1.032447924952; AAmatrix[11][ 4] = 0.285078800906; 
-	AAmatrix[11][ 5] = 3.945277674515; AAmatrix[11][ 6] = 2.802427151679; AAmatrix[11][ 7] = 0.752042440303; AAmatrix[11][ 8] = 1.022507035889; AAmatrix[11][ 9] = 0.406193586642; 
-	AAmatrix[11][10] = 0.445570274261; AAmatrix[11][11] = 0.000000000000; AAmatrix[11][12] = 1.073061184332; AAmatrix[11][13] = 0.266924750511; AAmatrix[11][14] = 1.047383450722; 
-	AAmatrix[11][15] = 1.752165917819; AAmatrix[11][16] = 1.303875200799; AAmatrix[11][17] = 0.332243040634; AAmatrix[11][18] = 0.717993486900; AAmatrix[11][19] = 0.498138475304; 
-	AAmatrix[12][ 0] = 1.253758266664; AAmatrix[12][ 1] = 0.983692987457; AAmatrix[12][ 2] = 0.648441278787; AAmatrix[12][ 3] = 0.222621897958; AAmatrix[12][ 4] = 0.767688823480; 
-	AAmatrix[12][ 5] = 2.494896077113; AAmatrix[12][ 6] = 0.555415397470; AAmatrix[12][ 7] = 0.459436173579; AAmatrix[12][ 8] = 0.984311525359; AAmatrix[12][ 9] = 3.364797763104; 
-	AAmatrix[12][10] = 6.030559379572; AAmatrix[12][11] = 1.073061184332; AAmatrix[12][12] = 0.000000000000; AAmatrix[12][13] = 1.773855168830; AAmatrix[12][14] = 0.454123625103; 
-	AAmatrix[12][15] = 0.918723415746; AAmatrix[12][16] = 1.488548053722; AAmatrix[12][17] = 0.888101098152; AAmatrix[12][18] = 0.951682162246; AAmatrix[12][19] = 2.575850755315; 
-	AAmatrix[13][ 0] = 0.492964679748; AAmatrix[13][ 1] = 0.371644693209; AAmatrix[13][ 2] = 0.354861249223; AAmatrix[13][ 3] = 0.281730694207; AAmatrix[13][ 4] = 0.441337471187; 
-	AAmatrix[13][ 5] = 0.144356959750; AAmatrix[13][ 6] = 0.291409084165; AAmatrix[13][ 7] = 0.368166464453; AAmatrix[13][ 8] = 0.714533703928; AAmatrix[13][ 9] = 1.517359325954; 
-	AAmatrix[13][10] = 2.064839703237; AAmatrix[13][11] = 0.266924750511; AAmatrix[13][12] = 1.773855168830; AAmatrix[13][13] = 0.000000000000; AAmatrix[13][14] = 0.233597909629; 
-	AAmatrix[13][15] = 0.540027644824; AAmatrix[13][16] = 0.488206118793; AAmatrix[13][17] = 2.074324893497; AAmatrix[13][18] = 6.747260430801; AAmatrix[13][19] = 0.838119610178; 
-	AAmatrix[14][ 0] = 1.173275900924; AAmatrix[14][ 1] = 0.448133661718; AAmatrix[14][ 2] = 0.494887043702; AAmatrix[14][ 3] = 0.730628272998; AAmatrix[14][ 4] = 0.356008498769; 
-	AAmatrix[14][ 5] = 0.858570575674; AAmatrix[14][ 6] = 0.926563934846; AAmatrix[14][ 7] = 0.504086599527; AAmatrix[14][ 8] = 0.527007339151; AAmatrix[14][ 9] = 0.388355409206; 
-	AAmatrix[14][10] = 0.374555687471; AAmatrix[14][11] = 1.047383450722; AAmatrix[14][12] = 0.454123625103; AAmatrix[14][13] = 0.233597909629; AAmatrix[14][14] = 0.000000000000; 
-	AAmatrix[14][15] = 1.169129577716; AAmatrix[14][16] = 1.005451683149; AAmatrix[14][17] = 0.252214830027; AAmatrix[14][18] = 0.369405319355; AAmatrix[14][19] = 0.496908410676; 
-	AAmatrix[15][ 0] = 4.325092687057; AAmatrix[15][ 1] = 1.122783104210; AAmatrix[15][ 2] = 2.904101656456; AAmatrix[15][ 3] = 1.582754142065; AAmatrix[15][ 4] = 1.197188415094; 
-	AAmatrix[15][ 5] = 1.934870924596; AAmatrix[15][ 6] = 1.769893238937; AAmatrix[15][ 7] = 1.509326253224; AAmatrix[15][ 8] = 1.117029762910; AAmatrix[15][ 9] = 0.357544412460; 
-	AAmatrix[15][10] = 0.352969184527; AAmatrix[15][11] = 1.752165917819; AAmatrix[15][12] = 0.918723415746; AAmatrix[15][13] = 0.540027644824; AAmatrix[15][14] = 1.169129577716; 
-	AAmatrix[15][15] = 0.000000000000; AAmatrix[15][16] = 5.151556292270; AAmatrix[15][17] = 0.387925622098; AAmatrix[15][18] = 0.796751520761; AAmatrix[15][19] = 0.561925457442; 
-	AAmatrix[16][ 0] = 1.729178019485; AAmatrix[16][ 1] = 0.914665954563; AAmatrix[16][ 2] = 1.898173634533; AAmatrix[16][ 3] = 0.934187509431; AAmatrix[16][ 4] = 1.119831358516; 
-	AAmatrix[16][ 5] = 1.277480294596; AAmatrix[16][ 6] = 1.071097236007; AAmatrix[16][ 7] = 0.641436011405; AAmatrix[16][ 8] = 0.585407090225; AAmatrix[16][ 9] = 1.179091197260; 
-	AAmatrix[16][10] = 0.915259857694; AAmatrix[16][11] = 1.303875200799; AAmatrix[16][12] = 1.488548053722; AAmatrix[16][13] = 0.488206118793; AAmatrix[16][14] = 1.005451683149; 
-	AAmatrix[16][15] = 5.151556292270; AAmatrix[16][16] = 0.000000000000; AAmatrix[16][17] = 0.513128126891; AAmatrix[16][18] = 0.801010243199; AAmatrix[16][19] = 2.253074051176; 
-	AAmatrix[17][ 0] = 0.465839367725; AAmatrix[17][ 1] = 0.426382310122; AAmatrix[17][ 2] = 0.191482046247; AAmatrix[17][ 3] = 0.145345046279; AAmatrix[17][ 4] = 0.527664418872; 
-	AAmatrix[17][ 5] = 0.758653808642; AAmatrix[17][ 6] = 0.407635648938; AAmatrix[17][ 7] = 0.508358924638; AAmatrix[17][ 8] = 0.301248600780; AAmatrix[17][ 9] = 0.341985787540; 
-	AAmatrix[17][10] = 0.691474634600; AAmatrix[17][11] = 0.332243040634; AAmatrix[17][12] = 0.888101098152; AAmatrix[17][13] = 2.074324893497; AAmatrix[17][14] = 0.252214830027; 
-	AAmatrix[17][15] = 0.387925622098; AAmatrix[17][16] = 0.513128126891; AAmatrix[17][17] = 0.000000000000; AAmatrix[17][18] = 4.054419006558; AAmatrix[17][19] = 0.266508731426; 
-	AAmatrix[18][ 0] = 0.718206697586; AAmatrix[18][ 1] = 0.720517441216; AAmatrix[18][ 2] = 0.538222519037; AAmatrix[18][ 3] = 0.261422208965; AAmatrix[18][ 4] = 0.470237733696; 
-	AAmatrix[18][ 5] = 0.958989742850; AAmatrix[18][ 6] = 0.596719300346; AAmatrix[18][ 7] = 0.308055737035; AAmatrix[18][ 8] = 4.218953969389; AAmatrix[18][ 9] = 0.674617093228; 
-	AAmatrix[18][10] = 0.811245856323; AAmatrix[18][11] = 0.717993486900; AAmatrix[18][12] = 0.951682162246; AAmatrix[18][13] = 6.747260430801; AAmatrix[18][14] = 0.369405319355; 
-	AAmatrix[18][15] = 0.796751520761; AAmatrix[18][16] = 0.801010243199; AAmatrix[18][17] = 4.054419006558; AAmatrix[18][18] = 0.000000000000; AAmatrix[18][19] = 1.000000000000; 
-	AAmatrix[19][ 0] = 2.187774522005; AAmatrix[19][ 1] = 0.438388343772; AAmatrix[19][ 2] = 0.312858797993; AAmatrix[19][ 3] = 0.258129289418; AAmatrix[19][ 4] = 1.116352478606; 
-	AAmatrix[19][ 5] = 0.530785790125; AAmatrix[19][ 6] = 0.524253846338; AAmatrix[19][ 7] = 0.253340790190; AAmatrix[19][ 8] = 0.201555971750; AAmatrix[19][ 9] = 8.311839405458; 
-	AAmatrix[19][10] = 2.231405688913; AAmatrix[19][11] = 0.498138475304; AAmatrix[19][12] = 2.575850755315; AAmatrix[19][13] = 0.838119610178; AAmatrix[19][14] = 0.496908410676; 
-	AAmatrix[19][15] = 0.561925457442; AAmatrix[19][16] = 2.253074051176; AAmatrix[19][17] = 0.266508731426; AAmatrix[19][18] = 1.000000000000; AAmatrix[19][19] = 0.000000000000; 	
+	AAmatrix[ 0][ 0] = 0.000000000000; AAmatrix[ 0][ 1] = 0.735790389698; AAmatrix[ 0][ 2] = 0.485391055466; AAmatrix[ 0][ 3] = 0.543161820899; AAmatrix[ 0][ 4] = 1.459995310470;
+	AAmatrix[ 0][ 5] = 1.199705704602; AAmatrix[ 0][ 6] = 1.170949042800; AAmatrix[ 0][ 7] = 1.955883574960; AAmatrix[ 0][ 8] = 0.716241444998; AAmatrix[ 0][ 9] = 0.605899003687;
+	AAmatrix[ 0][10] = 0.800016530518; AAmatrix[ 0][11] = 1.295201266783; AAmatrix[ 0][12] = 1.253758266664; AAmatrix[ 0][13] = 0.492964679748; AAmatrix[ 0][14] = 1.173275900924;
+	AAmatrix[ 0][15] = 4.325092687057; AAmatrix[ 0][16] = 1.729178019485; AAmatrix[ 0][17] = 0.465839367725; AAmatrix[ 0][18] = 0.718206697586; AAmatrix[ 0][19] = 2.187774522005;
+	AAmatrix[ 1][ 0] = 0.735790389698; AAmatrix[ 1][ 1] = 0.000000000000; AAmatrix[ 1][ 2] = 1.297446705134; AAmatrix[ 1][ 3] = 0.500964408555; AAmatrix[ 1][ 4] = 0.227826574209;
+	AAmatrix[ 1][ 5] = 3.020833610064; AAmatrix[ 1][ 6] = 1.360574190420; AAmatrix[ 1][ 7] = 0.418763308518; AAmatrix[ 1][ 8] = 1.456141166336; AAmatrix[ 1][ 9] = 0.232036445142;
+	AAmatrix[ 1][10] = 0.622711669692; AAmatrix[ 1][11] = 5.411115141489; AAmatrix[ 1][12] = 0.983692987457; AAmatrix[ 1][13] = 0.371644693209; AAmatrix[ 1][14] = 0.448133661718;
+	AAmatrix[ 1][15] = 1.122783104210; AAmatrix[ 1][16] = 0.914665954563; AAmatrix[ 1][17] = 0.426382310122; AAmatrix[ 1][18] = 0.720517441216; AAmatrix[ 1][19] = 0.438388343772;
+	AAmatrix[ 2][ 0] = 0.485391055466; AAmatrix[ 2][ 1] = 1.297446705134; AAmatrix[ 2][ 2] = 0.000000000000; AAmatrix[ 2][ 3] = 3.180100048216; AAmatrix[ 2][ 4] = 0.397358949897;
+	AAmatrix[ 2][ 5] = 1.839216146992; AAmatrix[ 2][ 6] = 1.240488508640; AAmatrix[ 2][ 7] = 1.355872344485; AAmatrix[ 2][ 8] = 2.414501434208; AAmatrix[ 2][ 9] = 0.283017326278;
+	AAmatrix[ 2][10] = 0.211888159615; AAmatrix[ 2][11] = 1.593137043457; AAmatrix[ 2][12] = 0.648441278787; AAmatrix[ 2][13] = 0.354861249223; AAmatrix[ 2][14] = 0.494887043702;
+	AAmatrix[ 2][15] = 2.904101656456; AAmatrix[ 2][16] = 1.898173634533; AAmatrix[ 2][17] = 0.191482046247; AAmatrix[ 2][18] = 0.538222519037; AAmatrix[ 2][19] = 0.312858797993;
+	AAmatrix[ 3][ 0] = 0.543161820899; AAmatrix[ 3][ 1] = 0.500964408555; AAmatrix[ 3][ 2] = 3.180100048216; AAmatrix[ 3][ 3] = 0.000000000000; AAmatrix[ 3][ 4] = 0.240836614802;
+	AAmatrix[ 3][ 5] = 1.190945703396; AAmatrix[ 3][ 6] = 3.761625208368; AAmatrix[ 3][ 7] = 0.798473248968; AAmatrix[ 3][ 8] = 0.778142664022; AAmatrix[ 3][ 9] = 0.418555732462;
+	AAmatrix[ 3][10] = 0.218131577594; AAmatrix[ 3][11] = 1.032447924952; AAmatrix[ 3][12] = 0.222621897958; AAmatrix[ 3][13] = 0.281730694207; AAmatrix[ 3][14] = 0.730628272998;
+	AAmatrix[ 3][15] = 1.582754142065; AAmatrix[ 3][16] = 0.934187509431; AAmatrix[ 3][17] = 0.145345046279; AAmatrix[ 3][18] = 0.261422208965; AAmatrix[ 3][19] = 0.258129289418;
+	AAmatrix[ 4][ 0] = 1.459995310470; AAmatrix[ 4][ 1] = 0.227826574209; AAmatrix[ 4][ 2] = 0.397358949897; AAmatrix[ 4][ 3] = 0.240836614802; AAmatrix[ 4][ 4] = 0.000000000000;
+	AAmatrix[ 4][ 5] = 0.329801504630; AAmatrix[ 4][ 6] = 0.140748891814; AAmatrix[ 4][ 7] = 0.418203192284; AAmatrix[ 4][ 8] = 0.354058109831; AAmatrix[ 4][ 9] = 0.774894022794;
+	AAmatrix[ 4][10] = 0.831842640142; AAmatrix[ 4][11] = 0.285078800906; AAmatrix[ 4][12] = 0.767688823480; AAmatrix[ 4][13] = 0.441337471187; AAmatrix[ 4][14] = 0.356008498769;
+	AAmatrix[ 4][15] = 1.197188415094; AAmatrix[ 4][16] = 1.119831358516; AAmatrix[ 4][17] = 0.527664418872; AAmatrix[ 4][18] = 0.470237733696; AAmatrix[ 4][19] = 1.116352478606;
+	AAmatrix[ 5][ 0] = 1.199705704602; AAmatrix[ 5][ 1] = 3.020833610064; AAmatrix[ 5][ 2] = 1.839216146992; AAmatrix[ 5][ 3] = 1.190945703396; AAmatrix[ 5][ 4] = 0.329801504630;
+	AAmatrix[ 5][ 5] = 0.000000000000; AAmatrix[ 5][ 6] = 5.528919177928; AAmatrix[ 5][ 7] = 0.609846305383; AAmatrix[ 5][ 8] = 2.435341131140; AAmatrix[ 5][ 9] = 0.236202451204;
+	AAmatrix[ 5][10] = 0.580737093181; AAmatrix[ 5][11] = 3.945277674515; AAmatrix[ 5][12] = 2.494896077113; AAmatrix[ 5][13] = 0.144356959750; AAmatrix[ 5][14] = 0.858570575674;
+	AAmatrix[ 5][15] = 1.934870924596; AAmatrix[ 5][16] = 1.277480294596; AAmatrix[ 5][17] = 0.758653808642; AAmatrix[ 5][18] = 0.958989742850; AAmatrix[ 5][19] = 0.530785790125;
+	AAmatrix[ 6][ 0] = 1.170949042800; AAmatrix[ 6][ 1] = 1.360574190420; AAmatrix[ 6][ 2] = 1.240488508640; AAmatrix[ 6][ 3] = 3.761625208368; AAmatrix[ 6][ 4] = 0.140748891814;
+	AAmatrix[ 6][ 5] = 5.528919177928; AAmatrix[ 6][ 6] = 0.000000000000; AAmatrix[ 6][ 7] = 0.423579992176; AAmatrix[ 6][ 8] = 1.626891056982; AAmatrix[ 6][ 9] = 0.186848046932;
+	AAmatrix[ 6][10] = 0.372625175087; AAmatrix[ 6][11] = 2.802427151679; AAmatrix[ 6][12] = 0.555415397470; AAmatrix[ 6][13] = 0.291409084165; AAmatrix[ 6][14] = 0.926563934846;
+	AAmatrix[ 6][15] = 1.769893238937; AAmatrix[ 6][16] = 1.071097236007; AAmatrix[ 6][17] = 0.407635648938; AAmatrix[ 6][18] = 0.596719300346; AAmatrix[ 6][19] = 0.524253846338;
+	AAmatrix[ 7][ 0] = 1.955883574960; AAmatrix[ 7][ 1] = 0.418763308518; AAmatrix[ 7][ 2] = 1.355872344485; AAmatrix[ 7][ 3] = 0.798473248968; AAmatrix[ 7][ 4] = 0.418203192284;
+	AAmatrix[ 7][ 5] = 0.609846305383; AAmatrix[ 7][ 6] = 0.423579992176; AAmatrix[ 7][ 7] = 0.000000000000; AAmatrix[ 7][ 8] = 0.539859124954; AAmatrix[ 7][ 9] = 0.189296292376;
+	AAmatrix[ 7][10] = 0.217721159236; AAmatrix[ 7][11] = 0.752042440303; AAmatrix[ 7][12] = 0.459436173579; AAmatrix[ 7][13] = 0.368166464453; AAmatrix[ 7][14] = 0.504086599527;
+	AAmatrix[ 7][15] = 1.509326253224; AAmatrix[ 7][16] = 0.641436011405; AAmatrix[ 7][17] = 0.508358924638; AAmatrix[ 7][18] = 0.308055737035; AAmatrix[ 7][19] = 0.253340790190;
+	AAmatrix[ 8][ 0] = 0.716241444998; AAmatrix[ 8][ 1] = 1.456141166336; AAmatrix[ 8][ 2] = 2.414501434208; AAmatrix[ 8][ 3] = 0.778142664022; AAmatrix[ 8][ 4] = 0.354058109831;
+	AAmatrix[ 8][ 5] = 2.435341131140; AAmatrix[ 8][ 6] = 1.626891056982; AAmatrix[ 8][ 7] = 0.539859124954; AAmatrix[ 8][ 8] = 0.000000000000; AAmatrix[ 8][ 9] = 0.252718447885;
+	AAmatrix[ 8][10] = 0.348072209797; AAmatrix[ 8][11] = 1.022507035889; AAmatrix[ 8][12] = 0.984311525359; AAmatrix[ 8][13] = 0.714533703928; AAmatrix[ 8][14] = 0.527007339151;
+	AAmatrix[ 8][15] = 1.117029762910; AAmatrix[ 8][16] = 0.585407090225; AAmatrix[ 8][17] = 0.301248600780; AAmatrix[ 8][18] = 4.218953969389; AAmatrix[ 8][19] = 0.201555971750;
+	AAmatrix[ 9][ 0] = 0.605899003687; AAmatrix[ 9][ 1] = 0.232036445142; AAmatrix[ 9][ 2] = 0.283017326278; AAmatrix[ 9][ 3] = 0.418555732462; AAmatrix[ 9][ 4] = 0.774894022794;
+	AAmatrix[ 9][ 5] = 0.236202451204; AAmatrix[ 9][ 6] = 0.186848046932; AAmatrix[ 9][ 7] = 0.189296292376; AAmatrix[ 9][ 8] = 0.252718447885; AAmatrix[ 9][ 9] = 0.000000000000;
+	AAmatrix[ 9][10] = 3.890963773304; AAmatrix[ 9][11] = 0.406193586642; AAmatrix[ 9][12] = 3.364797763104; AAmatrix[ 9][13] = 1.517359325954; AAmatrix[ 9][14] = 0.388355409206;
+	AAmatrix[ 9][15] = 0.357544412460; AAmatrix[ 9][16] = 1.179091197260; AAmatrix[ 9][17] = 0.341985787540; AAmatrix[ 9][18] = 0.674617093228; AAmatrix[ 9][19] = 8.311839405458;
+	AAmatrix[10][ 0] = 0.800016530518; AAmatrix[10][ 1] = 0.622711669692; AAmatrix[10][ 2] = 0.211888159615; AAmatrix[10][ 3] = 0.218131577594; AAmatrix[10][ 4] = 0.831842640142;
+	AAmatrix[10][ 5] = 0.580737093181; AAmatrix[10][ 6] = 0.372625175087; AAmatrix[10][ 7] = 0.217721159236; AAmatrix[10][ 8] = 0.348072209797; AAmatrix[10][ 9] = 3.890963773304;
+	AAmatrix[10][10] = 0.000000000000; AAmatrix[10][11] = 0.445570274261; AAmatrix[10][12] = 6.030559379572; AAmatrix[10][13] = 2.064839703237; AAmatrix[10][14] = 0.374555687471;
+	AAmatrix[10][15] = 0.352969184527; AAmatrix[10][16] = 0.915259857694; AAmatrix[10][17] = 0.691474634600; AAmatrix[10][18] = 0.811245856323; AAmatrix[10][19] = 2.231405688913;
+	AAmatrix[11][ 0] = 1.295201266783; AAmatrix[11][ 1] = 5.411115141489; AAmatrix[11][ 2] = 1.593137043457; AAmatrix[11][ 3] = 1.032447924952; AAmatrix[11][ 4] = 0.285078800906;
+	AAmatrix[11][ 5] = 3.945277674515; AAmatrix[11][ 6] = 2.802427151679; AAmatrix[11][ 7] = 0.752042440303; AAmatrix[11][ 8] = 1.022507035889; AAmatrix[11][ 9] = 0.406193586642;
+	AAmatrix[11][10] = 0.445570274261; AAmatrix[11][11] = 0.000000000000; AAmatrix[11][12] = 1.073061184332; AAmatrix[11][13] = 0.266924750511; AAmatrix[11][14] = 1.047383450722;
+	AAmatrix[11][15] = 1.752165917819; AAmatrix[11][16] = 1.303875200799; AAmatrix[11][17] = 0.332243040634; AAmatrix[11][18] = 0.717993486900; AAmatrix[11][19] = 0.498138475304;
+	AAmatrix[12][ 0] = 1.253758266664; AAmatrix[12][ 1] = 0.983692987457; AAmatrix[12][ 2] = 0.648441278787; AAmatrix[12][ 3] = 0.222621897958; AAmatrix[12][ 4] = 0.767688823480;
+	AAmatrix[12][ 5] = 2.494896077113; AAmatrix[12][ 6] = 0.555415397470; AAmatrix[12][ 7] = 0.459436173579; AAmatrix[12][ 8] = 0.984311525359; AAmatrix[12][ 9] = 3.364797763104;
+	AAmatrix[12][10] = 6.030559379572; AAmatrix[12][11] = 1.073061184332; AAmatrix[12][12] = 0.000000000000; AAmatrix[12][13] = 1.773855168830; AAmatrix[12][14] = 0.454123625103;
+	AAmatrix[12][15] = 0.918723415746; AAmatrix[12][16] = 1.488548053722; AAmatrix[12][17] = 0.888101098152; AAmatrix[12][18] = 0.951682162246; AAmatrix[12][19] = 2.575850755315;
+	AAmatrix[13][ 0] = 0.492964679748; AAmatrix[13][ 1] = 0.371644693209; AAmatrix[13][ 2] = 0.354861249223; AAmatrix[13][ 3] = 0.281730694207; AAmatrix[13][ 4] = 0.441337471187;
+	AAmatrix[13][ 5] = 0.144356959750; AAmatrix[13][ 6] = 0.291409084165; AAmatrix[13][ 7] = 0.368166464453; AAmatrix[13][ 8] = 0.714533703928; AAmatrix[13][ 9] = 1.517359325954;
+	AAmatrix[13][10] = 2.064839703237; AAmatrix[13][11] = 0.266924750511; AAmatrix[13][12] = 1.773855168830; AAmatrix[13][13] = 0.000000000000; AAmatrix[13][14] = 0.233597909629;
+	AAmatrix[13][15] = 0.540027644824; AAmatrix[13][16] = 0.488206118793; AAmatrix[13][17] = 2.074324893497; AAmatrix[13][18] = 6.747260430801; AAmatrix[13][19] = 0.838119610178;
+	AAmatrix[14][ 0] = 1.173275900924; AAmatrix[14][ 1] = 0.448133661718; AAmatrix[14][ 2] = 0.494887043702; AAmatrix[14][ 3] = 0.730628272998; AAmatrix[14][ 4] = 0.356008498769;
+	AAmatrix[14][ 5] = 0.858570575674; AAmatrix[14][ 6] = 0.926563934846; AAmatrix[14][ 7] = 0.504086599527; AAmatrix[14][ 8] = 0.527007339151; AAmatrix[14][ 9] = 0.388355409206;
+	AAmatrix[14][10] = 0.374555687471; AAmatrix[14][11] = 1.047383450722; AAmatrix[14][12] = 0.454123625103; AAmatrix[14][13] = 0.233597909629; AAmatrix[14][14] = 0.000000000000;
+	AAmatrix[14][15] = 1.169129577716; AAmatrix[14][16] = 1.005451683149; AAmatrix[14][17] = 0.252214830027; AAmatrix[14][18] = 0.369405319355; AAmatrix[14][19] = 0.496908410676;
+	AAmatrix[15][ 0] = 4.325092687057; AAmatrix[15][ 1] = 1.122783104210; AAmatrix[15][ 2] = 2.904101656456; AAmatrix[15][ 3] = 1.582754142065; AAmatrix[15][ 4] = 1.197188415094;
+	AAmatrix[15][ 5] = 1.934870924596; AAmatrix[15][ 6] = 1.769893238937; AAmatrix[15][ 7] = 1.509326253224; AAmatrix[15][ 8] = 1.117029762910; AAmatrix[15][ 9] = 0.357544412460;
+	AAmatrix[15][10] = 0.352969184527; AAmatrix[15][11] = 1.752165917819; AAmatrix[15][12] = 0.918723415746; AAmatrix[15][13] = 0.540027644824; AAmatrix[15][14] = 1.169129577716;
+	AAmatrix[15][15] = 0.000000000000; AAmatrix[15][16] = 5.151556292270; AAmatrix[15][17] = 0.387925622098; AAmatrix[15][18] = 0.796751520761; AAmatrix[15][19] = 0.561925457442;
+	AAmatrix[16][ 0] = 1.729178019485; AAmatrix[16][ 1] = 0.914665954563; AAmatrix[16][ 2] = 1.898173634533; AAmatrix[16][ 3] = 0.934187509431; AAmatrix[16][ 4] = 1.119831358516;
+	AAmatrix[16][ 5] = 1.277480294596; AAmatrix[16][ 6] = 1.071097236007; AAmatrix[16][ 7] = 0.641436011405; AAmatrix[16][ 8] = 0.585407090225; AAmatrix[16][ 9] = 1.179091197260;
+	AAmatrix[16][10] = 0.915259857694; AAmatrix[16][11] = 1.303875200799; AAmatrix[16][12] = 1.488548053722; AAmatrix[16][13] = 0.488206118793; AAmatrix[16][14] = 1.005451683149;
+	AAmatrix[16][15] = 5.151556292270; AAmatrix[16][16] = 0.000000000000; AAmatrix[16][17] = 0.513128126891; AAmatrix[16][18] = 0.801010243199; AAmatrix[16][19] = 2.253074051176;
+	AAmatrix[17][ 0] = 0.465839367725; AAmatrix[17][ 1] = 0.426382310122; AAmatrix[17][ 2] = 0.191482046247; AAmatrix[17][ 3] = 0.145345046279; AAmatrix[17][ 4] = 0.527664418872;
+	AAmatrix[17][ 5] = 0.758653808642; AAmatrix[17][ 6] = 0.407635648938; AAmatrix[17][ 7] = 0.508358924638; AAmatrix[17][ 8] = 0.301248600780; AAmatrix[17][ 9] = 0.341985787540;
+	AAmatrix[17][10] = 0.691474634600; AAmatrix[17][11] = 0.332243040634; AAmatrix[17][12] = 0.888101098152; AAmatrix[17][13] = 2.074324893497; AAmatrix[17][14] = 0.252214830027;
+	AAmatrix[17][15] = 0.387925622098; AAmatrix[17][16] = 0.513128126891; AAmatrix[17][17] = 0.000000000000; AAmatrix[17][18] = 4.054419006558; AAmatrix[17][19] = 0.266508731426;
+	AAmatrix[18][ 0] = 0.718206697586; AAmatrix[18][ 1] = 0.720517441216; AAmatrix[18][ 2] = 0.538222519037; AAmatrix[18][ 3] = 0.261422208965; AAmatrix[18][ 4] = 0.470237733696;
+	AAmatrix[18][ 5] = 0.958989742850; AAmatrix[18][ 6] = 0.596719300346; AAmatrix[18][ 7] = 0.308055737035; AAmatrix[18][ 8] = 4.218953969389; AAmatrix[18][ 9] = 0.674617093228;
+	AAmatrix[18][10] = 0.811245856323; AAmatrix[18][11] = 0.717993486900; AAmatrix[18][12] = 0.951682162246; AAmatrix[18][13] = 6.747260430801; AAmatrix[18][14] = 0.369405319355;
+	AAmatrix[18][15] = 0.796751520761; AAmatrix[18][16] = 0.801010243199; AAmatrix[18][17] = 4.054419006558; AAmatrix[18][18] = 0.000000000000; AAmatrix[18][19] = 1.000000000000;
+	AAmatrix[19][ 0] = 2.187774522005; AAmatrix[19][ 1] = 0.438388343772; AAmatrix[19][ 2] = 0.312858797993; AAmatrix[19][ 3] = 0.258129289418; AAmatrix[19][ 4] = 1.116352478606;
+	AAmatrix[19][ 5] = 0.530785790125; AAmatrix[19][ 6] = 0.524253846338; AAmatrix[19][ 7] = 0.253340790190; AAmatrix[19][ 8] = 0.201555971750; AAmatrix[19][ 9] = 8.311839405458;
+	AAmatrix[19][10] = 2.231405688913; AAmatrix[19][11] = 0.498138475304; AAmatrix[19][12] = 2.575850755315; AAmatrix[19][13] = 0.838119610178; AAmatrix[19][14] = 0.496908410676;
+	AAmatrix[19][15] = 0.561925457442; AAmatrix[19][16] = 2.253074051176; AAmatrix[19][17] = 0.266508731426; AAmatrix[19][18] = 1.000000000000; AAmatrix[19][19] = 0.000000000000;
 
-	AAPi[ 0] = 0.074; 
-	AAPi[ 1] = 0.052; 
-	AAPi[ 2] = 0.045; 
+	AAPi[ 0] = 0.074;
+	AAPi[ 1] = 0.052;
+	AAPi[ 2] = 0.045;
 	AAPi[ 3] = 0.054;
-	AAPi[ 4] = 0.025; 
-	AAPi[ 5] = 0.034; 
-	AAPi[ 6] = 0.054; 
+	AAPi[ 4] = 0.025;
+	AAPi[ 5] = 0.034;
+	AAPi[ 6] = 0.054;
 	AAPi[ 7] = 0.074;
-	AAPi[ 8] = 0.026; 
-	AAPi[ 9] = 0.068; 
-	AAPi[10] = 0.099; 
+	AAPi[ 8] = 0.026;
+	AAPi[ 9] = 0.068;
+	AAPi[10] = 0.099;
 	AAPi[11] = 0.058;
-	AAPi[12] = 0.025; 
-	AAPi[13] = 0.047; 
-	AAPi[14] = 0.039; 
+	AAPi[12] = 0.025;
+	AAPi[13] = 0.047;
+	AAPi[14] = 0.039;
 	AAPi[15] = 0.057;
-	AAPi[16] = 0.051; 
-	AAPi[17] = 0.013; 
-	AAPi[18] = 0.032; 
+	AAPi[16] = 0.051;
+	AAPi[17] = 0.013;
+	AAPi[18] = 0.032;
 	AAPi[19] = 0.073;
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
 	if(modelnumber==13)
 	{
 
-	/* 
+	/*
 		LG MODEL
-		
-		Le, S.Q. and Gascuel, O. (2008) LG: An Improved, General Amino-Acid Replacement Matrix. Molecular Biology and Evolution 25(7), 1307-1320 
+
+		Le, S.Q. and Gascuel, O. (2008) LG: An Improved, General Amino-Acid Replacement Matrix. Molecular Biology and Evolution 25(7), 1307-1320
 	*/
 
 
@@ -2756,106 +2756,106 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 
 	/*LG TEST*/
 	/* // old version of matrix
-	AAmatrixT[0][0] = 0;			AAmatrixT[0][1] = 0.449682;		AAmatrixT[0][2] = 0.267582;		AAmatrixT[0][3] = 0.401081;	
-	AAmatrixT[0][4] = 2.31284;		AAmatrixT[0][5] = 0.944706;		AAmatrixT[0][6] = 1.16436;		AAmatrixT[0][7] = 2.10185;	
-	AAmatrixT[0][8] = 0.341479;		AAmatrixT[0][9] = 0.122945;		AAmatrixT[0][10] = 0.391826;	AAmatrixT[0][11] = 0.556137;	
-	AAmatrixT[0][12] = 1.0503;		AAmatrixT[0][13] = 0.237746;	AAmatrixT[0][14] = 1.23291;		AAmatrixT[0][15] = 4.65523;	
-	AAmatrixT[0][16] = 1.98643;		AAmatrixT[0][17] = 0.179433;	AAmatrixT[0][18] = 0.223517;	AAmatrixT[0][19] = 2.36882;	
-	AAmatrixT[1][0] = 0.449682;		AAmatrixT[1][1] = 0;			AAmatrixT[1][2] = 0.827348;		AAmatrixT[1][3] = 0.132811;	
-	AAmatrixT[1][4] = 0.552587;		AAmatrixT[1][5] = 3.10941;		AAmatrixT[1][6] = 0.442407;		AAmatrixT[1][7] = 0.44398;	
-	AAmatrixT[1][8] = 2.65765;		AAmatrixT[1][9] = 0.134451;		AAmatrixT[1][10] = 0.33036;		AAmatrixT[1][11] = 7.11437;	
-	AAmatrixT[1][12] = 0.477124;	AAmatrixT[1][13] = 0.055544;	AAmatrixT[1][14] = 0.404818;	AAmatrixT[1][15] = 0.897892;	
-	AAmatrixT[1][16] = 0.579784;	AAmatrixT[1][17] = 0.701255;	AAmatrixT[1][18] = 0.342216;	AAmatrixT[1][19] = 0.173721;	
-	AAmatrixT[2][0] = 0.267582;		AAmatrixT[2][1] = 0.827348;		AAmatrixT[2][2] = 0;			AAmatrixT[2][3] = 5.921;	
-	AAmatrixT[2][4] = 0.522133;		AAmatrixT[2][5] = 1.87744;		AAmatrixT[2][6] = 0.599223;		AAmatrixT[2][7] = 1.56619;	
-	AAmatrixT[2][8] = 4.88956;		AAmatrixT[2][9] = 0.216069;		AAmatrixT[2][10] = 0.075149;	AAmatrixT[2][11] = 2.46334;	
-	AAmatrixT[2][12] = 0.370061;	AAmatrixT[2][13] = 0.090929;	AAmatrixT[2][14] = 0.19063;		AAmatrixT[2][15] = 4.29942;	
-	AAmatrixT[2][16] = 2.06149;		AAmatrixT[2][17] = 0.054722;	AAmatrixT[2][18] = 0.658002;	AAmatrixT[2][19] = 0.088856;	
-	AAmatrixT[3][0] = 0.401081;		AAmatrixT[3][1] = 0.132811;		AAmatrixT[3][2] = 5.921;		AAmatrixT[3][3] = 0;	
-	AAmatrixT[3][4] = 0.056428;		AAmatrixT[3][5] = 0.498202;		AAmatrixT[3][6] = 6.37423;		AAmatrixT[3][7] = 0.922928;	
-	AAmatrixT[3][8] = 0.982202;		AAmatrixT[3][9] = 0.010922;		AAmatrixT[3][10] = 0.017176;	AAmatrixT[3][11] = 0.278545;	
-	AAmatrixT[3][12] = 0.022762;	AAmatrixT[3][13] = 0.017714;	AAmatrixT[3][14] = 0.449817;	AAmatrixT[3][15] = 1.26822;	
-	AAmatrixT[3][16] = 0.405969;	AAmatrixT[3][17] = 0.046559;	AAmatrixT[3][18] = 0.147235;	AAmatrixT[3][19] = 0.03872;	
-	AAmatrixT[4][0] = 2.31284;		AAmatrixT[4][1] = 0.552587;		AAmatrixT[4][2] = 0.522133;		AAmatrixT[4][3] = 0.056428;	
-	AAmatrixT[4][4] = 0;			AAmatrixT[4][5] = 0.080602;		AAmatrixT[4][6] = 0.00133;		AAmatrixT[4][7] = 0.529114;	
-	AAmatrixT[4][8] = 0.593147;		AAmatrixT[4][9] = 0.262931;		AAmatrixT[4][10] = 0.541544;	AAmatrixT[4][11] = 0.003892;	
-	AAmatrixT[4][12] = 0.773189;	AAmatrixT[4][13] = 0.950511;	AAmatrixT[4][14] = 0.076565;	AAmatrixT[4][15] = 2.60597;	
-	AAmatrixT[4][16] = 0.993542;	AAmatrixT[4][17] = 0.659458;	AAmatrixT[4][18] = 1.09531;		AAmatrixT[4][19] = 1.74588;	
-	AAmatrixT[5][0] = 0.944706;		AAmatrixT[5][1] = 3.10941;		AAmatrixT[5][2] = 1.87744;		AAmatrixT[5][3] = 0.498202;	
-	AAmatrixT[5][4] = 0.080602;		AAmatrixT[5][5] = 0;			AAmatrixT[5][6] = 4.7998;		AAmatrixT[5][7] = 0.279365;	
-	AAmatrixT[5][8] = 5.178;		AAmatrixT[5][9] = 0.073719;		AAmatrixT[5][10] = 0.61329;		AAmatrixT[5][11] = 3.46677;	
-	AAmatrixT[5][12] = 1.65667;		AAmatrixT[5][13] = 0.033627;	AAmatrixT[5][14] = 0.69839;		AAmatrixT[5][15] = 1.2058;	
-	AAmatrixT[5][16] = 1.02734;		AAmatrixT[5][17] = 0.249044;	AAmatrixT[5][18] = 0.244886;	AAmatrixT[5][19] = 0.204644;	
-	AAmatrixT[6][0] = 1.16436;		AAmatrixT[6][1] = 0.442407;		AAmatrixT[6][2] = 0.599223;		AAmatrixT[6][3] = 6.37423;	
-	AAmatrixT[6][4] = 0.00133;		AAmatrixT[6][5] = 4.7998;		AAmatrixT[6][6] = 0;			AAmatrixT[6][7] = 0.407773;	
-	AAmatrixT[6][8] = 0.458209;		AAmatrixT[6][9] = 0.056153;		AAmatrixT[6][10] = 0.086633;	AAmatrixT[6][11] = 2.16893;	
-	AAmatrixT[6][12] = 0.183748;	AAmatrixT[6][13] = 0.024362;	AAmatrixT[6][14] = 0.523437;	AAmatrixT[6][15] = 0.667092;	
-	AAmatrixT[6][16] = 0.659097;	AAmatrixT[6][17] = 0.099542;	AAmatrixT[6][18] = 0.140547;	AAmatrixT[6][19] = 0.278624;	
-	AAmatrixT[7][0] = 2.10185;		AAmatrixT[7][1] = 0.44398;		AAmatrixT[7][2] = 1.56619;		AAmatrixT[7][3] = 0.922928;	
-	AAmatrixT[7][4] = 0.529114;		AAmatrixT[7][5] = 0.279365;		AAmatrixT[7][6] = 0.407773;		AAmatrixT[7][7] = 0;	
-	AAmatrixT[7][8] = 0.30432;		AAmatrixT[7][9] = 0.008454;		AAmatrixT[7][10] = 0.047556;	AAmatrixT[7][11] = 0.313114;	
-	AAmatrixT[7][12] = 0.137976;	AAmatrixT[7][13] = 0.080743;	AAmatrixT[7][14] = 0.226307;	AAmatrixT[7][15] = 1.78478;	
-	AAmatrixT[7][16] = 0.114336;	AAmatrixT[7][17] = 0.292882;	AAmatrixT[7][18] = 0.056885;	AAmatrixT[7][19] = 0.075577;	
-	AAmatrixT[8][0] = 0.341479;		AAmatrixT[8][1] = 2.65765;		AAmatrixT[8][2] = 4.88956;		AAmatrixT[8][3] = 0.982202;	
-	AAmatrixT[8][4] = 0.593147;		AAmatrixT[8][5] = 5.178;		AAmatrixT[8][6] = 0.458209;		AAmatrixT[8][7] = 0.30432;	
-	AAmatrixT[8][8] = 0;			AAmatrixT[8][9] = 0.106232;		AAmatrixT[8][10] = 0.363554;	AAmatrixT[8][11] = 0.682564;	
-	AAmatrixT[8][12] = 0.395265;	AAmatrixT[8][13] = 0.616582;	AAmatrixT[8][14] = 0.545492;	AAmatrixT[8][15] = 0.947402;	
-	AAmatrixT[8][16] = 0.526423;	AAmatrixT[8][17] = 0.559689;	AAmatrixT[8][18] = 5.44623;		AAmatrixT[8][19] = 0.108961;	
-	AAmatrixT[9][0] = 0.122945;		AAmatrixT[9][1] = 0.134451;		AAmatrixT[9][2] = 0.216069;		AAmatrixT[9][3] = 0.010922;	
-	AAmatrixT[9][4] = 0.262931;		AAmatrixT[9][5] = 0.073719;		AAmatrixT[9][6] = 0.056153;		AAmatrixT[9][7] = 0.008454;	
-	AAmatrixT[9][8] = 0.106232;		AAmatrixT[9][9] = 0;			AAmatrixT[9][10] = 3.80151;		AAmatrixT[9][11] = 0.173179;	
-	AAmatrixT[9][12] = 3.84902;		AAmatrixT[9][13] = 1.02066;		AAmatrixT[9][14] = 0.086269;	AAmatrixT[9][15] = 0.063251;	
-	AAmatrixT[9][16] = 0.992803;	AAmatrixT[9][17] = 0.121839;	AAmatrixT[9][18] = 0.238891;	AAmatrixT[9][19] = 9.41677;	
-	AAmatrixT[10][0] = 0.391826;	AAmatrixT[10][1] = 0.33036;		AAmatrixT[10][2] = 0.075149;	AAmatrixT[10][3] = 0.017176;	
-	AAmatrixT[10][4] = 0.541544;	AAmatrixT[10][5] = 0.61329;		AAmatrixT[10][6] = 0.086633;	AAmatrixT[10][7] = 0.047556;	
-	AAmatrixT[10][8] = 0.363554;	AAmatrixT[10][9] = 3.80151;		AAmatrixT[10][10] = 0;			AAmatrixT[10][11] = 0.145273;	
-	AAmatrixT[10][12] = 5.83627;	AAmatrixT[10][13] = 2.42627;	AAmatrixT[10][14] = 0.265077;	AAmatrixT[10][15] = 0.184361;	
-	AAmatrixT[10][16] = 0.286481;	AAmatrixT[10][17] = 0.649934;	AAmatrixT[10][18] = 0.292232;	AAmatrixT[10][19] = 1.51964;	
-	AAmatrixT[11][0] = 0.556137;	AAmatrixT[11][1] = 7.11437;		AAmatrixT[11][2] = 2.46334;		AAmatrixT[11][3] = 0.278545;	
-	AAmatrixT[11][4] = 0.003892;	AAmatrixT[11][5] = 3.46677;		AAmatrixT[11][6] = 2.16893;		AAmatrixT[11][7] = 0.313114;	
-	AAmatrixT[11][8] = 0.682564;	AAmatrixT[11][9] = 0.173179;	AAmatrixT[11][10] = 0.145273;	AAmatrixT[11][11] = 0;	
-	AAmatrixT[11][12] = 0.672252;	AAmatrixT[11][13] = 0.026721;	AAmatrixT[11][14] = 0.445474;	AAmatrixT[11][15] = 0.755746;	
-	AAmatrixT[11][16] = 1.15218;	AAmatrixT[11][17] = 0.047995;	AAmatrixT[11][18] = 0.138336;	AAmatrixT[11][19] = 0.184432;	
-	AAmatrixT[12][0] = 1.0503;		AAmatrixT[12][1] = 0.477124;	AAmatrixT[12][2] = 0.370061;	AAmatrixT[12][3] = 0.022762;	
-	AAmatrixT[12][4] = 0.773189;	AAmatrixT[12][5] = 1.65667;		AAmatrixT[12][6] = 0.183748;	AAmatrixT[12][7] = 0.137976;	
-	AAmatrixT[12][8] = 0.395265;	AAmatrixT[12][9] = 3.84902;		AAmatrixT[12][10] = 5.83627;	AAmatrixT[12][11] = 0.672252;	
-	AAmatrixT[12][12] = 0;			AAmatrixT[12][13] = 1.62617;	AAmatrixT[12][14] = 0.096861;	AAmatrixT[12][15] = 0.319101;	
-	AAmatrixT[12][16] = 1.86695;	AAmatrixT[12][17] = 0.660667;	AAmatrixT[12][18] = 0.436403;	AAmatrixT[12][19] = 1.59505;	
-	AAmatrixT[13][0] = 0.237746;	AAmatrixT[13][1] = 0.055544;	AAmatrixT[13][2] = 0.090929;	AAmatrixT[13][3] = 0.017714;	
-	AAmatrixT[13][4] = 0.950511;	AAmatrixT[13][5] = 0.033627;	AAmatrixT[13][6] = 0.024362;	AAmatrixT[13][7] = 0.080743;	
-	AAmatrixT[13][8] = 0.616582;	AAmatrixT[13][9] = 1.02066;		AAmatrixT[13][10] = 2.42627;	AAmatrixT[13][11] = 0.026721;	
-	AAmatrixT[13][12] = 1.62617;	AAmatrixT[13][13] = 0;			AAmatrixT[13][14] = 0.104849;	AAmatrixT[13][15] = 0.355654;	
-	AAmatrixT[13][16] = 0.145526;	AAmatrixT[13][17] = 2.42582;	AAmatrixT[13][18] = 7.59878;	AAmatrixT[13][19] = 0.578417;	
-	AAmatrixT[14][0] = 1.23291;		AAmatrixT[14][1] = 0.404818;	AAmatrixT[14][2] = 0.19063;		AAmatrixT[14][3] = 0.449817;	
-	AAmatrixT[14][4] = 0.076565;	AAmatrixT[14][5] = 0.69839;		AAmatrixT[14][6] = 0.523437;	AAmatrixT[14][7] = 0.226307;	
-	AAmatrixT[14][8] = 0.545492;	AAmatrixT[14][9] = 0.086269;	AAmatrixT[14][10] = 0.265077;	AAmatrixT[14][11] = 0.445474;	
-	AAmatrixT[14][12] = 0.096861;	AAmatrixT[14][13] = 0.104849;	AAmatrixT[14][14] = 0;			AAmatrixT[14][15] = 1.42481;	
-	AAmatrixT[14][16] = 0.592443;	AAmatrixT[14][17] = 0.118287;	AAmatrixT[14][18] = 0.109774;	AAmatrixT[14][19] = 0.302548;	
-	AAmatrixT[15][0] = 4.65523;		AAmatrixT[15][1] = 0.897892;	AAmatrixT[15][2] = 4.29942;		AAmatrixT[15][3] = 1.26822;	
-	AAmatrixT[15][4] = 2.60597;		AAmatrixT[15][5] = 1.2058;		AAmatrixT[15][6] = 0.667092;	AAmatrixT[15][7] = 1.78478;	
-	AAmatrixT[15][8] = 0.947402;	AAmatrixT[15][9] = 0.063251;	AAmatrixT[15][10] = 0.184361;	AAmatrixT[15][11] = 0.755746;	
-	AAmatrixT[15][12] = 0.319101;	AAmatrixT[15][13] = 0.355654;	AAmatrixT[15][14] = 1.42481;	AAmatrixT[15][15] = 0;	
-	AAmatrixT[15][16] = 6.26607;	AAmatrixT[15][17] = 0.267487;	AAmatrixT[15][18] = 0.407468;	AAmatrixT[15][19] = 0.062285;	
-	AAmatrixT[16][0] = 1.98643;		AAmatrixT[16][1] = 0.579784;	AAmatrixT[16][2] = 2.06149;		AAmatrixT[16][3] = 0.405969;	
-	AAmatrixT[16][4] = 0.993542;	AAmatrixT[16][5] = 1.02734;		AAmatrixT[16][6] = 0.659097;	AAmatrixT[16][7] = 0.114336;	
-	AAmatrixT[16][8] = 0.526423;	AAmatrixT[16][9] = 0.992803;	AAmatrixT[16][10] = 0.286481;	AAmatrixT[16][11] = 1.15218;	
-	AAmatrixT[16][12] = 1.86695;	AAmatrixT[16][13] = 0.145526;	AAmatrixT[16][14] = 0.592443;	AAmatrixT[16][15] = 6.26607;	
-	AAmatrixT[16][16] = 0;			AAmatrixT[16][17] = 0.144967;	AAmatrixT[16][18] = 0.236493;	AAmatrixT[16][19] = 1.94732;	
-	AAmatrixT[17][0] = 0.179433;	AAmatrixT[17][1] = 0.701255;	AAmatrixT[17][2] = 0.054722;	AAmatrixT[17][3] = 0.046559;	
-	AAmatrixT[17][4] = 0.659458;	AAmatrixT[17][5] = 0.249044;	AAmatrixT[17][6] = 0.099542;	AAmatrixT[17][7] = 0.292882;	
-	AAmatrixT[17][8] = 0.559689;	AAmatrixT[17][9] = 0.121839;	AAmatrixT[17][10] = 0.649934;	AAmatrixT[17][11] = 0.047995;	
-	AAmatrixT[17][12] = 0.660667;	AAmatrixT[17][13] = 2.42582;	AAmatrixT[17][14] = 0.118287;	AAmatrixT[17][15] = 0.267487;	
-	AAmatrixT[17][16] = 0.144967;	AAmatrixT[17][17] = 0;			AAmatrixT[17][18] = 3.34452;	AAmatrixT[17][19] = 0.201078;	
-	AAmatrixT[18][0] = 0.223517;	AAmatrixT[18][1] = 0.342216;	AAmatrixT[18][2] = 0.658002;	AAmatrixT[18][3] = 0.147235;	
-	AAmatrixT[18][4] = 1.09531;		AAmatrixT[18][5] = 0.244886;	AAmatrixT[18][6] = 0.140547;	AAmatrixT[18][7] = 0.056885;	
-	AAmatrixT[18][8] = 5.44623;		AAmatrixT[18][9] = 0.238891;	AAmatrixT[18][10] = 0.292232;	AAmatrixT[18][11] = 0.138336;	
-	AAmatrixT[18][12] = 0.436403;	AAmatrixT[18][13] = 7.59878;	AAmatrixT[18][14] = 0.109774;	AAmatrixT[18][15] = 0.407468;	
-	AAmatrixT[18][16] = 0.236493;	AAmatrixT[18][17] = 3.34452;	AAmatrixT[18][18] = 0;			AAmatrixT[18][19] = 0.235819;	
-	AAmatrixT[19][0] = 2.36882;		AAmatrixT[19][1] = 0.173721;	AAmatrixT[19][2] = 0.088856;	AAmatrixT[19][3] = 0.03872;	
-	AAmatrixT[19][4] = 1.74588;		AAmatrixT[19][5] = 0.204644;	AAmatrixT[19][6] = 0.278624;	AAmatrixT[19][7] = 0.075577;	
-	AAmatrixT[19][8] = 0.108961;	AAmatrixT[19][9] = 9.41677;		AAmatrixT[19][10] = 1.51964;	AAmatrixT[19][11] = 0.184432;	
-	AAmatrixT[19][12] = 1.59505;	AAmatrixT[19][13] = 0.578417;	AAmatrixT[19][14] = 0.302548;	AAmatrixT[19][15] = 0.062285;	
-	AAmatrixT[19][16] = 1.94732;	AAmatrixT[19][17] = 0.201078;	AAmatrixT[19][18] = 0.235819;	AAmatrixT[19][19] = 0;	
+	AAmatrixT[0][0] = 0;			AAmatrixT[0][1] = 0.449682;		AAmatrixT[0][2] = 0.267582;		AAmatrixT[0][3] = 0.401081;
+	AAmatrixT[0][4] = 2.31284;		AAmatrixT[0][5] = 0.944706;		AAmatrixT[0][6] = 1.16436;		AAmatrixT[0][7] = 2.10185;
+	AAmatrixT[0][8] = 0.341479;		AAmatrixT[0][9] = 0.122945;		AAmatrixT[0][10] = 0.391826;	AAmatrixT[0][11] = 0.556137;
+	AAmatrixT[0][12] = 1.0503;		AAmatrixT[0][13] = 0.237746;	AAmatrixT[0][14] = 1.23291;		AAmatrixT[0][15] = 4.65523;
+	AAmatrixT[0][16] = 1.98643;		AAmatrixT[0][17] = 0.179433;	AAmatrixT[0][18] = 0.223517;	AAmatrixT[0][19] = 2.36882;
+	AAmatrixT[1][0] = 0.449682;		AAmatrixT[1][1] = 0;			AAmatrixT[1][2] = 0.827348;		AAmatrixT[1][3] = 0.132811;
+	AAmatrixT[1][4] = 0.552587;		AAmatrixT[1][5] = 3.10941;		AAmatrixT[1][6] = 0.442407;		AAmatrixT[1][7] = 0.44398;
+	AAmatrixT[1][8] = 2.65765;		AAmatrixT[1][9] = 0.134451;		AAmatrixT[1][10] = 0.33036;		AAmatrixT[1][11] = 7.11437;
+	AAmatrixT[1][12] = 0.477124;	AAmatrixT[1][13] = 0.055544;	AAmatrixT[1][14] = 0.404818;	AAmatrixT[1][15] = 0.897892;
+	AAmatrixT[1][16] = 0.579784;	AAmatrixT[1][17] = 0.701255;	AAmatrixT[1][18] = 0.342216;	AAmatrixT[1][19] = 0.173721;
+	AAmatrixT[2][0] = 0.267582;		AAmatrixT[2][1] = 0.827348;		AAmatrixT[2][2] = 0;			AAmatrixT[2][3] = 5.921;
+	AAmatrixT[2][4] = 0.522133;		AAmatrixT[2][5] = 1.87744;		AAmatrixT[2][6] = 0.599223;		AAmatrixT[2][7] = 1.56619;
+	AAmatrixT[2][8] = 4.88956;		AAmatrixT[2][9] = 0.216069;		AAmatrixT[2][10] = 0.075149;	AAmatrixT[2][11] = 2.46334;
+	AAmatrixT[2][12] = 0.370061;	AAmatrixT[2][13] = 0.090929;	AAmatrixT[2][14] = 0.19063;		AAmatrixT[2][15] = 4.29942;
+	AAmatrixT[2][16] = 2.06149;		AAmatrixT[2][17] = 0.054722;	AAmatrixT[2][18] = 0.658002;	AAmatrixT[2][19] = 0.088856;
+	AAmatrixT[3][0] = 0.401081;		AAmatrixT[3][1] = 0.132811;		AAmatrixT[3][2] = 5.921;		AAmatrixT[3][3] = 0;
+	AAmatrixT[3][4] = 0.056428;		AAmatrixT[3][5] = 0.498202;		AAmatrixT[3][6] = 6.37423;		AAmatrixT[3][7] = 0.922928;
+	AAmatrixT[3][8] = 0.982202;		AAmatrixT[3][9] = 0.010922;		AAmatrixT[3][10] = 0.017176;	AAmatrixT[3][11] = 0.278545;
+	AAmatrixT[3][12] = 0.022762;	AAmatrixT[3][13] = 0.017714;	AAmatrixT[3][14] = 0.449817;	AAmatrixT[3][15] = 1.26822;
+	AAmatrixT[3][16] = 0.405969;	AAmatrixT[3][17] = 0.046559;	AAmatrixT[3][18] = 0.147235;	AAmatrixT[3][19] = 0.03872;
+	AAmatrixT[4][0] = 2.31284;		AAmatrixT[4][1] = 0.552587;		AAmatrixT[4][2] = 0.522133;		AAmatrixT[4][3] = 0.056428;
+	AAmatrixT[4][4] = 0;			AAmatrixT[4][5] = 0.080602;		AAmatrixT[4][6] = 0.00133;		AAmatrixT[4][7] = 0.529114;
+	AAmatrixT[4][8] = 0.593147;		AAmatrixT[4][9] = 0.262931;		AAmatrixT[4][10] = 0.541544;	AAmatrixT[4][11] = 0.003892;
+	AAmatrixT[4][12] = 0.773189;	AAmatrixT[4][13] = 0.950511;	AAmatrixT[4][14] = 0.076565;	AAmatrixT[4][15] = 2.60597;
+	AAmatrixT[4][16] = 0.993542;	AAmatrixT[4][17] = 0.659458;	AAmatrixT[4][18] = 1.09531;		AAmatrixT[4][19] = 1.74588;
+	AAmatrixT[5][0] = 0.944706;		AAmatrixT[5][1] = 3.10941;		AAmatrixT[5][2] = 1.87744;		AAmatrixT[5][3] = 0.498202;
+	AAmatrixT[5][4] = 0.080602;		AAmatrixT[5][5] = 0;			AAmatrixT[5][6] = 4.7998;		AAmatrixT[5][7] = 0.279365;
+	AAmatrixT[5][8] = 5.178;		AAmatrixT[5][9] = 0.073719;		AAmatrixT[5][10] = 0.61329;		AAmatrixT[5][11] = 3.46677;
+	AAmatrixT[5][12] = 1.65667;		AAmatrixT[5][13] = 0.033627;	AAmatrixT[5][14] = 0.69839;		AAmatrixT[5][15] = 1.2058;
+	AAmatrixT[5][16] = 1.02734;		AAmatrixT[5][17] = 0.249044;	AAmatrixT[5][18] = 0.244886;	AAmatrixT[5][19] = 0.204644;
+	AAmatrixT[6][0] = 1.16436;		AAmatrixT[6][1] = 0.442407;		AAmatrixT[6][2] = 0.599223;		AAmatrixT[6][3] = 6.37423;
+	AAmatrixT[6][4] = 0.00133;		AAmatrixT[6][5] = 4.7998;		AAmatrixT[6][6] = 0;			AAmatrixT[6][7] = 0.407773;
+	AAmatrixT[6][8] = 0.458209;		AAmatrixT[6][9] = 0.056153;		AAmatrixT[6][10] = 0.086633;	AAmatrixT[6][11] = 2.16893;
+	AAmatrixT[6][12] = 0.183748;	AAmatrixT[6][13] = 0.024362;	AAmatrixT[6][14] = 0.523437;	AAmatrixT[6][15] = 0.667092;
+	AAmatrixT[6][16] = 0.659097;	AAmatrixT[6][17] = 0.099542;	AAmatrixT[6][18] = 0.140547;	AAmatrixT[6][19] = 0.278624;
+	AAmatrixT[7][0] = 2.10185;		AAmatrixT[7][1] = 0.44398;		AAmatrixT[7][2] = 1.56619;		AAmatrixT[7][3] = 0.922928;
+	AAmatrixT[7][4] = 0.529114;		AAmatrixT[7][5] = 0.279365;		AAmatrixT[7][6] = 0.407773;		AAmatrixT[7][7] = 0;
+	AAmatrixT[7][8] = 0.30432;		AAmatrixT[7][9] = 0.008454;		AAmatrixT[7][10] = 0.047556;	AAmatrixT[7][11] = 0.313114;
+	AAmatrixT[7][12] = 0.137976;	AAmatrixT[7][13] = 0.080743;	AAmatrixT[7][14] = 0.226307;	AAmatrixT[7][15] = 1.78478;
+	AAmatrixT[7][16] = 0.114336;	AAmatrixT[7][17] = 0.292882;	AAmatrixT[7][18] = 0.056885;	AAmatrixT[7][19] = 0.075577;
+	AAmatrixT[8][0] = 0.341479;		AAmatrixT[8][1] = 2.65765;		AAmatrixT[8][2] = 4.88956;		AAmatrixT[8][3] = 0.982202;
+	AAmatrixT[8][4] = 0.593147;		AAmatrixT[8][5] = 5.178;		AAmatrixT[8][6] = 0.458209;		AAmatrixT[8][7] = 0.30432;
+	AAmatrixT[8][8] = 0;			AAmatrixT[8][9] = 0.106232;		AAmatrixT[8][10] = 0.363554;	AAmatrixT[8][11] = 0.682564;
+	AAmatrixT[8][12] = 0.395265;	AAmatrixT[8][13] = 0.616582;	AAmatrixT[8][14] = 0.545492;	AAmatrixT[8][15] = 0.947402;
+	AAmatrixT[8][16] = 0.526423;	AAmatrixT[8][17] = 0.559689;	AAmatrixT[8][18] = 5.44623;		AAmatrixT[8][19] = 0.108961;
+	AAmatrixT[9][0] = 0.122945;		AAmatrixT[9][1] = 0.134451;		AAmatrixT[9][2] = 0.216069;		AAmatrixT[9][3] = 0.010922;
+	AAmatrixT[9][4] = 0.262931;		AAmatrixT[9][5] = 0.073719;		AAmatrixT[9][6] = 0.056153;		AAmatrixT[9][7] = 0.008454;
+	AAmatrixT[9][8] = 0.106232;		AAmatrixT[9][9] = 0;			AAmatrixT[9][10] = 3.80151;		AAmatrixT[9][11] = 0.173179;
+	AAmatrixT[9][12] = 3.84902;		AAmatrixT[9][13] = 1.02066;		AAmatrixT[9][14] = 0.086269;	AAmatrixT[9][15] = 0.063251;
+	AAmatrixT[9][16] = 0.992803;	AAmatrixT[9][17] = 0.121839;	AAmatrixT[9][18] = 0.238891;	AAmatrixT[9][19] = 9.41677;
+	AAmatrixT[10][0] = 0.391826;	AAmatrixT[10][1] = 0.33036;		AAmatrixT[10][2] = 0.075149;	AAmatrixT[10][3] = 0.017176;
+	AAmatrixT[10][4] = 0.541544;	AAmatrixT[10][5] = 0.61329;		AAmatrixT[10][6] = 0.086633;	AAmatrixT[10][7] = 0.047556;
+	AAmatrixT[10][8] = 0.363554;	AAmatrixT[10][9] = 3.80151;		AAmatrixT[10][10] = 0;			AAmatrixT[10][11] = 0.145273;
+	AAmatrixT[10][12] = 5.83627;	AAmatrixT[10][13] = 2.42627;	AAmatrixT[10][14] = 0.265077;	AAmatrixT[10][15] = 0.184361;
+	AAmatrixT[10][16] = 0.286481;	AAmatrixT[10][17] = 0.649934;	AAmatrixT[10][18] = 0.292232;	AAmatrixT[10][19] = 1.51964;
+	AAmatrixT[11][0] = 0.556137;	AAmatrixT[11][1] = 7.11437;		AAmatrixT[11][2] = 2.46334;		AAmatrixT[11][3] = 0.278545;
+	AAmatrixT[11][4] = 0.003892;	AAmatrixT[11][5] = 3.46677;		AAmatrixT[11][6] = 2.16893;		AAmatrixT[11][7] = 0.313114;
+	AAmatrixT[11][8] = 0.682564;	AAmatrixT[11][9] = 0.173179;	AAmatrixT[11][10] = 0.145273;	AAmatrixT[11][11] = 0;
+	AAmatrixT[11][12] = 0.672252;	AAmatrixT[11][13] = 0.026721;	AAmatrixT[11][14] = 0.445474;	AAmatrixT[11][15] = 0.755746;
+	AAmatrixT[11][16] = 1.15218;	AAmatrixT[11][17] = 0.047995;	AAmatrixT[11][18] = 0.138336;	AAmatrixT[11][19] = 0.184432;
+	AAmatrixT[12][0] = 1.0503;		AAmatrixT[12][1] = 0.477124;	AAmatrixT[12][2] = 0.370061;	AAmatrixT[12][3] = 0.022762;
+	AAmatrixT[12][4] = 0.773189;	AAmatrixT[12][5] = 1.65667;		AAmatrixT[12][6] = 0.183748;	AAmatrixT[12][7] = 0.137976;
+	AAmatrixT[12][8] = 0.395265;	AAmatrixT[12][9] = 3.84902;		AAmatrixT[12][10] = 5.83627;	AAmatrixT[12][11] = 0.672252;
+	AAmatrixT[12][12] = 0;			AAmatrixT[12][13] = 1.62617;	AAmatrixT[12][14] = 0.096861;	AAmatrixT[12][15] = 0.319101;
+	AAmatrixT[12][16] = 1.86695;	AAmatrixT[12][17] = 0.660667;	AAmatrixT[12][18] = 0.436403;	AAmatrixT[12][19] = 1.59505;
+	AAmatrixT[13][0] = 0.237746;	AAmatrixT[13][1] = 0.055544;	AAmatrixT[13][2] = 0.090929;	AAmatrixT[13][3] = 0.017714;
+	AAmatrixT[13][4] = 0.950511;	AAmatrixT[13][5] = 0.033627;	AAmatrixT[13][6] = 0.024362;	AAmatrixT[13][7] = 0.080743;
+	AAmatrixT[13][8] = 0.616582;	AAmatrixT[13][9] = 1.02066;		AAmatrixT[13][10] = 2.42627;	AAmatrixT[13][11] = 0.026721;
+	AAmatrixT[13][12] = 1.62617;	AAmatrixT[13][13] = 0;			AAmatrixT[13][14] = 0.104849;	AAmatrixT[13][15] = 0.355654;
+	AAmatrixT[13][16] = 0.145526;	AAmatrixT[13][17] = 2.42582;	AAmatrixT[13][18] = 7.59878;	AAmatrixT[13][19] = 0.578417;
+	AAmatrixT[14][0] = 1.23291;		AAmatrixT[14][1] = 0.404818;	AAmatrixT[14][2] = 0.19063;		AAmatrixT[14][3] = 0.449817;
+	AAmatrixT[14][4] = 0.076565;	AAmatrixT[14][5] = 0.69839;		AAmatrixT[14][6] = 0.523437;	AAmatrixT[14][7] = 0.226307;
+	AAmatrixT[14][8] = 0.545492;	AAmatrixT[14][9] = 0.086269;	AAmatrixT[14][10] = 0.265077;	AAmatrixT[14][11] = 0.445474;
+	AAmatrixT[14][12] = 0.096861;	AAmatrixT[14][13] = 0.104849;	AAmatrixT[14][14] = 0;			AAmatrixT[14][15] = 1.42481;
+	AAmatrixT[14][16] = 0.592443;	AAmatrixT[14][17] = 0.118287;	AAmatrixT[14][18] = 0.109774;	AAmatrixT[14][19] = 0.302548;
+	AAmatrixT[15][0] = 4.65523;		AAmatrixT[15][1] = 0.897892;	AAmatrixT[15][2] = 4.29942;		AAmatrixT[15][3] = 1.26822;
+	AAmatrixT[15][4] = 2.60597;		AAmatrixT[15][5] = 1.2058;		AAmatrixT[15][6] = 0.667092;	AAmatrixT[15][7] = 1.78478;
+	AAmatrixT[15][8] = 0.947402;	AAmatrixT[15][9] = 0.063251;	AAmatrixT[15][10] = 0.184361;	AAmatrixT[15][11] = 0.755746;
+	AAmatrixT[15][12] = 0.319101;	AAmatrixT[15][13] = 0.355654;	AAmatrixT[15][14] = 1.42481;	AAmatrixT[15][15] = 0;
+	AAmatrixT[15][16] = 6.26607;	AAmatrixT[15][17] = 0.267487;	AAmatrixT[15][18] = 0.407468;	AAmatrixT[15][19] = 0.062285;
+	AAmatrixT[16][0] = 1.98643;		AAmatrixT[16][1] = 0.579784;	AAmatrixT[16][2] = 2.06149;		AAmatrixT[16][3] = 0.405969;
+	AAmatrixT[16][4] = 0.993542;	AAmatrixT[16][5] = 1.02734;		AAmatrixT[16][6] = 0.659097;	AAmatrixT[16][7] = 0.114336;
+	AAmatrixT[16][8] = 0.526423;	AAmatrixT[16][9] = 0.992803;	AAmatrixT[16][10] = 0.286481;	AAmatrixT[16][11] = 1.15218;
+	AAmatrixT[16][12] = 1.86695;	AAmatrixT[16][13] = 0.145526;	AAmatrixT[16][14] = 0.592443;	AAmatrixT[16][15] = 6.26607;
+	AAmatrixT[16][16] = 0;			AAmatrixT[16][17] = 0.144967;	AAmatrixT[16][18] = 0.236493;	AAmatrixT[16][19] = 1.94732;
+	AAmatrixT[17][0] = 0.179433;	AAmatrixT[17][1] = 0.701255;	AAmatrixT[17][2] = 0.054722;	AAmatrixT[17][3] = 0.046559;
+	AAmatrixT[17][4] = 0.659458;	AAmatrixT[17][5] = 0.249044;	AAmatrixT[17][6] = 0.099542;	AAmatrixT[17][7] = 0.292882;
+	AAmatrixT[17][8] = 0.559689;	AAmatrixT[17][9] = 0.121839;	AAmatrixT[17][10] = 0.649934;	AAmatrixT[17][11] = 0.047995;
+	AAmatrixT[17][12] = 0.660667;	AAmatrixT[17][13] = 2.42582;	AAmatrixT[17][14] = 0.118287;	AAmatrixT[17][15] = 0.267487;
+	AAmatrixT[17][16] = 0.144967;	AAmatrixT[17][17] = 0;			AAmatrixT[17][18] = 3.34452;	AAmatrixT[17][19] = 0.201078;
+	AAmatrixT[18][0] = 0.223517;	AAmatrixT[18][1] = 0.342216;	AAmatrixT[18][2] = 0.658002;	AAmatrixT[18][3] = 0.147235;
+	AAmatrixT[18][4] = 1.09531;		AAmatrixT[18][5] = 0.244886;	AAmatrixT[18][6] = 0.140547;	AAmatrixT[18][7] = 0.056885;
+	AAmatrixT[18][8] = 5.44623;		AAmatrixT[18][9] = 0.238891;	AAmatrixT[18][10] = 0.292232;	AAmatrixT[18][11] = 0.138336;
+	AAmatrixT[18][12] = 0.436403;	AAmatrixT[18][13] = 7.59878;	AAmatrixT[18][14] = 0.109774;	AAmatrixT[18][15] = 0.407468;
+	AAmatrixT[18][16] = 0.236493;	AAmatrixT[18][17] = 3.34452;	AAmatrixT[18][18] = 0;			AAmatrixT[18][19] = 0.235819;
+	AAmatrixT[19][0] = 2.36882;		AAmatrixT[19][1] = 0.173721;	AAmatrixT[19][2] = 0.088856;	AAmatrixT[19][3] = 0.03872;
+	AAmatrixT[19][4] = 1.74588;		AAmatrixT[19][5] = 0.204644;	AAmatrixT[19][6] = 0.278624;	AAmatrixT[19][7] = 0.075577;
+	AAmatrixT[19][8] = 0.108961;	AAmatrixT[19][9] = 9.41677;		AAmatrixT[19][10] = 1.51964;	AAmatrixT[19][11] = 0.184432;
+	AAmatrixT[19][12] = 1.59505;	AAmatrixT[19][13] = 0.578417;	AAmatrixT[19][14] = 0.302548;	AAmatrixT[19][15] = 0.062285;
+	AAmatrixT[19][16] = 1.94732;	AAmatrixT[19][17] = 0.201078;	AAmatrixT[19][18] = 0.235819;	AAmatrixT[19][19] = 0;
 
 	AAPiT[0] = 0.079611;
 	AAPiT[1] = 0.053191;
@@ -2877,11 +2877,11 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPiT[17] = 0.012588;
 	AAPiT[18] = 0.035709;
 	AAPiT[19] = 0.071505;
-	
+
 		for(int gb1=0; gb1<20; gb1++)
 		{
 			if(AAPiT[gb1]!=AAPiT[gb1]) {cout<<"ERROR in base frequency translation check in LG model"<<endl; gb1--;}
-			
+
 			for(int gb2=0; gb2<20; gb2++)
 			{
 				if(AAmatrix[gb1][gb2]!=AAmatrixT[gb1][gb2]) {cout<<"ERROR in substitution matrix translation check in LG model"<<endl; gb2--;}
@@ -2890,120 +2890,120 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	*/
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
 	if(modelnumber==14)
 	{
 
-	
+
 	/*
 		HIVb
-		
-		Nickle DC, Heath L, Jensen MA, Gilbert PB, Mullins JI, Kosakovsky Pond SL. (2007) HIV-Specific Probabilistic Models 
+
+		Nickle DC, Heath L, Jensen MA, Gilbert PB, Mullins JI, Kosakovsky Pond SL. (2007) HIV-Specific Probabilistic Models
 		of Protein Evolution. PLoS ONE. Jun 6;2:e503.
 	*/
-	AAmatrix[0][0] = 0;				AAmatrix[0][1] = 0.307507;		AAmatrix[0][2] = 0.005;			AAmatrix[0][3] = 1.45504;	
-	AAmatrix[0][4] = 0.123758;		AAmatrix[0][5] = 0.0551128;		AAmatrix[0][6] = 1.48135;		AAmatrix[0][7] = 2.13536;	
-	AAmatrix[0][8] = 0.0847613;		AAmatrix[0][9] = 0.005;			AAmatrix[0][10] = 0.215256;		AAmatrix[0][11] = 0.005;	
-	AAmatrix[0][12] = 0.0186643;	AAmatrix[0][13] = 0.0141269;	AAmatrix[0][14] = 2.12217;		AAmatrix[0][15] = 2.46633;	
-	AAmatrix[0][16] = 15.9183;		AAmatrix[0][17] = 0.005;		AAmatrix[0][18] = 0.005;		AAmatrix[0][19] = 7.61428;	
-	AAmatrix[1][0] = 0.307507;		AAmatrix[1][1] = 0;				AAmatrix[1][2] = 0.295543;		AAmatrix[1][3] = 0.005;	
-	AAmatrix[1][4] = 0.351721;		AAmatrix[1][5] = 3.4215;		AAmatrix[1][6] = 0.0749218;		AAmatrix[1][7] = 3.65345;	
-	AAmatrix[1][8] = 9.04044;		AAmatrix[1][9] = 0.677289;		AAmatrix[1][10] = 0.701427;		AAmatrix[1][11] = 20.45;	
-	AAmatrix[1][12] = 2.51394;		AAmatrix[1][13] = 0.005;		AAmatrix[1][14] = 1.28355;		AAmatrix[1][15] = 3.4791;	
-	AAmatrix[1][16] = 2.86868;		AAmatrix[1][17] = 0.991338;		AAmatrix[1][18] = 0.00991826;	AAmatrix[1][19] = 0.0812454;	
-	AAmatrix[2][0] = 0.005;			AAmatrix[2][1] = 0.295543;		AAmatrix[2][2] = 0;				AAmatrix[2][3] = 17.6612;	
-	AAmatrix[2][4] = 0.0860642;		AAmatrix[2][5] = 0.672052;		AAmatrix[2][6] = 0.0792633;		AAmatrix[2][7] = 0.323401;	
-	AAmatrix[2][8] = 7.64585;		AAmatrix[2][9] = 0.680565;		AAmatrix[2][10] = 0.005;		AAmatrix[2][11] = 7.90443;	
-	AAmatrix[2][12] = 0.005;		AAmatrix[2][13] = 0.005;		AAmatrix[2][14] = 0.00739578;	AAmatrix[2][15] = 13.1447;	
-	AAmatrix[2][16] = 6.88667;		AAmatrix[2][17] = 0.005;		AAmatrix[2][18] = 1.76417;		AAmatrix[2][19] = 0.026656;	
-	AAmatrix[3][0] = 1.45504;		AAmatrix[3][1] = 0.005;			AAmatrix[3][2] = 17.6612;		AAmatrix[3][3] = 0;	
-	AAmatrix[3][4] = 0.005;			AAmatrix[3][5] = 0.005;			AAmatrix[3][6] = 10.5872;		AAmatrix[3][7] = 2.83806;	
-	AAmatrix[3][8] = 1.9169;		AAmatrix[3][9] = 0.0176792;		AAmatrix[3][10] = 0.00876048;	AAmatrix[3][11] = 0.005;	
-	AAmatrix[3][12] = 0.005;		AAmatrix[3][13] = 0.005;		AAmatrix[3][14] = 0.0342658;	AAmatrix[3][15] = 0.52823;	
-	AAmatrix[3][16] = 0.274724;		AAmatrix[3][17] = 0.005;		AAmatrix[3][18] = 0.674653;		AAmatrix[3][19] = 1.04793;	
-	AAmatrix[4][0] = 0.123758;		AAmatrix[4][1] = 0.351721;		AAmatrix[4][2] = 0.0860642;		AAmatrix[4][3] = 0.005;	
-	AAmatrix[4][4] = 0;				AAmatrix[4][5] = 0.005;			AAmatrix[4][6] = 0.005;			AAmatrix[4][7] = 0.897871;	
-	AAmatrix[4][8] = 0.240073;		AAmatrix[4][9] = 0.005;			AAmatrix[4][10] = 0.129777;		AAmatrix[4][11] = 0.005;	
-	AAmatrix[4][12] = 0.005;		AAmatrix[4][13] = 9.29815;		AAmatrix[4][14] = 0.005;		AAmatrix[4][15] = 4.69314;	
-	AAmatrix[4][16] = 0.739969;		AAmatrix[4][17] = 2.63277;		AAmatrix[4][18] = 7.57932;		AAmatrix[4][19] = 0.420027;	
-	AAmatrix[5][0] = 0.0551128;		AAmatrix[5][1] = 3.4215;		AAmatrix[5][2] = 0.672052;		AAmatrix[5][3] = 0.005;	
-	AAmatrix[5][4] = 0.005;			AAmatrix[5][5] = 0;				AAmatrix[5][6] = 2.5602;		AAmatrix[5][7] = 0.0619137;	
-	AAmatrix[5][8] = 7.05545;		AAmatrix[5][9] = 0.005;			AAmatrix[5][10] = 1.49456;		AAmatrix[5][11] = 6.54737;	
-	AAmatrix[5][12] = 0.303676;		AAmatrix[5][13] = 0.005;		AAmatrix[5][14] = 4.47211;		AAmatrix[5][15] = 0.116311;	
-	AAmatrix[5][16] = 0.243589;		AAmatrix[5][17] = 0.026656;		AAmatrix[5][18] = 0.113033;		AAmatrix[5][19] = 0.0209153;	
-	AAmatrix[6][0] = 1.48135;		AAmatrix[6][1] = 0.0749218;		AAmatrix[6][2] = 0.0792633;		AAmatrix[6][3] = 10.5872;	
-	AAmatrix[6][4] = 0.005;			AAmatrix[6][5] = 2.5602;		AAmatrix[6][6] = 0;				AAmatrix[6][7] = 3.92775;	
-	AAmatrix[6][8] = 0.11974;		AAmatrix[6][9] = 0.00609079;	AAmatrix[6][10] = 0.005;		AAmatrix[6][11] = 4.61482;	
-	AAmatrix[6][12] = 0.175789;		AAmatrix[6][13] = 0.005;		AAmatrix[6][14] = 0.0120226;	AAmatrix[6][15] = 0.005;	
-	AAmatrix[6][16] = 0.289774;		AAmatrix[6][17] = 0.005;		AAmatrix[6][18] = 0.0792633;	AAmatrix[6][19] = 1.02847;	
-	AAmatrix[7][0] = 2.13536;		AAmatrix[7][1] = 3.65345;		AAmatrix[7][2] = 0.323401;		AAmatrix[7][3] = 2.83806;	
-	AAmatrix[7][4] = 0.897871;		AAmatrix[7][5] = 0.0619137;		AAmatrix[7][6] = 3.92775;		AAmatrix[7][7] = 0;	
-	AAmatrix[7][8] = 0.005;			AAmatrix[7][9] = 0.005;			AAmatrix[7][10] = 0.005;		AAmatrix[7][11] = 0.521705;	
-	AAmatrix[7][12] = 0.005;		AAmatrix[7][13] = 0.291561;		AAmatrix[7][14] = 0.005;		AAmatrix[7][15] = 4.38041;	
-	AAmatrix[7][16] = 0.369615;		AAmatrix[7][17] = 1.21674;		AAmatrix[7][18] = 0.005;		AAmatrix[7][19] = 0.953155;	
-	AAmatrix[8][0] = 0.0847613;		AAmatrix[8][1] = 9.04044;		AAmatrix[8][2] = 7.64585;		AAmatrix[8][3] = 1.9169;	
-	AAmatrix[8][4] = 0.240073;		AAmatrix[8][5] = 7.05545;		AAmatrix[8][6] = 0.11974;		AAmatrix[8][7] = 0.005;	
-	AAmatrix[8][8] = 0;				AAmatrix[8][9] = 0.103111;		AAmatrix[8][10] = 1.74171;		AAmatrix[8][11] = 0.005;	
-	AAmatrix[8][12] = 0.005;		AAmatrix[8][13] = 0.145558;		AAmatrix[8][14] = 2.45318;		AAmatrix[8][15] = 0.382747;	
-	AAmatrix[8][16] = 0.711594;		AAmatrix[8][17] = 0.0695179;	AAmatrix[8][18] = 18.6943;		AAmatrix[8][19] = 0.005;	
-	AAmatrix[9][0] = 0.005;			AAmatrix[9][1] = 0.677289;		AAmatrix[9][2] = 0.680565;		AAmatrix[9][3] = 0.0176792;	
-	AAmatrix[9][4] = 0.005;			AAmatrix[9][5] = 0.005;			AAmatrix[9][6] = 0.00609079;	AAmatrix[9][7] = 0.005;	
-	AAmatrix[9][8] = 0.103111;		AAmatrix[9][9] = 0;				AAmatrix[9][10] = 5.95879;		AAmatrix[9][11] = 0.322319;	
-	AAmatrix[9][12] = 11.2065;		AAmatrix[9][13] = 3.39836;		AAmatrix[9][14] = 0.0410593;	AAmatrix[9][15] = 1.21803;	
-	AAmatrix[9][16] = 8.61217;		AAmatrix[9][17] = 0.005;		AAmatrix[9][18] = 0.148168;		AAmatrix[9][19] = 17.7389;	
-	AAmatrix[10][0] = 0.215256;		AAmatrix[10][1] = 0.701427;		AAmatrix[10][2] = 0.005;		AAmatrix[10][3] = 0.00876048;	
-	AAmatrix[10][4] = 0.129777;		AAmatrix[10][5] = 1.49456;		AAmatrix[10][6] = 0.005;		AAmatrix[10][7] = 0.005;	
-	AAmatrix[10][8] = 1.74171;		AAmatrix[10][9] = 5.95879;		AAmatrix[10][10] = 0;			AAmatrix[10][11] = 0.0814995;	
-	AAmatrix[10][12] = 5.31961;		AAmatrix[10][13] = 8.52484;		AAmatrix[10][14] = 2.07757;		AAmatrix[10][15] = 0.927656;	
-	AAmatrix[10][16] = 0.0437673;	AAmatrix[10][17] = 0.748843;	AAmatrix[10][18] = 0.111986;	AAmatrix[10][19] = 1.41036;	
-	AAmatrix[11][0] = 0.005;		AAmatrix[11][1] = 20.45;		AAmatrix[11][2] = 7.90443;		AAmatrix[11][3] = 0.005;	
-	AAmatrix[11][4] = 0.005;		AAmatrix[11][5] = 6.54737;		AAmatrix[11][6] = 4.61482;		AAmatrix[11][7] = 0.521705;	
-	AAmatrix[11][8] = 0.005;		AAmatrix[11][9] = 0.322319;		AAmatrix[11][10] = 0.0814995;	AAmatrix[11][11] = 0;	
-	AAmatrix[11][12] = 1.28246;		AAmatrix[11][13] = 0.0342658;	AAmatrix[11][14] = 0.0313862;	AAmatrix[11][15] = 0.504111;	
-	AAmatrix[11][16] = 4.67142;		AAmatrix[11][17] = 0.005;		AAmatrix[11][18] = 0.005;		AAmatrix[11][19] = 0.265829;	
-	AAmatrix[12][0] = 0.0186643;	AAmatrix[12][1] = 2.51394;		AAmatrix[12][2] = 0.005;		AAmatrix[12][3] = 0.005;	
-	AAmatrix[12][4] = 0.005;		AAmatrix[12][5] = 0.303676;		AAmatrix[12][6] = 0.175789;		AAmatrix[12][7] = 0.005;	
-	AAmatrix[12][8] = 0.005;		AAmatrix[12][9] = 11.2065;		AAmatrix[12][10] = 5.31961;		AAmatrix[12][11] = 1.28246;	
-	AAmatrix[12][12] = 0;			AAmatrix[12][13] = 0.188025;	AAmatrix[12][14] = 0.005;		AAmatrix[12][15] = 0.005;	
-	AAmatrix[12][16] = 4.94026;		AAmatrix[12][17] = 0.089078;	AAmatrix[12][18] = 0.005;		AAmatrix[12][19] = 6.8532;	
-	AAmatrix[13][0] = 0.0141269;	AAmatrix[13][1] = 0.005;		AAmatrix[13][2] = 0.005;		AAmatrix[13][3] = 0.005;	
-	AAmatrix[13][4] = 9.29815;		AAmatrix[13][5] = 0.005;		AAmatrix[13][6] = 0.005;		AAmatrix[13][7] = 0.291561;	
-	AAmatrix[13][8] = 0.145558;		AAmatrix[13][9] = 3.39836;		AAmatrix[13][10] = 8.52484;		AAmatrix[13][11] = 0.0342658;	
-	AAmatrix[13][12] = 0.188025;	AAmatrix[13][13] = 0;			AAmatrix[13][14] = 0.005;		AAmatrix[13][15] = 0.956472;	
-	AAmatrix[13][16] = 0.0141269;	AAmatrix[13][17] = 0.829343;	AAmatrix[13][18] = 15.34;		AAmatrix[13][19] = 0.723274;	
-	AAmatrix[14][0] = 2.12217;		AAmatrix[14][1] = 1.28355;		AAmatrix[14][2] = 0.00739578;	AAmatrix[14][3] = 0.0342658;	
-	AAmatrix[14][4] = 0.005;		AAmatrix[14][5] = 4.47211;		AAmatrix[14][6] = 0.0120226;	AAmatrix[14][7] = 0.005;	
-	AAmatrix[14][8] = 2.45318;		AAmatrix[14][9] = 0.0410593;	AAmatrix[14][10] = 2.07757;		AAmatrix[14][11] = 0.0313862;	
-	AAmatrix[14][12] = 0.005;		AAmatrix[14][13] = 0.005;		AAmatrix[14][14] = 0;			AAmatrix[14][15] = 5.37762;	
-	AAmatrix[14][16] = 2.01417;		AAmatrix[14][17] = 0.0444506;	AAmatrix[14][18] = 0.0304381;	AAmatrix[14][19] = 0.005;	
-	AAmatrix[15][0] = 2.46633;		AAmatrix[15][1] = 3.4791;		AAmatrix[15][2] = 13.1447;		AAmatrix[15][3] = 0.52823;	
-	AAmatrix[15][4] = 4.69314;		AAmatrix[15][5] = 0.116311;		AAmatrix[15][6] = 0.005;		AAmatrix[15][7] = 4.38041;	
-	AAmatrix[15][8] = 0.382747;		AAmatrix[15][9] = 1.21803;		AAmatrix[15][10] = 0.927656;	AAmatrix[15][11] = 0.504111;	
-	AAmatrix[15][12] = 0.005;		AAmatrix[15][13] = 0.956472;	AAmatrix[15][14] = 5.37762;		AAmatrix[15][15] = 0;	
-	AAmatrix[15][16] = 8.93107;		AAmatrix[15][17] = 0.0248728;	AAmatrix[15][18] = 0.648024;	AAmatrix[15][19] = 0.0749218;	
-	AAmatrix[16][0] = 15.9183;		AAmatrix[16][1] = 2.86868;		AAmatrix[16][2] = 6.88667;		AAmatrix[16][3] = 0.274724;	
-	AAmatrix[16][4] = 0.739969;		AAmatrix[16][5] = 0.243589;		AAmatrix[16][6] = 0.289774;		AAmatrix[16][7] = 0.369615;	
-	AAmatrix[16][8] = 0.711594;		AAmatrix[16][9] = 8.61217;		AAmatrix[16][10] = 0.0437673;	AAmatrix[16][11] = 4.67142;	
-	AAmatrix[16][12] = 4.94026;		AAmatrix[16][13] = 0.0141269;	AAmatrix[16][14] = 2.01417;		AAmatrix[16][15] = 8.93107;	
-	AAmatrix[16][16] = 0;			AAmatrix[16][17] = 0.005;		AAmatrix[16][18] = 0.105652;	AAmatrix[16][19] = 0.709226;	
-	AAmatrix[17][0] = 0.005;		AAmatrix[17][1] = 0.991338;		AAmatrix[17][2] = 0.005;		AAmatrix[17][3] = 0.005;	
-	AAmatrix[17][4] = 2.63277;		AAmatrix[17][5] = 0.026656;		AAmatrix[17][6] = 0.005;		AAmatrix[17][7] = 1.21674;	
-	AAmatrix[17][8] = 0.0695179;	AAmatrix[17][9] = 0.005;		AAmatrix[17][10] = 0.748843;	AAmatrix[17][11] = 0.005;	
-	AAmatrix[17][12] = 0.089078;	AAmatrix[17][13] = 0.829343;	AAmatrix[17][14] = 0.0444506;	AAmatrix[17][15] = 0.0248728;	
-	AAmatrix[17][16] = 0.005;		AAmatrix[17][17] = 0;			AAmatrix[17][18] = 1.28022;		AAmatrix[17][19] = 0.005;	
-	AAmatrix[18][0] = 0.005;		AAmatrix[18][1] = 0.00991826;	AAmatrix[18][2] = 1.76417;		AAmatrix[18][3] = 0.674653;	
-	AAmatrix[18][4] = 7.57932;		AAmatrix[18][5] = 0.113033;		AAmatrix[18][6] = 0.0792633;	AAmatrix[18][7] = 0.005;	
-	AAmatrix[18][8] = 18.6943;		AAmatrix[18][9] = 0.148168;		AAmatrix[18][10] = 0.111986;	AAmatrix[18][11] = 0.005;	
-	AAmatrix[18][12] = 0.005;		AAmatrix[18][13] = 15.34;		AAmatrix[18][14] = 0.0304381;	AAmatrix[18][15] = 0.648024;	
-	AAmatrix[18][16] = 0.105652;	AAmatrix[18][17] = 1.28022;		AAmatrix[18][18] = 0;			AAmatrix[18][19] = 0.0410593;	
-	AAmatrix[19][0] = 7.61428;		AAmatrix[19][1] = 0.0812454;	AAmatrix[19][2] = 0.026656;		AAmatrix[19][3] = 1.04793;	
-	AAmatrix[19][4] = 0.420027;		AAmatrix[19][5] = 0.0209153;	AAmatrix[19][6] = 1.02847;		AAmatrix[19][7] = 0.953155;	
-	AAmatrix[19][8] = 0.005;		AAmatrix[19][9] = 17.7389;		AAmatrix[19][10] = 1.41036;		AAmatrix[19][11] = 0.265829;	
-	AAmatrix[19][12] = 6.8532;		AAmatrix[19][13] = 0.723274;	AAmatrix[19][14] = 0.005;		AAmatrix[19][15] = 0.0749218;	
-	AAmatrix[19][16] = 0.709226;	AAmatrix[19][17] = 0.005;		AAmatrix[19][18] = 0.0410593;	AAmatrix[19][19] = 0;	
+	AAmatrix[0][0] = 0;				AAmatrix[0][1] = 0.307507;		AAmatrix[0][2] = 0.005;			AAmatrix[0][3] = 1.45504;
+	AAmatrix[0][4] = 0.123758;		AAmatrix[0][5] = 0.0551128;		AAmatrix[0][6] = 1.48135;		AAmatrix[0][7] = 2.13536;
+	AAmatrix[0][8] = 0.0847613;		AAmatrix[0][9] = 0.005;			AAmatrix[0][10] = 0.215256;		AAmatrix[0][11] = 0.005;
+	AAmatrix[0][12] = 0.0186643;	AAmatrix[0][13] = 0.0141269;	AAmatrix[0][14] = 2.12217;		AAmatrix[0][15] = 2.46633;
+	AAmatrix[0][16] = 15.9183;		AAmatrix[0][17] = 0.005;		AAmatrix[0][18] = 0.005;		AAmatrix[0][19] = 7.61428;
+	AAmatrix[1][0] = 0.307507;		AAmatrix[1][1] = 0;				AAmatrix[1][2] = 0.295543;		AAmatrix[1][3] = 0.005;
+	AAmatrix[1][4] = 0.351721;		AAmatrix[1][5] = 3.4215;		AAmatrix[1][6] = 0.0749218;		AAmatrix[1][7] = 3.65345;
+	AAmatrix[1][8] = 9.04044;		AAmatrix[1][9] = 0.677289;		AAmatrix[1][10] = 0.701427;		AAmatrix[1][11] = 20.45;
+	AAmatrix[1][12] = 2.51394;		AAmatrix[1][13] = 0.005;		AAmatrix[1][14] = 1.28355;		AAmatrix[1][15] = 3.4791;
+	AAmatrix[1][16] = 2.86868;		AAmatrix[1][17] = 0.991338;		AAmatrix[1][18] = 0.00991826;	AAmatrix[1][19] = 0.0812454;
+	AAmatrix[2][0] = 0.005;			AAmatrix[2][1] = 0.295543;		AAmatrix[2][2] = 0;				AAmatrix[2][3] = 17.6612;
+	AAmatrix[2][4] = 0.0860642;		AAmatrix[2][5] = 0.672052;		AAmatrix[2][6] = 0.0792633;		AAmatrix[2][7] = 0.323401;
+	AAmatrix[2][8] = 7.64585;		AAmatrix[2][9] = 0.680565;		AAmatrix[2][10] = 0.005;		AAmatrix[2][11] = 7.90443;
+	AAmatrix[2][12] = 0.005;		AAmatrix[2][13] = 0.005;		AAmatrix[2][14] = 0.00739578;	AAmatrix[2][15] = 13.1447;
+	AAmatrix[2][16] = 6.88667;		AAmatrix[2][17] = 0.005;		AAmatrix[2][18] = 1.76417;		AAmatrix[2][19] = 0.026656;
+	AAmatrix[3][0] = 1.45504;		AAmatrix[3][1] = 0.005;			AAmatrix[3][2] = 17.6612;		AAmatrix[3][3] = 0;
+	AAmatrix[3][4] = 0.005;			AAmatrix[3][5] = 0.005;			AAmatrix[3][6] = 10.5872;		AAmatrix[3][7] = 2.83806;
+	AAmatrix[3][8] = 1.9169;		AAmatrix[3][9] = 0.0176792;		AAmatrix[3][10] = 0.00876048;	AAmatrix[3][11] = 0.005;
+	AAmatrix[3][12] = 0.005;		AAmatrix[3][13] = 0.005;		AAmatrix[3][14] = 0.0342658;	AAmatrix[3][15] = 0.52823;
+	AAmatrix[3][16] = 0.274724;		AAmatrix[3][17] = 0.005;		AAmatrix[3][18] = 0.674653;		AAmatrix[3][19] = 1.04793;
+	AAmatrix[4][0] = 0.123758;		AAmatrix[4][1] = 0.351721;		AAmatrix[4][2] = 0.0860642;		AAmatrix[4][3] = 0.005;
+	AAmatrix[4][4] = 0;				AAmatrix[4][5] = 0.005;			AAmatrix[4][6] = 0.005;			AAmatrix[4][7] = 0.897871;
+	AAmatrix[4][8] = 0.240073;		AAmatrix[4][9] = 0.005;			AAmatrix[4][10] = 0.129777;		AAmatrix[4][11] = 0.005;
+	AAmatrix[4][12] = 0.005;		AAmatrix[4][13] = 9.29815;		AAmatrix[4][14] = 0.005;		AAmatrix[4][15] = 4.69314;
+	AAmatrix[4][16] = 0.739969;		AAmatrix[4][17] = 2.63277;		AAmatrix[4][18] = 7.57932;		AAmatrix[4][19] = 0.420027;
+	AAmatrix[5][0] = 0.0551128;		AAmatrix[5][1] = 3.4215;		AAmatrix[5][2] = 0.672052;		AAmatrix[5][3] = 0.005;
+	AAmatrix[5][4] = 0.005;			AAmatrix[5][5] = 0;				AAmatrix[5][6] = 2.5602;		AAmatrix[5][7] = 0.0619137;
+	AAmatrix[5][8] = 7.05545;		AAmatrix[5][9] = 0.005;			AAmatrix[5][10] = 1.49456;		AAmatrix[5][11] = 6.54737;
+	AAmatrix[5][12] = 0.303676;		AAmatrix[5][13] = 0.005;		AAmatrix[5][14] = 4.47211;		AAmatrix[5][15] = 0.116311;
+	AAmatrix[5][16] = 0.243589;		AAmatrix[5][17] = 0.026656;		AAmatrix[5][18] = 0.113033;		AAmatrix[5][19] = 0.0209153;
+	AAmatrix[6][0] = 1.48135;		AAmatrix[6][1] = 0.0749218;		AAmatrix[6][2] = 0.0792633;		AAmatrix[6][3] = 10.5872;
+	AAmatrix[6][4] = 0.005;			AAmatrix[6][5] = 2.5602;		AAmatrix[6][6] = 0;				AAmatrix[6][7] = 3.92775;
+	AAmatrix[6][8] = 0.11974;		AAmatrix[6][9] = 0.00609079;	AAmatrix[6][10] = 0.005;		AAmatrix[6][11] = 4.61482;
+	AAmatrix[6][12] = 0.175789;		AAmatrix[6][13] = 0.005;		AAmatrix[6][14] = 0.0120226;	AAmatrix[6][15] = 0.005;
+	AAmatrix[6][16] = 0.289774;		AAmatrix[6][17] = 0.005;		AAmatrix[6][18] = 0.0792633;	AAmatrix[6][19] = 1.02847;
+	AAmatrix[7][0] = 2.13536;		AAmatrix[7][1] = 3.65345;		AAmatrix[7][2] = 0.323401;		AAmatrix[7][3] = 2.83806;
+	AAmatrix[7][4] = 0.897871;		AAmatrix[7][5] = 0.0619137;		AAmatrix[7][6] = 3.92775;		AAmatrix[7][7] = 0;
+	AAmatrix[7][8] = 0.005;			AAmatrix[7][9] = 0.005;			AAmatrix[7][10] = 0.005;		AAmatrix[7][11] = 0.521705;
+	AAmatrix[7][12] = 0.005;		AAmatrix[7][13] = 0.291561;		AAmatrix[7][14] = 0.005;		AAmatrix[7][15] = 4.38041;
+	AAmatrix[7][16] = 0.369615;		AAmatrix[7][17] = 1.21674;		AAmatrix[7][18] = 0.005;		AAmatrix[7][19] = 0.953155;
+	AAmatrix[8][0] = 0.0847613;		AAmatrix[8][1] = 9.04044;		AAmatrix[8][2] = 7.64585;		AAmatrix[8][3] = 1.9169;
+	AAmatrix[8][4] = 0.240073;		AAmatrix[8][5] = 7.05545;		AAmatrix[8][6] = 0.11974;		AAmatrix[8][7] = 0.005;
+	AAmatrix[8][8] = 0;				AAmatrix[8][9] = 0.103111;		AAmatrix[8][10] = 1.74171;		AAmatrix[8][11] = 0.005;
+	AAmatrix[8][12] = 0.005;		AAmatrix[8][13] = 0.145558;		AAmatrix[8][14] = 2.45318;		AAmatrix[8][15] = 0.382747;
+	AAmatrix[8][16] = 0.711594;		AAmatrix[8][17] = 0.0695179;	AAmatrix[8][18] = 18.6943;		AAmatrix[8][19] = 0.005;
+	AAmatrix[9][0] = 0.005;			AAmatrix[9][1] = 0.677289;		AAmatrix[9][2] = 0.680565;		AAmatrix[9][3] = 0.0176792;
+	AAmatrix[9][4] = 0.005;			AAmatrix[9][5] = 0.005;			AAmatrix[9][6] = 0.00609079;	AAmatrix[9][7] = 0.005;
+	AAmatrix[9][8] = 0.103111;		AAmatrix[9][9] = 0;				AAmatrix[9][10] = 5.95879;		AAmatrix[9][11] = 0.322319;
+	AAmatrix[9][12] = 11.2065;		AAmatrix[9][13] = 3.39836;		AAmatrix[9][14] = 0.0410593;	AAmatrix[9][15] = 1.21803;
+	AAmatrix[9][16] = 8.61217;		AAmatrix[9][17] = 0.005;		AAmatrix[9][18] = 0.148168;		AAmatrix[9][19] = 17.7389;
+	AAmatrix[10][0] = 0.215256;		AAmatrix[10][1] = 0.701427;		AAmatrix[10][2] = 0.005;		AAmatrix[10][3] = 0.00876048;
+	AAmatrix[10][4] = 0.129777;		AAmatrix[10][5] = 1.49456;		AAmatrix[10][6] = 0.005;		AAmatrix[10][7] = 0.005;
+	AAmatrix[10][8] = 1.74171;		AAmatrix[10][9] = 5.95879;		AAmatrix[10][10] = 0;			AAmatrix[10][11] = 0.0814995;
+	AAmatrix[10][12] = 5.31961;		AAmatrix[10][13] = 8.52484;		AAmatrix[10][14] = 2.07757;		AAmatrix[10][15] = 0.927656;
+	AAmatrix[10][16] = 0.0437673;	AAmatrix[10][17] = 0.748843;	AAmatrix[10][18] = 0.111986;	AAmatrix[10][19] = 1.41036;
+	AAmatrix[11][0] = 0.005;		AAmatrix[11][1] = 20.45;		AAmatrix[11][2] = 7.90443;		AAmatrix[11][3] = 0.005;
+	AAmatrix[11][4] = 0.005;		AAmatrix[11][5] = 6.54737;		AAmatrix[11][6] = 4.61482;		AAmatrix[11][7] = 0.521705;
+	AAmatrix[11][8] = 0.005;		AAmatrix[11][9] = 0.322319;		AAmatrix[11][10] = 0.0814995;	AAmatrix[11][11] = 0;
+	AAmatrix[11][12] = 1.28246;		AAmatrix[11][13] = 0.0342658;	AAmatrix[11][14] = 0.0313862;	AAmatrix[11][15] = 0.504111;
+	AAmatrix[11][16] = 4.67142;		AAmatrix[11][17] = 0.005;		AAmatrix[11][18] = 0.005;		AAmatrix[11][19] = 0.265829;
+	AAmatrix[12][0] = 0.0186643;	AAmatrix[12][1] = 2.51394;		AAmatrix[12][2] = 0.005;		AAmatrix[12][3] = 0.005;
+	AAmatrix[12][4] = 0.005;		AAmatrix[12][5] = 0.303676;		AAmatrix[12][6] = 0.175789;		AAmatrix[12][7] = 0.005;
+	AAmatrix[12][8] = 0.005;		AAmatrix[12][9] = 11.2065;		AAmatrix[12][10] = 5.31961;		AAmatrix[12][11] = 1.28246;
+	AAmatrix[12][12] = 0;			AAmatrix[12][13] = 0.188025;	AAmatrix[12][14] = 0.005;		AAmatrix[12][15] = 0.005;
+	AAmatrix[12][16] = 4.94026;		AAmatrix[12][17] = 0.089078;	AAmatrix[12][18] = 0.005;		AAmatrix[12][19] = 6.8532;
+	AAmatrix[13][0] = 0.0141269;	AAmatrix[13][1] = 0.005;		AAmatrix[13][2] = 0.005;		AAmatrix[13][3] = 0.005;
+	AAmatrix[13][4] = 9.29815;		AAmatrix[13][5] = 0.005;		AAmatrix[13][6] = 0.005;		AAmatrix[13][7] = 0.291561;
+	AAmatrix[13][8] = 0.145558;		AAmatrix[13][9] = 3.39836;		AAmatrix[13][10] = 8.52484;		AAmatrix[13][11] = 0.0342658;
+	AAmatrix[13][12] = 0.188025;	AAmatrix[13][13] = 0;			AAmatrix[13][14] = 0.005;		AAmatrix[13][15] = 0.956472;
+	AAmatrix[13][16] = 0.0141269;	AAmatrix[13][17] = 0.829343;	AAmatrix[13][18] = 15.34;		AAmatrix[13][19] = 0.723274;
+	AAmatrix[14][0] = 2.12217;		AAmatrix[14][1] = 1.28355;		AAmatrix[14][2] = 0.00739578;	AAmatrix[14][3] = 0.0342658;
+	AAmatrix[14][4] = 0.005;		AAmatrix[14][5] = 4.47211;		AAmatrix[14][6] = 0.0120226;	AAmatrix[14][7] = 0.005;
+	AAmatrix[14][8] = 2.45318;		AAmatrix[14][9] = 0.0410593;	AAmatrix[14][10] = 2.07757;		AAmatrix[14][11] = 0.0313862;
+	AAmatrix[14][12] = 0.005;		AAmatrix[14][13] = 0.005;		AAmatrix[14][14] = 0;			AAmatrix[14][15] = 5.37762;
+	AAmatrix[14][16] = 2.01417;		AAmatrix[14][17] = 0.0444506;	AAmatrix[14][18] = 0.0304381;	AAmatrix[14][19] = 0.005;
+	AAmatrix[15][0] = 2.46633;		AAmatrix[15][1] = 3.4791;		AAmatrix[15][2] = 13.1447;		AAmatrix[15][3] = 0.52823;
+	AAmatrix[15][4] = 4.69314;		AAmatrix[15][5] = 0.116311;		AAmatrix[15][6] = 0.005;		AAmatrix[15][7] = 4.38041;
+	AAmatrix[15][8] = 0.382747;		AAmatrix[15][9] = 1.21803;		AAmatrix[15][10] = 0.927656;	AAmatrix[15][11] = 0.504111;
+	AAmatrix[15][12] = 0.005;		AAmatrix[15][13] = 0.956472;	AAmatrix[15][14] = 5.37762;		AAmatrix[15][15] = 0;
+	AAmatrix[15][16] = 8.93107;		AAmatrix[15][17] = 0.0248728;	AAmatrix[15][18] = 0.648024;	AAmatrix[15][19] = 0.0749218;
+	AAmatrix[16][0] = 15.9183;		AAmatrix[16][1] = 2.86868;		AAmatrix[16][2] = 6.88667;		AAmatrix[16][3] = 0.274724;
+	AAmatrix[16][4] = 0.739969;		AAmatrix[16][5] = 0.243589;		AAmatrix[16][6] = 0.289774;		AAmatrix[16][7] = 0.369615;
+	AAmatrix[16][8] = 0.711594;		AAmatrix[16][9] = 8.61217;		AAmatrix[16][10] = 0.0437673;	AAmatrix[16][11] = 4.67142;
+	AAmatrix[16][12] = 4.94026;		AAmatrix[16][13] = 0.0141269;	AAmatrix[16][14] = 2.01417;		AAmatrix[16][15] = 8.93107;
+	AAmatrix[16][16] = 0;			AAmatrix[16][17] = 0.005;		AAmatrix[16][18] = 0.105652;	AAmatrix[16][19] = 0.709226;
+	AAmatrix[17][0] = 0.005;		AAmatrix[17][1] = 0.991338;		AAmatrix[17][2] = 0.005;		AAmatrix[17][3] = 0.005;
+	AAmatrix[17][4] = 2.63277;		AAmatrix[17][5] = 0.026656;		AAmatrix[17][6] = 0.005;		AAmatrix[17][7] = 1.21674;
+	AAmatrix[17][8] = 0.0695179;	AAmatrix[17][9] = 0.005;		AAmatrix[17][10] = 0.748843;	AAmatrix[17][11] = 0.005;
+	AAmatrix[17][12] = 0.089078;	AAmatrix[17][13] = 0.829343;	AAmatrix[17][14] = 0.0444506;	AAmatrix[17][15] = 0.0248728;
+	AAmatrix[17][16] = 0.005;		AAmatrix[17][17] = 0;			AAmatrix[17][18] = 1.28022;		AAmatrix[17][19] = 0.005;
+	AAmatrix[18][0] = 0.005;		AAmatrix[18][1] = 0.00991826;	AAmatrix[18][2] = 1.76417;		AAmatrix[18][3] = 0.674653;
+	AAmatrix[18][4] = 7.57932;		AAmatrix[18][5] = 0.113033;		AAmatrix[18][6] = 0.0792633;	AAmatrix[18][7] = 0.005;
+	AAmatrix[18][8] = 18.6943;		AAmatrix[18][9] = 0.148168;		AAmatrix[18][10] = 0.111986;	AAmatrix[18][11] = 0.005;
+	AAmatrix[18][12] = 0.005;		AAmatrix[18][13] = 15.34;		AAmatrix[18][14] = 0.0304381;	AAmatrix[18][15] = 0.648024;
+	AAmatrix[18][16] = 0.105652;	AAmatrix[18][17] = 1.28022;		AAmatrix[18][18] = 0;			AAmatrix[18][19] = 0.0410593;
+	AAmatrix[19][0] = 7.61428;		AAmatrix[19][1] = 0.0812454;	AAmatrix[19][2] = 0.026656;		AAmatrix[19][3] = 1.04793;
+	AAmatrix[19][4] = 0.420027;		AAmatrix[19][5] = 0.0209153;	AAmatrix[19][6] = 1.02847;		AAmatrix[19][7] = 0.953155;
+	AAmatrix[19][8] = 0.005;		AAmatrix[19][9] = 17.7389;		AAmatrix[19][10] = 1.41036;		AAmatrix[19][11] = 0.265829;
+	AAmatrix[19][12] = 6.8532;		AAmatrix[19][13] = 0.723274;	AAmatrix[19][14] = 0.005;		AAmatrix[19][15] = 0.0749218;
+	AAmatrix[19][16] = 0.709226;	AAmatrix[19][17] = 0.005;		AAmatrix[19][18] = 0.0410593;	AAmatrix[19][19] = 0;
 
 	AAPi[0] = 0.0604902;
 	AAPi[1] = 0.0660397;
@@ -3027,7 +3027,7 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	AAPi[19] = 0.0616252;
 
 	}
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	else
@@ -3036,110 +3036,110 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 
 	/*
 		HIVw
-		
-		Nickle DC, Heath L, Jensen MA, Gilbert PB, Mullins JI, Kosakovsky Pond SL. (2007) HIV-Specific Probabilistic Models 
+
+		Nickle DC, Heath L, Jensen MA, Gilbert PB, Mullins JI, Kosakovsky Pond SL. (2007) HIV-Specific Probabilistic Models
 		of Protein Evolution. PLoS ONE. Jun 6;2:e503.
 	*/
-	AAmatrix[0][0] = 0;				AAmatrix[0][1] = 0.0744808;		AAmatrix[0][2] = 0.617509;		AAmatrix[0][3] = 4.43521;	
-	AAmatrix[0][4] = 0.167653;		AAmatrix[0][5] = 0.005;			AAmatrix[0][6] = 5.56325;		AAmatrix[0][7] = 1.8685;	
-	AAmatrix[0][8] = 0.005;			AAmatrix[0][9] = 0.005;			AAmatrix[0][10] = 0.16024;		AAmatrix[0][11] = 0.592784;	
-	AAmatrix[0][12] = 0.005;		AAmatrix[0][13] = 0.597923;		AAmatrix[0][14] = 1.00981;		AAmatrix[0][15] = 8.5942;	
-	AAmatrix[0][16] = 24.1422;		AAmatrix[0][17] = 0.005;		AAmatrix[0][18] = 0.005;		AAmatrix[0][19] = 24.8094;	
-	AAmatrix[1][0] = 0.0744808;		AAmatrix[1][1] = 0;				AAmatrix[1][2] = 0.16024;		AAmatrix[1][3] = 0.0674539;	
-	AAmatrix[1][4] = 2.86364;		AAmatrix[1][5] = 10.6746;		AAmatrix[1][6] = 0.0251632;		AAmatrix[1][7] = 13.4379;	
-	AAmatrix[1][8] = 6.84405;		AAmatrix[1][9] = 1.34069;		AAmatrix[1][10] = 0.586757;		AAmatrix[1][11] = 39.8897;	
-	AAmatrix[1][12] = 3.28652;		AAmatrix[1][13] = 0.005;		AAmatrix[1][14] = 0.404723;		AAmatrix[1][15] = 8.35024;	
-	AAmatrix[1][16] = 0.928203;		AAmatrix[1][17] = 5.96564;		AAmatrix[1][18] = 0.005;		AAmatrix[1][19] = 0.279425;	
-	AAmatrix[2][0] = 0.617509;		AAmatrix[2][1] = 0.16024;		AAmatrix[2][2] = 0;				AAmatrix[2][3] = 29.4087;	
-	AAmatrix[2][4] = 0.0604932;		AAmatrix[2][5] = 0.342068;		AAmatrix[2][6] = 0.201526;		AAmatrix[2][7] = 0.0604932;	
-	AAmatrix[2][8] = 8.59876;		AAmatrix[2][9] = 0.987028;		AAmatrix[2][10] = 0.005;		AAmatrix[2][11] = 10.6655;	
-	AAmatrix[2][12] = 0.201526;		AAmatrix[2][13] = 0.005;		AAmatrix[2][14] = 0.344848;		AAmatrix[2][15] = 14.5699;	
-	AAmatrix[2][16] = 4.54206;		AAmatrix[2][17] = 0.005;		AAmatrix[2][18] = 5.06475;		AAmatrix[2][19] = 0.0744808;	
-	AAmatrix[3][0] = 4.43521;		AAmatrix[3][1] = 0.0674539;		AAmatrix[3][2] = 29.4087;		AAmatrix[3][3] = 0;	
-	AAmatrix[3][4] = 0.005;			AAmatrix[3][5] = 0.005;			AAmatrix[3][6] = 12.1233;		AAmatrix[3][7] = 10.3969;	
-	AAmatrix[3][8] = 2.31779;		AAmatrix[3][9] = 0.145124;		AAmatrix[3][10] = 0.005;		AAmatrix[3][11] = 0.894313;	
-	AAmatrix[3][12] = 0.005;		AAmatrix[3][13] = 0.005;		AAmatrix[3][14] = 0.005;		AAmatrix[3][15] = 0.427881;	
-	AAmatrix[3][16] = 0.630395;		AAmatrix[3][17] = 0.005;		AAmatrix[3][18] = 2.28154;		AAmatrix[3][19] = 2.91786;	
-	AAmatrix[4][0] = 0.167653;		AAmatrix[4][1] = 2.86364;		AAmatrix[4][2] = 0.0604932;		AAmatrix[4][3] = 0.005;	
-	AAmatrix[4][4] = 0;				AAmatrix[4][5] = 0.005;			AAmatrix[4][6] = 0.005;			AAmatrix[4][7] = 0.0489798;	
-	AAmatrix[4][8] = 0.005;			AAmatrix[4][9] = 0.005;			AAmatrix[4][10] = 0.005;		AAmatrix[4][11] = 0.005;	
-	AAmatrix[4][12] = 0.005;		AAmatrix[4][13] = 0.362959;		AAmatrix[4][14] = 0.005;		AAmatrix[4][15] = 1.12195;	
-	AAmatrix[4][16] = 0.005;		AAmatrix[4][17] = 5.49894;		AAmatrix[4][18] = 8.34835;		AAmatrix[4][19] = 0.005;	
-	AAmatrix[5][0] = 0.005;			AAmatrix[5][1] = 10.6746;		AAmatrix[5][2] = 0.342068;		AAmatrix[5][3] = 0.005;	
-	AAmatrix[5][4] = 0.005;			AAmatrix[5][5] = 0;				AAmatrix[5][6] = 3.20656;		AAmatrix[5][7] = 0.0604932;	
-	AAmatrix[5][8] = 18.5465;		AAmatrix[5][9] = 0.0342252;		AAmatrix[5][10] = 2.89048;		AAmatrix[5][11] = 13.0705;	
-	AAmatrix[5][12] = 0.005;		AAmatrix[5][13] = 0.005;		AAmatrix[5][14] = 3.04502;		AAmatrix[5][15] = 0.16024;	
-	AAmatrix[5][16] = 0.203091;		AAmatrix[5][17] = 0.0443298;	AAmatrix[5][18] = 0.005;		AAmatrix[5][19] = 0.005;	
-	AAmatrix[6][0] = 5.56325;		AAmatrix[6][1] = 0.0251632;		AAmatrix[6][2] = 0.201526;		AAmatrix[6][3] = 12.1233;	
-	AAmatrix[6][4] = 0.005;			AAmatrix[6][5] = 3.20656;		AAmatrix[6][6] = 0;				AAmatrix[6][7] = 14.7801;	
-	AAmatrix[6][8] = 0.005;			AAmatrix[6][9] = 0.0390512;		AAmatrix[6][10] = 0.129839;		AAmatrix[6][11] = 23.9626;	
-	AAmatrix[6][12] = 0.005;		AAmatrix[6][13] = 0.005;		AAmatrix[6][14] = 0.005;		AAmatrix[6][15] = 0.005;	
-	AAmatrix[6][16] = 0.458743;		AAmatrix[6][17] = 0.005;		AAmatrix[6][18] = 0.005;		AAmatrix[6][19] = 2.19952;	
-	AAmatrix[7][0] = 1.8685;		AAmatrix[7][1] = 13.4379;		AAmatrix[7][2] = 0.0604932;		AAmatrix[7][3] = 10.3969;	
-	AAmatrix[7][4] = 0.0489798;		AAmatrix[7][5] = 0.0604932;		AAmatrix[7][6] = 14.7801;		AAmatrix[7][7] = 0;	
-	AAmatrix[7][8] = 0.005;			AAmatrix[7][9] = 0.005;			AAmatrix[7][10] = 0.0489798;	AAmatrix[7][11] = 0.279425;	
-	AAmatrix[7][12] = 0.0489798;	AAmatrix[7][13] = 0.005;		AAmatrix[7][14] = 0.005;		AAmatrix[7][15] = 6.27966;	
-	AAmatrix[7][16] = 0.0489798;	AAmatrix[7][17] = 2.8258;		AAmatrix[7][18] = 0.005;		AAmatrix[7][19] = 2.79622;	
-	AAmatrix[8][0] = 0.005;			AAmatrix[8][1] = 6.84405;		AAmatrix[8][2] = 8.59876;		AAmatrix[8][3] = 2.31779;	
-	AAmatrix[8][4] = 0.005;			AAmatrix[8][5] = 18.5465;		AAmatrix[8][6] = 0.005;			AAmatrix[8][7] = 0.005;	
-	AAmatrix[8][8] = 0;				AAmatrix[8][9] = 0.005;			AAmatrix[8][10] = 1.76382;		AAmatrix[8][11] = 0.22406;	
-	AAmatrix[8][12] = 0.005;		AAmatrix[8][13] = 0.005;		AAmatrix[8][14] = 13.9444;		AAmatrix[8][15] = 0.725157;	
-	AAmatrix[8][16] = 0.95956;		AAmatrix[8][17] = 0.005;		AAmatrix[8][18] = 47.4889;		AAmatrix[8][19] = 0.827479;	
-	AAmatrix[9][0] = 0.005;			AAmatrix[9][1] = 1.34069;		AAmatrix[9][2] = 0.987028;		AAmatrix[9][3] = 0.145124;	
-	AAmatrix[9][4] = 0.005;			AAmatrix[9][5] = 0.0342252;		AAmatrix[9][6] = 0.0390512;		AAmatrix[9][7] = 0.005;	
-	AAmatrix[9][8] = 0.005;			AAmatrix[9][9] = 0;				AAmatrix[9][10] = 9.10246;		AAmatrix[9][11] = 0.817481;	
-	AAmatrix[9][12] = 17.3064;		AAmatrix[9][13] = 1.48288;		AAmatrix[9][14] = 0.005;		AAmatrix[9][15] = 0.740091;	
-	AAmatrix[9][16] = 9.36345;		AAmatrix[9][17] = 0.005;		AAmatrix[9][18] = 0.114512;		AAmatrix[9][19] = 24.8231;	
-	AAmatrix[10][0] = 0.16024;		AAmatrix[10][1] = 0.586757;		AAmatrix[10][2] = 0.005;		AAmatrix[10][3] = 0.005;	
-	AAmatrix[10][4] = 0.005;		AAmatrix[10][5] = 2.89048;		AAmatrix[10][6] = 0.129839;		AAmatrix[10][7] = 0.0489798;	
-	AAmatrix[10][8] = 1.76382;		AAmatrix[10][9] = 9.10246;		AAmatrix[10][10] = 0;			AAmatrix[10][11] = 0.005;	
-	AAmatrix[10][12] = 11.3839;		AAmatrix[10][13] = 7.48781;		AAmatrix[10][14] = 9.83095;		AAmatrix[10][15] = 6.14396;	
-	AAmatrix[10][16] = 0.005;		AAmatrix[10][17] = 1.37031;		AAmatrix[10][18] = 0.005;		AAmatrix[10][19] = 2.95344;	
-	AAmatrix[11][0] = 0.592784;		AAmatrix[11][1] = 39.8897;		AAmatrix[11][2] = 10.6655;		AAmatrix[11][3] = 0.894313;	
-	AAmatrix[11][4] = 0.005;		AAmatrix[11][5] = 13.0705;		AAmatrix[11][6] = 23.9626;		AAmatrix[11][7] = 0.279425;	
-	AAmatrix[11][8] = 0.22406;		AAmatrix[11][9] = 0.817481;		AAmatrix[11][10] = 0.005;		AAmatrix[11][11] = 0;	
-	AAmatrix[11][12] = 4.09564;		AAmatrix[11][13] = 0.005;		AAmatrix[11][14] = 0.111928;	AAmatrix[11][15] = 0.005;	
-	AAmatrix[11][16] = 4.04802;		AAmatrix[11][17] = 0.005;		AAmatrix[11][18] = 0.005;		AAmatrix[11][19] = 0.128065;	
-	AAmatrix[12][0] = 0.005;		AAmatrix[12][1] = 3.28652;		AAmatrix[12][2] = 0.201526;		AAmatrix[12][3] = 0.005;	
-	AAmatrix[12][4] = 0.005;		AAmatrix[12][5] = 0.005;		AAmatrix[12][6] = 0.005;		AAmatrix[12][7] = 0.0489798;	
-	AAmatrix[12][8] = 0.005;		AAmatrix[12][9] = 17.3064;		AAmatrix[12][10] = 11.3839;		AAmatrix[12][11] = 4.09564;	
-	AAmatrix[12][12] = 0;			AAmatrix[12][13] = 0.005;		AAmatrix[12][14] = 0.005;		AAmatrix[12][15] = 0.392575;	
-	AAmatrix[12][16] = 7.41313;		AAmatrix[12][17] = 0.005;		AAmatrix[12][18] = 0.579198;	AAmatrix[12][19] = 14.7683;	
-	AAmatrix[13][0] = 0.597923;		AAmatrix[13][1] = 0.005;		AAmatrix[13][2] = 0.005;		AAmatrix[13][3] = 0.005;	
-	AAmatrix[13][4] = 0.362959;		AAmatrix[13][5] = 0.005;		AAmatrix[13][6] = 0.005;		AAmatrix[13][7] = 0.005;	
-	AAmatrix[13][8] = 0.005;		AAmatrix[13][9] = 1.48288;		AAmatrix[13][10] = 7.48781;		AAmatrix[13][11] = 0.005;	
-	AAmatrix[13][12] = 0.005;		AAmatrix[13][13] = 0;			AAmatrix[13][14] = 0.0342252;	AAmatrix[13][15] = 4.27939;	
-	AAmatrix[13][16] = 0.114512;	AAmatrix[13][17] = 0.005;		AAmatrix[13][18] = 4.12728;		AAmatrix[13][19] = 2.28;	
-	AAmatrix[14][0] = 1.00981;		AAmatrix[14][1] = 0.404723;		AAmatrix[14][2] = 0.344848;		AAmatrix[14][3] = 0.005;	
-	AAmatrix[14][4] = 0.005;		AAmatrix[14][5] = 3.04502;		AAmatrix[14][6] = 0.005;		AAmatrix[14][7] = 0.005;	
-	AAmatrix[14][8] = 13.9444;		AAmatrix[14][9] = 0.005;		AAmatrix[14][10] = 9.83095;		AAmatrix[14][11] = 0.111928;	
-	AAmatrix[14][12] = 0.005;		AAmatrix[14][13] = 0.0342252;	AAmatrix[14][14] = 0;			AAmatrix[14][15] = 14.249;	
-	AAmatrix[14][16] = 4.33701;		AAmatrix[14][17] = 0.005;		AAmatrix[14][18] = 0.005;		AAmatrix[14][19] = 0.005;	
-	AAmatrix[15][0] = 8.5942;		AAmatrix[15][1] = 8.35024;		AAmatrix[15][2] = 14.5699;		AAmatrix[15][3] = 0.427881;	
-	AAmatrix[15][4] = 1.12195;		AAmatrix[15][5] = 0.16024;		AAmatrix[15][6] = 0.005;		AAmatrix[15][7] = 6.27966;	
-	AAmatrix[15][8] = 0.725157;		AAmatrix[15][9] = 0.740091;		AAmatrix[15][10] = 6.14396;		AAmatrix[15][11] = 0.005;	
-	AAmatrix[15][12] = 0.392575;	AAmatrix[15][13] = 4.27939;		AAmatrix[15][14] = 14.249;		AAmatrix[15][15] = 0;	
-	AAmatrix[15][16] = 6.34079;		AAmatrix[15][17] = 1.10156;		AAmatrix[15][18] = 0.933142;	AAmatrix[15][19] = 0.862637;	
-	AAmatrix[16][0] = 24.1422;		AAmatrix[16][1] = 0.928203;		AAmatrix[16][2] = 4.54206;		AAmatrix[16][3] = 0.630395;	
-	AAmatrix[16][4] = 0.005;		AAmatrix[16][5] = 0.203091;		AAmatrix[16][6] = 0.458743;		AAmatrix[16][7] = 0.0489798;	
-	AAmatrix[16][8] = 0.95956;		AAmatrix[16][9] = 9.36345;		AAmatrix[16][10] = 0.005;		AAmatrix[16][11] = 4.04802;	
-	AAmatrix[16][12] = 7.41313;		AAmatrix[16][13] = 0.114512;	AAmatrix[16][14] = 4.33701;		AAmatrix[16][15] = 6.34079;	
-	AAmatrix[16][16] = 0;			AAmatrix[16][17] = 0.005;		AAmatrix[16][18] = 0.490608;	AAmatrix[16][19] = 0.005;	
-	AAmatrix[17][0] = 0.005;		AAmatrix[17][1] = 5.96564;		AAmatrix[17][2] = 0.005;		AAmatrix[17][3] = 0.005;	
-	AAmatrix[17][4] = 5.49894;		AAmatrix[17][5] = 0.0443298;	AAmatrix[17][6] = 0.005;		AAmatrix[17][7] = 2.8258;	
-	AAmatrix[17][8] = 0.005;		AAmatrix[17][9] = 0.005;		AAmatrix[17][10] = 1.37031;		AAmatrix[17][11] = 0.005;	
-	AAmatrix[17][12] = 0.005;		AAmatrix[17][13] = 0.005;		AAmatrix[17][14] = 0.005;		AAmatrix[17][15] = 1.10156;	
-	AAmatrix[17][16] = 0.005;		AAmatrix[17][17] = 0;			AAmatrix[17][18] = 0.005;		AAmatrix[17][19] = 0.005;	
-	AAmatrix[18][0] = 0.005;		AAmatrix[18][1] = 0.005;		AAmatrix[18][2] = 5.06475;		AAmatrix[18][3] = 2.28154;	
-	AAmatrix[18][4] = 8.34835;		AAmatrix[18][5] = 0.005;		AAmatrix[18][6] = 0.005;		AAmatrix[18][7] = 0.005;	
-	AAmatrix[18][8] = 47.4889;		AAmatrix[18][9] = 0.114512;		AAmatrix[18][10] = 0.005;		AAmatrix[18][11] = 0.005;	
-	AAmatrix[18][12] = 0.579198;	AAmatrix[18][13] = 4.12728;		AAmatrix[18][14] = 0.005;		AAmatrix[18][15] = 0.933142;	
-	AAmatrix[18][16] = 0.490608;	AAmatrix[18][17] = 0.005;		AAmatrix[18][18] = 0;			AAmatrix[18][19] = 1.35482;	
-	AAmatrix[19][0] = 24.8094;		AAmatrix[19][1] = 0.279425;		AAmatrix[19][2] = 0.0744808;	AAmatrix[19][3] = 2.91786;	
-	AAmatrix[19][4] = 0.005;		AAmatrix[19][5] = 0.005;		AAmatrix[19][6] = 2.19952;		AAmatrix[19][7] = 2.79622;	
-	AAmatrix[19][8] = 0.827479;		AAmatrix[19][9] = 24.8231;		AAmatrix[19][10] = 2.95344;		AAmatrix[19][11] = 0.128065;	
-	AAmatrix[19][12] = 14.7683;		AAmatrix[19][13] = 2.28;		AAmatrix[19][14] = 0.005;		AAmatrix[19][15] = 0.862637;	
-	AAmatrix[19][16] = 0.005;		AAmatrix[19][17] = 0.005;		AAmatrix[19][18] = 1.35482;		AAmatrix[19][19] = 0;	
+	AAmatrix[0][0] = 0;				AAmatrix[0][1] = 0.0744808;		AAmatrix[0][2] = 0.617509;		AAmatrix[0][3] = 4.43521;
+	AAmatrix[0][4] = 0.167653;		AAmatrix[0][5] = 0.005;			AAmatrix[0][6] = 5.56325;		AAmatrix[0][7] = 1.8685;
+	AAmatrix[0][8] = 0.005;			AAmatrix[0][9] = 0.005;			AAmatrix[0][10] = 0.16024;		AAmatrix[0][11] = 0.592784;
+	AAmatrix[0][12] = 0.005;		AAmatrix[0][13] = 0.597923;		AAmatrix[0][14] = 1.00981;		AAmatrix[0][15] = 8.5942;
+	AAmatrix[0][16] = 24.1422;		AAmatrix[0][17] = 0.005;		AAmatrix[0][18] = 0.005;		AAmatrix[0][19] = 24.8094;
+	AAmatrix[1][0] = 0.0744808;		AAmatrix[1][1] = 0;				AAmatrix[1][2] = 0.16024;		AAmatrix[1][3] = 0.0674539;
+	AAmatrix[1][4] = 2.86364;		AAmatrix[1][5] = 10.6746;		AAmatrix[1][6] = 0.0251632;		AAmatrix[1][7] = 13.4379;
+	AAmatrix[1][8] = 6.84405;		AAmatrix[1][9] = 1.34069;		AAmatrix[1][10] = 0.586757;		AAmatrix[1][11] = 39.8897;
+	AAmatrix[1][12] = 3.28652;		AAmatrix[1][13] = 0.005;		AAmatrix[1][14] = 0.404723;		AAmatrix[1][15] = 8.35024;
+	AAmatrix[1][16] = 0.928203;		AAmatrix[1][17] = 5.96564;		AAmatrix[1][18] = 0.005;		AAmatrix[1][19] = 0.279425;
+	AAmatrix[2][0] = 0.617509;		AAmatrix[2][1] = 0.16024;		AAmatrix[2][2] = 0;				AAmatrix[2][3] = 29.4087;
+	AAmatrix[2][4] = 0.0604932;		AAmatrix[2][5] = 0.342068;		AAmatrix[2][6] = 0.201526;		AAmatrix[2][7] = 0.0604932;
+	AAmatrix[2][8] = 8.59876;		AAmatrix[2][9] = 0.987028;		AAmatrix[2][10] = 0.005;		AAmatrix[2][11] = 10.6655;
+	AAmatrix[2][12] = 0.201526;		AAmatrix[2][13] = 0.005;		AAmatrix[2][14] = 0.344848;		AAmatrix[2][15] = 14.5699;
+	AAmatrix[2][16] = 4.54206;		AAmatrix[2][17] = 0.005;		AAmatrix[2][18] = 5.06475;		AAmatrix[2][19] = 0.0744808;
+	AAmatrix[3][0] = 4.43521;		AAmatrix[3][1] = 0.0674539;		AAmatrix[3][2] = 29.4087;		AAmatrix[3][3] = 0;
+	AAmatrix[3][4] = 0.005;			AAmatrix[3][5] = 0.005;			AAmatrix[3][6] = 12.1233;		AAmatrix[3][7] = 10.3969;
+	AAmatrix[3][8] = 2.31779;		AAmatrix[3][9] = 0.145124;		AAmatrix[3][10] = 0.005;		AAmatrix[3][11] = 0.894313;
+	AAmatrix[3][12] = 0.005;		AAmatrix[3][13] = 0.005;		AAmatrix[3][14] = 0.005;		AAmatrix[3][15] = 0.427881;
+	AAmatrix[3][16] = 0.630395;		AAmatrix[3][17] = 0.005;		AAmatrix[3][18] = 2.28154;		AAmatrix[3][19] = 2.91786;
+	AAmatrix[4][0] = 0.167653;		AAmatrix[4][1] = 2.86364;		AAmatrix[4][2] = 0.0604932;		AAmatrix[4][3] = 0.005;
+	AAmatrix[4][4] = 0;				AAmatrix[4][5] = 0.005;			AAmatrix[4][6] = 0.005;			AAmatrix[4][7] = 0.0489798;
+	AAmatrix[4][8] = 0.005;			AAmatrix[4][9] = 0.005;			AAmatrix[4][10] = 0.005;		AAmatrix[4][11] = 0.005;
+	AAmatrix[4][12] = 0.005;		AAmatrix[4][13] = 0.362959;		AAmatrix[4][14] = 0.005;		AAmatrix[4][15] = 1.12195;
+	AAmatrix[4][16] = 0.005;		AAmatrix[4][17] = 5.49894;		AAmatrix[4][18] = 8.34835;		AAmatrix[4][19] = 0.005;
+	AAmatrix[5][0] = 0.005;			AAmatrix[5][1] = 10.6746;		AAmatrix[5][2] = 0.342068;		AAmatrix[5][3] = 0.005;
+	AAmatrix[5][4] = 0.005;			AAmatrix[5][5] = 0;				AAmatrix[5][6] = 3.20656;		AAmatrix[5][7] = 0.0604932;
+	AAmatrix[5][8] = 18.5465;		AAmatrix[5][9] = 0.0342252;		AAmatrix[5][10] = 2.89048;		AAmatrix[5][11] = 13.0705;
+	AAmatrix[5][12] = 0.005;		AAmatrix[5][13] = 0.005;		AAmatrix[5][14] = 3.04502;		AAmatrix[5][15] = 0.16024;
+	AAmatrix[5][16] = 0.203091;		AAmatrix[5][17] = 0.0443298;	AAmatrix[5][18] = 0.005;		AAmatrix[5][19] = 0.005;
+	AAmatrix[6][0] = 5.56325;		AAmatrix[6][1] = 0.0251632;		AAmatrix[6][2] = 0.201526;		AAmatrix[6][3] = 12.1233;
+	AAmatrix[6][4] = 0.005;			AAmatrix[6][5] = 3.20656;		AAmatrix[6][6] = 0;				AAmatrix[6][7] = 14.7801;
+	AAmatrix[6][8] = 0.005;			AAmatrix[6][9] = 0.0390512;		AAmatrix[6][10] = 0.129839;		AAmatrix[6][11] = 23.9626;
+	AAmatrix[6][12] = 0.005;		AAmatrix[6][13] = 0.005;		AAmatrix[6][14] = 0.005;		AAmatrix[6][15] = 0.005;
+	AAmatrix[6][16] = 0.458743;		AAmatrix[6][17] = 0.005;		AAmatrix[6][18] = 0.005;		AAmatrix[6][19] = 2.19952;
+	AAmatrix[7][0] = 1.8685;		AAmatrix[7][1] = 13.4379;		AAmatrix[7][2] = 0.0604932;		AAmatrix[7][3] = 10.3969;
+	AAmatrix[7][4] = 0.0489798;		AAmatrix[7][5] = 0.0604932;		AAmatrix[7][6] = 14.7801;		AAmatrix[7][7] = 0;
+	AAmatrix[7][8] = 0.005;			AAmatrix[7][9] = 0.005;			AAmatrix[7][10] = 0.0489798;	AAmatrix[7][11] = 0.279425;
+	AAmatrix[7][12] = 0.0489798;	AAmatrix[7][13] = 0.005;		AAmatrix[7][14] = 0.005;		AAmatrix[7][15] = 6.27966;
+	AAmatrix[7][16] = 0.0489798;	AAmatrix[7][17] = 2.8258;		AAmatrix[7][18] = 0.005;		AAmatrix[7][19] = 2.79622;
+	AAmatrix[8][0] = 0.005;			AAmatrix[8][1] = 6.84405;		AAmatrix[8][2] = 8.59876;		AAmatrix[8][3] = 2.31779;
+	AAmatrix[8][4] = 0.005;			AAmatrix[8][5] = 18.5465;		AAmatrix[8][6] = 0.005;			AAmatrix[8][7] = 0.005;
+	AAmatrix[8][8] = 0;				AAmatrix[8][9] = 0.005;			AAmatrix[8][10] = 1.76382;		AAmatrix[8][11] = 0.22406;
+	AAmatrix[8][12] = 0.005;		AAmatrix[8][13] = 0.005;		AAmatrix[8][14] = 13.9444;		AAmatrix[8][15] = 0.725157;
+	AAmatrix[8][16] = 0.95956;		AAmatrix[8][17] = 0.005;		AAmatrix[8][18] = 47.4889;		AAmatrix[8][19] = 0.827479;
+	AAmatrix[9][0] = 0.005;			AAmatrix[9][1] = 1.34069;		AAmatrix[9][2] = 0.987028;		AAmatrix[9][3] = 0.145124;
+	AAmatrix[9][4] = 0.005;			AAmatrix[9][5] = 0.0342252;		AAmatrix[9][6] = 0.0390512;		AAmatrix[9][7] = 0.005;
+	AAmatrix[9][8] = 0.005;			AAmatrix[9][9] = 0;				AAmatrix[9][10] = 9.10246;		AAmatrix[9][11] = 0.817481;
+	AAmatrix[9][12] = 17.3064;		AAmatrix[9][13] = 1.48288;		AAmatrix[9][14] = 0.005;		AAmatrix[9][15] = 0.740091;
+	AAmatrix[9][16] = 9.36345;		AAmatrix[9][17] = 0.005;		AAmatrix[9][18] = 0.114512;		AAmatrix[9][19] = 24.8231;
+	AAmatrix[10][0] = 0.16024;		AAmatrix[10][1] = 0.586757;		AAmatrix[10][2] = 0.005;		AAmatrix[10][3] = 0.005;
+	AAmatrix[10][4] = 0.005;		AAmatrix[10][5] = 2.89048;		AAmatrix[10][6] = 0.129839;		AAmatrix[10][7] = 0.0489798;
+	AAmatrix[10][8] = 1.76382;		AAmatrix[10][9] = 9.10246;		AAmatrix[10][10] = 0;			AAmatrix[10][11] = 0.005;
+	AAmatrix[10][12] = 11.3839;		AAmatrix[10][13] = 7.48781;		AAmatrix[10][14] = 9.83095;		AAmatrix[10][15] = 6.14396;
+	AAmatrix[10][16] = 0.005;		AAmatrix[10][17] = 1.37031;		AAmatrix[10][18] = 0.005;		AAmatrix[10][19] = 2.95344;
+	AAmatrix[11][0] = 0.592784;		AAmatrix[11][1] = 39.8897;		AAmatrix[11][2] = 10.6655;		AAmatrix[11][3] = 0.894313;
+	AAmatrix[11][4] = 0.005;		AAmatrix[11][5] = 13.0705;		AAmatrix[11][6] = 23.9626;		AAmatrix[11][7] = 0.279425;
+	AAmatrix[11][8] = 0.22406;		AAmatrix[11][9] = 0.817481;		AAmatrix[11][10] = 0.005;		AAmatrix[11][11] = 0;
+	AAmatrix[11][12] = 4.09564;		AAmatrix[11][13] = 0.005;		AAmatrix[11][14] = 0.111928;	AAmatrix[11][15] = 0.005;
+	AAmatrix[11][16] = 4.04802;		AAmatrix[11][17] = 0.005;		AAmatrix[11][18] = 0.005;		AAmatrix[11][19] = 0.128065;
+	AAmatrix[12][0] = 0.005;		AAmatrix[12][1] = 3.28652;		AAmatrix[12][2] = 0.201526;		AAmatrix[12][3] = 0.005;
+	AAmatrix[12][4] = 0.005;		AAmatrix[12][5] = 0.005;		AAmatrix[12][6] = 0.005;		AAmatrix[12][7] = 0.0489798;
+	AAmatrix[12][8] = 0.005;		AAmatrix[12][9] = 17.3064;		AAmatrix[12][10] = 11.3839;		AAmatrix[12][11] = 4.09564;
+	AAmatrix[12][12] = 0;			AAmatrix[12][13] = 0.005;		AAmatrix[12][14] = 0.005;		AAmatrix[12][15] = 0.392575;
+	AAmatrix[12][16] = 7.41313;		AAmatrix[12][17] = 0.005;		AAmatrix[12][18] = 0.579198;	AAmatrix[12][19] = 14.7683;
+	AAmatrix[13][0] = 0.597923;		AAmatrix[13][1] = 0.005;		AAmatrix[13][2] = 0.005;		AAmatrix[13][3] = 0.005;
+	AAmatrix[13][4] = 0.362959;		AAmatrix[13][5] = 0.005;		AAmatrix[13][6] = 0.005;		AAmatrix[13][7] = 0.005;
+	AAmatrix[13][8] = 0.005;		AAmatrix[13][9] = 1.48288;		AAmatrix[13][10] = 7.48781;		AAmatrix[13][11] = 0.005;
+	AAmatrix[13][12] = 0.005;		AAmatrix[13][13] = 0;			AAmatrix[13][14] = 0.0342252;	AAmatrix[13][15] = 4.27939;
+	AAmatrix[13][16] = 0.114512;	AAmatrix[13][17] = 0.005;		AAmatrix[13][18] = 4.12728;		AAmatrix[13][19] = 2.28;
+	AAmatrix[14][0] = 1.00981;		AAmatrix[14][1] = 0.404723;		AAmatrix[14][2] = 0.344848;		AAmatrix[14][3] = 0.005;
+	AAmatrix[14][4] = 0.005;		AAmatrix[14][5] = 3.04502;		AAmatrix[14][6] = 0.005;		AAmatrix[14][7] = 0.005;
+	AAmatrix[14][8] = 13.9444;		AAmatrix[14][9] = 0.005;		AAmatrix[14][10] = 9.83095;		AAmatrix[14][11] = 0.111928;
+	AAmatrix[14][12] = 0.005;		AAmatrix[14][13] = 0.0342252;	AAmatrix[14][14] = 0;			AAmatrix[14][15] = 14.249;
+	AAmatrix[14][16] = 4.33701;		AAmatrix[14][17] = 0.005;		AAmatrix[14][18] = 0.005;		AAmatrix[14][19] = 0.005;
+	AAmatrix[15][0] = 8.5942;		AAmatrix[15][1] = 8.35024;		AAmatrix[15][2] = 14.5699;		AAmatrix[15][3] = 0.427881;
+	AAmatrix[15][4] = 1.12195;		AAmatrix[15][5] = 0.16024;		AAmatrix[15][6] = 0.005;		AAmatrix[15][7] = 6.27966;
+	AAmatrix[15][8] = 0.725157;		AAmatrix[15][9] = 0.740091;		AAmatrix[15][10] = 6.14396;		AAmatrix[15][11] = 0.005;
+	AAmatrix[15][12] = 0.392575;	AAmatrix[15][13] = 4.27939;		AAmatrix[15][14] = 14.249;		AAmatrix[15][15] = 0;
+	AAmatrix[15][16] = 6.34079;		AAmatrix[15][17] = 1.10156;		AAmatrix[15][18] = 0.933142;	AAmatrix[15][19] = 0.862637;
+	AAmatrix[16][0] = 24.1422;		AAmatrix[16][1] = 0.928203;		AAmatrix[16][2] = 4.54206;		AAmatrix[16][3] = 0.630395;
+	AAmatrix[16][4] = 0.005;		AAmatrix[16][5] = 0.203091;		AAmatrix[16][6] = 0.458743;		AAmatrix[16][7] = 0.0489798;
+	AAmatrix[16][8] = 0.95956;		AAmatrix[16][9] = 9.36345;		AAmatrix[16][10] = 0.005;		AAmatrix[16][11] = 4.04802;
+	AAmatrix[16][12] = 7.41313;		AAmatrix[16][13] = 0.114512;	AAmatrix[16][14] = 4.33701;		AAmatrix[16][15] = 6.34079;
+	AAmatrix[16][16] = 0;			AAmatrix[16][17] = 0.005;		AAmatrix[16][18] = 0.490608;	AAmatrix[16][19] = 0.005;
+	AAmatrix[17][0] = 0.005;		AAmatrix[17][1] = 5.96564;		AAmatrix[17][2] = 0.005;		AAmatrix[17][3] = 0.005;
+	AAmatrix[17][4] = 5.49894;		AAmatrix[17][5] = 0.0443298;	AAmatrix[17][6] = 0.005;		AAmatrix[17][7] = 2.8258;
+	AAmatrix[17][8] = 0.005;		AAmatrix[17][9] = 0.005;		AAmatrix[17][10] = 1.37031;		AAmatrix[17][11] = 0.005;
+	AAmatrix[17][12] = 0.005;		AAmatrix[17][13] = 0.005;		AAmatrix[17][14] = 0.005;		AAmatrix[17][15] = 1.10156;
+	AAmatrix[17][16] = 0.005;		AAmatrix[17][17] = 0;			AAmatrix[17][18] = 0.005;		AAmatrix[17][19] = 0.005;
+	AAmatrix[18][0] = 0.005;		AAmatrix[18][1] = 0.005;		AAmatrix[18][2] = 5.06475;		AAmatrix[18][3] = 2.28154;
+	AAmatrix[18][4] = 8.34835;		AAmatrix[18][5] = 0.005;		AAmatrix[18][6] = 0.005;		AAmatrix[18][7] = 0.005;
+	AAmatrix[18][8] = 47.4889;		AAmatrix[18][9] = 0.114512;		AAmatrix[18][10] = 0.005;		AAmatrix[18][11] = 0.005;
+	AAmatrix[18][12] = 0.579198;	AAmatrix[18][13] = 4.12728;		AAmatrix[18][14] = 0.005;		AAmatrix[18][15] = 0.933142;
+	AAmatrix[18][16] = 0.490608;	AAmatrix[18][17] = 0.005;		AAmatrix[18][18] = 0;			AAmatrix[18][19] = 1.35482;
+	AAmatrix[19][0] = 24.8094;		AAmatrix[19][1] = 0.279425;		AAmatrix[19][2] = 0.0744808;	AAmatrix[19][3] = 2.91786;
+	AAmatrix[19][4] = 0.005;		AAmatrix[19][5] = 0.005;		AAmatrix[19][6] = 2.19952;		AAmatrix[19][7] = 2.79622;
+	AAmatrix[19][8] = 0.827479;		AAmatrix[19][9] = 24.8231;		AAmatrix[19][10] = 2.95344;		AAmatrix[19][11] = 0.128065;
+	AAmatrix[19][12] = 14.7683;		AAmatrix[19][13] = 2.28;		AAmatrix[19][14] = 0.005;		AAmatrix[19][15] = 0.862637;
+	AAmatrix[19][16] = 0.005;		AAmatrix[19][17] = 0.005;		AAmatrix[19][18] = 1.35482;		AAmatrix[19][19] = 0;
 
 	AAPi[0] = 0.0377494;
 	AAPi[1] = 0.057321;
@@ -3176,7 +3176,7 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	else {cout<<"ERROR IN AMINO ACID MODEL NUMBER IN SETAARATES"<<endl; }
 
 
-	// now, check that the matrices are symmetrical 
+	// now, check that the matrices are symmetrical
 	for (i=0; i<20; i++)
 		{
 		for (j=i+1; j<20; j++)
@@ -3188,7 +3188,7 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 				{
 					string errorout="ERROR: ";
 
-				
+
 					if(modelnumber==0)  errorout+="Poisson model ";
 					else if(modelnumber==1)  errorout+="Jones model ";
 					else if(modelnumber==2)  errorout+="Jones - DCMUT model ";
@@ -3206,7 +3206,7 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 					else if(modelnumber==14) errorout+="HIVb model ";
 					else if(modelnumber==15) errorout+="HIVw model ";
 					//else if(modelnumber==16) errorout+="User-defined PROTEIN model ";
-				
+
 
 					errorout+="is not symmetrical.";
 
@@ -3236,15 +3236,15 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 	}
 
 
-	// rescale stationary frequencies, to make certain they sum to 1.0 
+	// rescale stationary frequencies, to make certain they sum to 1.0
 	double sum = 0.0;
 	for (i=0; i<20; i++) sum += basefreqs.at(i); //cout<<basefreqs.at(i)<<" ";} cout<<endl;
 	if(sum!=1) for (i=0; i<20; i++) basefreqs.at(i) /= sum;
 
-	// multiply entries by stationary frequencies 
+	// multiply entries by stationary frequencies
 	for (i=0; i<20; i++) for (j=0; j<20; j++) (blah.at(i)).at(j) *= basefreqs.at(j);
-			
-	// rescale, so branch lengths are in terms of expected number of substitutions per site 
+
+	// rescale, so branch lengths are in terms of expected number of substitutions per site
 	double scaler = 0.0;
 	for (i=0; i<20; i++)
 	{
@@ -3255,7 +3255,7 @@ vector<vector<double> > getAA( string name, vector<double> params, vector<double
 		}
 	}
 	scaler = 1.0 / scaler;
-	
+
 
 	for (i=0; i<20; i++) for (j=0; j<20; j++) (blah.at(i)).at(j) *= scaler;
 
@@ -3353,8 +3353,8 @@ vector<vector<double> > getECMr()
 		{0.022103,0.021383,0.016387,0.015425,0.01188,0.011131,0.00975,0.008956,0.015965,0.015782,0,0,0.006025,0.007029,0,0.01188,0.014467,0.017386,0.0076,0.028839,0.010007,0.0101,0.010642,0.011843,0.011097,0.011703,0.016076,0.020211,0.008311,0.014148,0.0048,0.007837,0.025576,0.023441,0.013551,0.020102,0.013424,0.020201,0.015528,0.012142,0.023006,0.020171,0.030001,0.026344,0.010142,0.011679,0.010372,0.008195,0.019047,0.018938,0.010901,0.022747,0.019005,0.028307,0.015908,0.018853,0.028198,0.024532,0.033223,0.031878,0.016852,0.022982,0.015796,0.010191};
 
 
-		if(basefreqs.empty()) for(int gv3=0; gv3<64; gv3++) basefreqs.push_back(ECMrestPi[gv3]); 
-			
+		if(basefreqs.empty()) for(int gv3=0; gv3<64; gv3++) basefreqs.push_back(ECMrestPi[gv3]);
+
 		for(int gv1=0; gv1<64; gv1++) {row.clear(); {for(int gv2=0; gv2<64; gv2++) row.push_back(ECMrestQ[gv1][gv2]);} myQvec.push_back(row);}
 
 		return myQvec;
@@ -3362,11 +3362,11 @@ vector<vector<double> > getECMr()
 
 vector<vector<double> > getECMu()
 {
-	
+
 	/*
 		Kosiol, C., Holmes, I. and Goldman, N. (2007) An Empirical Codon Model for Protein Sequence Evolution.  Molecular Biology and Evolution 24(7): 1464-1479.
 
-		Empirical codon substitution model where doublet and triplet substitutions are allowed as well 
+		Empirical codon substitution model where doublet and triplet substitutions are allowed as well
 	*/
 	vector<vector<double> > myQvec;
 	vector<double> row;
@@ -3440,8 +3440,8 @@ vector<vector<double> > getECMu()
 		double ECMunrestPi[64]=
 		{0.021414,0.021349,0.016195,0.015717,0.011798,0.010761,0.010366,0.008721,0.017237,0.016697,0,0,0.006441,0.007415,0,0.012744,0.015167,0.016798,0.007359,0.028497,0.010425,0.010408,0.011165,0.012199,0.010671,0.01104,0.017168,0.02073,0.008491,0.014604,0.004809,0.008158,0.024759,0.023762,0.012814,0.02118,0.012656,0.017882,0.01312,0.010682,0.022276,0.020321,0.03109,0.026699,0.01031,0.013701,0.009746,0.006788,0.01902,0.018419,0.010921,0.022626,0.018907,0.026817,0.016516,0.018288,0.02859,0.025285,0.034527,0.030606,0.016883,0.023659,0.016386,0.010223};
 
-		if(basefreqs.empty()) for(int gv3=0; gv3<64; gv3++) basefreqs.push_back(ECMunrestPi[gv3]); 
-			
+		if(basefreqs.empty()) for(int gv3=0; gv3<64; gv3++) basefreqs.push_back(ECMunrestPi[gv3]);
+
 		for(int gv1=0; gv1<64; gv1++) {row.clear(); {for(int gv2=0; gv2<64; gv2++) row.push_back(ECMunrestQ[gv1][gv2]);} myQvec.push_back(row);}
 
 		return myQvec;
@@ -3466,81 +3466,81 @@ vector<vector<double> > getCOD(string &name, vector<double> &basefreqs, int mymo
 		{
 			int xcodonNumber  = (xh1<<4)+(xh2<<2)+xh3; //getCodonNumber2(xh1,xh2,xh3);
 			int ycodonNumber  = (yh1<<4)+(yh2<<2)+yh3; //getCodonNumber2(yh1,yh2,yh3);
- 
+
 			double matrixrate=0;
- 
+
 			char xcodon=GeneticCodeTable[geneticcode][xcodonNumber];
 			char ycodon=GeneticCodeTable[geneticcode][ycodonNumber];
 
 		    if(xcodon!='*' && ycodon!='*')
-			{				
+			{
 				if(yh1==xh1 && yh2==xh2 && yh3==xh3) matrixrate=0;
 
-				else 
+				else
 				if(yh1==xh1 && yh2==xh2)
 				{
-					if(xcodon!=ycodon) matrixrate=omega; else matrixrate=1; 
+					if(xcodon!=ycodon) matrixrate=omega; else matrixrate=1;
 //	 				if( (yh3==0 && xh3==1) || (yh3==1 && xh3==0) || (yh3==3 && xh3==2) || (yh3==2 && xh3==3) )  matrixrate*=kappa;
-					if((yh3+xh3-1)*(yh3+xh3-5)==0)  matrixrate*=kappa;  
+					if((yh3+xh3-1)*(yh3+xh3-5)==0)  matrixrate*=kappa;
 				}
 				else if(yh1==xh1 && yh3==xh3)
 				{
-					if(xcodon!=ycodon) matrixrate=omega; else matrixrate=1; 
+					if(xcodon!=ycodon) matrixrate=omega; else matrixrate=1;
 //					if( (yh2==0 && xh2==1) || (yh2==1 && xh2==0) || (yh2==3 && xh2==2) || (yh2==2 && xh2==3) )  matrixrate*=kappa;
-					if((yh2+xh2-1)*(yh2+xh2-5)==0)  matrixrate*=kappa;  
+					if((yh2+xh2-1)*(yh2+xh2-5)==0)  matrixrate*=kappa;
 				}
-				else if(yh2==xh2 && yh3==xh3) 
+				else if(yh2==xh2 && yh3==xh3)
 				{
-					if(xcodon!=ycodon) matrixrate=omega; else matrixrate=1; 
+					if(xcodon!=ycodon) matrixrate=omega; else matrixrate=1;
 //	 				if( (yh1==0 && xh1==1) || (yh1==1 && xh1==0) || (yh1==3 && xh1==2) || (yh1==2 && xh1==3) )  matrixrate*=kappa;
-					if((yh1+xh1-1)*(yh1+xh1-5)==0)  matrixrate*=kappa;  
+					if((yh1+xh1-1)*(yh1+xh1-5)==0)  matrixrate*=kappa;
 				}
 			}
-			//else cout<<xcodon<<" "<<ycodon<<"     ";   
-			
+			//else cout<<xcodon<<" "<<ycodon<<"     ";
+
 			row.push_back(matrixrate);
 			}}} // end of second for triple
 
 		myQvec.push_back(row);
 		row.clear();
 		}}} // end of first for triple
-		
 
-		
+
+
 
 
 
 		/*
-		// checks that the matrices are symmetrical 
+		// checks that the matrices are symmetrical
 		for ( i=0; i<64; i++)
 		{						CPi[i]=mybasefreqs.at(i);
 		for (j=i+1; j<64; j++)
-		{ 
+		{
 			diff = Cmatrix[i][j] - Cmatrix[j][i];
 			if (diff < 0.0)
 				diff = -diff;
-			if (diff > 0.001)  
+			if (diff > 0.001)
 				if(ECMrest)cout<<" ERROR: ECMrestCodon model is not symmetrical before frequencies.\n";
 				else if(ECMunrest)cout<<" ERROR: ECMunrest Codon model is not symmetrical before frequencies.\n";
 				else cout<<" ERROR: User Codon model is not symmetrical before frequencies.\n";
-				
-				
+
+
 			}
 		}
 		*/
 
 		int i,j;
-		// rescale stationary frequencies, to make certain they sum to 1.0 
+		// rescale stationary frequencies, to make certain they sum to 1.0
 		double sum = 0.0;
 		for (i=0; i<64; i++) sum += basefreqs.at(i); //cout<<basefreqs.at(i)<<" ";} cout<<endl;
 		if(sum!=1) for (i=0; i<64; i++) basefreqs.at(i) /= sum;
-			
-		
-		// multiply entries by stationary frequencies 
-		for (i=0; i<64; i++) for (j=0; j<64; j++) (myQvec.at(i)).at(j) *= basefreqs.at(j);
-		
 
-		// rescale, so branch lengths are in terms of expected number of substitutions per site 
+
+		// multiply entries by stationary frequencies
+		for (i=0; i<64; i++) for (j=0; j<64; j++) (myQvec.at(i)).at(j) *= basefreqs.at(j);
+
+
+		// rescale, so branch lengths are in terms of expected number of substitutions per site
 		double scaler = 0.0;
 		for ( i=0; i<64; i++)
 		{
@@ -3553,7 +3553,7 @@ vector<vector<double> > getCOD(string &name, vector<double> &basefreqs, int mymo
 
 		//set diagonal of matrix
 		for( i=0; i<64; i++) {sum=0; for(j=0; j<64; j++) if(i!=j) sum+=(myQvec.at(i)).at(j); (myQvec.at(i)).at(i)=-sum; }
-		
+
 		scalefactors.push_back(scaler);
 
 	return myQvec;
@@ -3569,7 +3569,7 @@ vector<vector<double> > getCOD(string &name, vector<double> &basefreqs, int mymo
 ///////////////////
 /*
 double main(int argc, char* argv[])
-{	
+{
 
 	return 0;
 }

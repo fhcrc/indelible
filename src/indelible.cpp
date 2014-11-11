@@ -1,16 +1,16 @@
 // Please uncomment this line if compiling source code on Windows machine
 // #define WINDOWS
 
-/* 
+/*
    INDELible V1.03
     "A comprehensive and flexible simulator of molecular sequence evolution"
     Copyright (C) 2009 William Fletcher
- 
+
     If using this software please cite the following reference:
 
-    Fletcher, W. and Yang, Z. 2009. 
-	"INDELible: a flexible simulator of biological sequence evolution." 
-	Mol. Biol. and Evol. (submitted on Friday 13th March 2009). 
+    Fletcher, W. and Yang, Z. 2009.
+	"INDELible: a flexible simulator of biological sequence evolution."
+	Mol. Biol. and Evol. (submitted on Friday 13th March 2009).
 
     If you need to contact me with any queries, questions, problems or (god-forbid) bugs
     then please go to http://abacus.gene.ucl.ac.uk/software/indelible/bug.php
@@ -33,7 +33,7 @@
 
 //#define printoverrideok  // this allows the use of the same filename for different blocks
 
-//if(globalthisrep==6877+1 || globalthisrep==5775+1) 
+//if(globalthisrep==6877+1 || globalthisrep==5775+1)
 //#define printrepstoscreen	// just prints reps to screen
 
 //#define inheritancycheck	// used to check if inheritancy of insertions is correct, needs
@@ -41,12 +41,12 @@
 //#define checkingindelsubs1
 //#define checkingindelsubs2
 //#define checkingindelsubs3
- 
+
 //#define checkingindelsininsertions
 
 //#define myevolvedebugger	// used to check if insertions work and evolve correctly
 int	fixedsize		= 3;	// fixed size of indels if inheritancy check is used.
-//#define fixedindels	
+//#define fixedindels
 
 
 //#define checkindeldistributions	// used to check whether indel length distributions are consistent.
@@ -104,17 +104,17 @@ int inspinvcount, corepinvcount;
    clock_t start, finish;
    double  duration;
 
- // Measure the duration of an event. 
+ // Measure the duration of an event.
    printf( "Time to do %ld empty loops is ", i );
    start = clock();
-   while( i-- ) 
+   while( i-- )
       ;
    finish = clock();
    duration = (double)(finish - start) / CLOCKS_PER_SEC;
    printf( "%2.1f seconds\n", duration );
 */
 #include <iostream>
-#include <iomanip> 
+#include <iomanip>
 #include <fstream>
 #include <time.h>
 #include <string>
@@ -175,8 +175,8 @@ public:
 	int siteclass;		// site class for site, used for codon site-models or discrete gamma
 	double subrate;		// substitution rate for site that depends on state held in base (for method 2)
 	double timeleft;	// if an insertion occurs at distance x into branch of length y then timeleft = y - x
-						// used by method 1 to distinguish from sites that were inserted on different branches 
-						
+						// used by method 1 to distinguish from sites that were inserted on different branches
+
 	site (int b, double ra, int si, double r, double t)
 	{
 		base=b;
@@ -191,9 +191,9 @@ class insert
 {
 	// every site k in the core sequence has an instance of "insert" i_k say
 	// that mirrors it to hold information about inserted sequences.
-	
+
 public:
-	vector<site> insertvec; // all sites that are inserted after core position k are stored here 
+	vector<site> insertvec; // all sites that are inserted after core position k are stored here
 	int length;				// number of sites in insertvec
 	double subrate;			// total substitution rate for all sites in insertvec
 
@@ -205,7 +205,7 @@ public:
 	}
 };
 
-	
+
 class SUMS
 {
 	// an instance of SUMS is used in every simulation.
@@ -331,7 +331,7 @@ public:
 
 class RATES
 {
-	// an instance of RATES is used in each simulation to track and store changes in 
+	// an instance of RATES is used in each simulation to track and store changes in
 	// substitution, insertion and deletion rates for inserted sites and core sites.
 	// the total rate is used to generate exponential waiting times
 	// the other rates are used to choose between different types of event, and
@@ -347,12 +347,12 @@ public:
 	double inssubrate;		// total substitution rate for all inserted sites
 	double insinsertrate;	// total insertion rate for all inserted sites
 	double insdeleterate;	// total deletion rate for all inserted sites
-	
+
 	// at the root inslength = 0, and the others all equal the root length specified.
-	int rootlength;			// 
+	int rootlength;			//
 	int corelength;			// this starts as rootlength but decreases with every core site deleted
-	int inslength;			// 
-	int totallength;		// 
+	int inslength;			//
+	int totallength;		//
 	int partitionlength;	// ... fill in later.
 
 	RATES()
@@ -396,7 +396,7 @@ bool weareon;
 #ifdef checksitesclass
 ofstream gout("g.txt");
 #endif
-				
+
 model* m;
 siteclass* s;
 branchclass* b;
@@ -406,9 +406,9 @@ Tree* treeC;
 
 void changezipfrandoms()
 {
-		Zq1=(*m).q1;  
+		Zq1=(*m).q1;
 		Zq2=(*m).q2 ;
-		ZHx0=(*m).Hx0; 
+		ZHx0=(*m).Hx0;
 		Zs=(*m).s ;
 		ZHimax=(*m).Himax;
 }
@@ -417,13 +417,13 @@ vector<vector<int> >	 insPOS;				// for use inside TinsPOS
 vector<vector<int> >	 sequencesINT;			// for use inside TsequencesINT
 vector<vector<insert> >  insINT;				// for use inside TinsINT
 
-vector<vector<vector<int> > >  TinsPOS;			// holds *all* inserted site position information in a block.  
-vector<vector<vector<int> > >  TsequencesINT;	// holds *all* core sequence information in a block.  
+vector<vector<vector<int> > >  TinsPOS;			// holds *all* inserted site position information in a block.
+vector<vector<vector<int> > >  TsequencesINT;	// holds *all* core sequence information in a block.
 												// outside vector is for each partition
 												// middle vector is positions for each node on the tree for the partition
 												// internal vector is actual sequence information.
 
-vector<vector<vector<insert> > >  TinsINT;		// holds *all* core insertion information in a block.  
+vector<vector<vector<insert> > >  TinsINT;		// holds *all* core insertion information in a block.
 												// outside vector is for each partition
 												// middle vector is positions for each node on the tree for the partition
 												// internal vector represents insertion information positions of insertions relative to core.
@@ -437,13 +437,13 @@ vector<vector<double> > JVec;
 vector<double> Csitefreqs;
 
 // to store codon model information from control file
-vector<vector<double> > codoninfo; 
+vector<vector<double> > codoninfo;
 
 // vector of jump matrices for each site class
-vector<vector<vector<double> > > matrixJVsites;	
+vector<vector<vector<double> > > matrixJVsites;
 
 // vector of different matrixJVsites for each branch category
-vector<vector<vector<vector<double> > > > matrixJVbranches;	
+vector<vector<vector<vector<double> > > > matrixJVbranches;
 
 vector<double>  GDfreq;			// used in gamma rate variation
 vector<double>  GDrates;		// used in gamma rate variation
@@ -461,7 +461,7 @@ string		VersionNumber="1.03";
 int linecount		= 0;	// used to identify the line in the control file where an error occurs
 int deletionlength	= 0;	// tracks number of bases needing to be deleted when switching between core sequence and insertions
 
-//int breakonerror	= 1;	// should be left as 1 unless debugging		
+//int breakonerror	= 1;	// should be left as 1 unless debugging
 
 vector<double> defaultAAbasefreqs,  AAbasefreqs;	// Protein base frequencies vectors
 vector<double> defaultDNAbasefreqs, DNAbasefreqs;	// DNA base frequencies vectors
@@ -507,7 +507,7 @@ vector<string> partonetaxanames;			// this stores the real taxon names and inter
 											// - and to make sure that the total number of taxa/taxa names is same across partitions
 vector<vector< string> > commandblocks;		// this will store the command blocks in total, as read from the control file
 
-	int NgamCAT;			// Number of categories for the discrete gamma rate variation 
+	int NgamCAT;			// Number of categories for the discrete gamma rate variation
 	int medianORmean;		// 1 = use medians, 0 = use means, to represent categories in discrete gamma rate variation
 	int rootlength;			// length of root sequence to be created or when given.
 	int reps;				// number of repetitions
@@ -551,14 +551,14 @@ vector<vector< string> > commandblocks;		// this will store the command blocks i
 	double currenttreelength;	// amount of treelength in a given repetition that has been completed
 	double treelength;			// total treelength to be evolved in a given repetition, used with currenttreelength to calculate percentage complete.
 
-	string filenamestub;		// this is a unique file name for every block appended with the repetition number for the output files	
+	string filenamestub;		// this is a unique file name for every block appended with the repetition number for the output files
 	string paupblockname;		// filename for paupblock.
 	string nonamestree;			// all used in tree manipulation.
 	string origtreewithnodes;
 	string nonamestreewithnodes;
 	string workingtree;
 	string guidetree;
-	
+
 //	vector<double> ratevec;				// Used to store information on continuous/discrete gamme rate variation, & proportion of invariant sites
 	vector<double> usermodel;			// Used for user-defined Amino Acid substitution model
 //	vector<double> rootbasefreqs;		// base frequencies used to create root sequence if not using model base frequencies
@@ -571,7 +571,7 @@ vector<vector< string> > commandblocks;		// this will store the command blocks i
 
 	double codonrate[3]={1,1,1};
 
-	
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 double smalldiff=0.0000000001;  //for comparing floating point values
@@ -592,8 +592,8 @@ void printtitle(ofstream &LOG, string &title)
 	LOG<<endl;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-void format(string &tss, string &css, string &ass, string &gss, double t, double c, double a, double g) 
+
+void format(string &tss, string &css, string &ass, string &gss, double t, double c, double a, double g)
 {
 
 /*
@@ -607,30 +607,30 @@ string format(double Value, int nPrecision)
 */
 
 
-	stringstream ts,cs,as,gs; 
+	stringstream ts,cs,as,gs;
 //	int maxsize;
 
 	if(t==1.0) tss="1.0"; else if(t==0.0) tss="0.0"; else {ts<<t; ts.width(6); tss=ts.str(); }//cout<<tss<<endl;}
 	if(c==1.0) css="1.0"; else if(c==0.0) css="0.0"; else {cs<<c; cs.width(6); css=cs.str(); }//cout<<css<<endl;}
 	if(a==1.0) ass="1.0"; else if(a==0.0) ass="0.0"; else {as<<a; as.width(6); ass=as.str(); }//cout<<ass<<endl;}
 	if(g==1.0) gss="1.0"; else if(g==0.0) gss="0.0"; else {gs<<g; gs.width(6); gss=gs.str(); }//cout<<gss<<endl;}
-		
+
 
 /*
-	stringstream ts,cs,as,gs; 
+	stringstream ts,cs,as,gs;
 	int maxsize;
 
 	if(t==1.0) tss="1.0"; else if(t==0.0) tss="0.0"; else {ts<<t; tss=ts.str(); maxsize=tss.size();                         }//cout<<tss<<endl;}
 	if(c==1.0) css="1.0"; else if(c==0.0) css="0.0"; else {cs<<c; css=cs.str(); if(maxsize<css.size()) maxsize=css.size();  }//cout<<css<<endl;}
 	if(a==1.0) ass="1.0"; else if(a==0.0) ass="0.0"; else {as<<a; ass=as.str(); if(maxsize<ass.size()) maxsize=ass.size();  }//cout<<ass<<endl;}
 	if(g==1.0) gss="1.0"; else if(g==0.0) gss="0.0"; else {gs<<g; gss=gs.str(); if(maxsize<gss.size()) maxsize=gss.size();  }//cout<<gss<<endl;}
-		
-	for(int jh1=0; jh1<maxsize+1; jh1++) 
+
+	for(int jh1=0; jh1<maxsize+1; jh1++)
 	{
-		if(jh1>tss.size()) tss+="0"; 
-		if(jh1>css.size()) css+="0"; 
-		if(jh1>ass.size()) ass+="0"; 
-		if(jh1>gss.size()) gss+="0"; 
+		if(jh1>tss.size()) tss+="0";
+		if(jh1>css.size()) css+="0";
+		if(jh1>ass.size()) ass+="0";
+		if(jh1>gss.size()) gss+="0";
 	}
 */
 }
@@ -653,11 +653,11 @@ void chooseNEWbase(int &newbase,  vector<double> JVecRow)
 
 
 int returnNewSiteClass(/*vector<int> &siteclasscount, */ vector<double> siteprops, int po)
-{	
-	if(siteprops.empty())  {cout<<endl<<endl<<"ERROR 1 in returnNEWsiteClass"<<endl<<endl; return 0;} 
+{
+	if(siteprops.empty())  {cout<<endl<<endl<<"ERROR 1 in returnNEWsiteClass"<<endl<<endl; return 0;}
 	double rand=mtrand1(); //cout<<rate
 	int siteclass=-1;
-	for(int i1=0; i1<siteprops.size(); i1++) 
+	for(int i1=0; i1<siteprops.size(); i1++)
 	{
 		if(rand<siteprops.at(i1)) {siteclass=i1; break;}
 	}
@@ -665,7 +665,7 @@ int returnNewSiteClass(/*vector<int> &siteclasscount, */ vector<double> siteprop
 	if(siteclass==-1) cout<<endl<<endl<<"ERROR 2 in returnNEWsiteClass"<<endl<<endl;
 
 	//(siteclasscount.at(siteclass))++;
-	
+
 	//if(po<50) cout<<po<<"  "<<siteclass<<endl;
 	return siteclass;
 }
@@ -679,11 +679,11 @@ double returnNewSiteRate(int pos)
 
 	if(type==3)
 	{
-		//if(!sites) rate=1; else for(int gv1=0; gv1<Csitefreqs.size(); gv1++) if(mtrand1()<Csitefreqs.at(gv1)) rate=gv1; 
-		//for(int i1a=0; i1a<((*m).codoncatfreqs).size(); i1a++) cout<<((*m).codoncatfreqs).at(i1a)<<" "; cout<<endl; 
-		
+		//if(!sites) rate=1; else for(int gv1=0; gv1<Csitefreqs.size(); gv1++) if(mtrand1()<Csitefreqs.at(gv1)) rate=gv1;
+		//for(int i1a=0; i1a<((*m).codoncatfreqs).size(); i1a++) cout<<((*m).codoncatfreqs).at(i1a)<<" "; cout<<endl;
+
 		rate=mtrand1(); //cout<<rate;
-		for(int i1=0; i1<((*m).cumfreqs).size(); i1++) 
+		for(int i1=0; i1<((*m).cumfreqs).size(); i1++)
 		{
 			if(rate<((*m).cumfreqs).at(i1)) {rate=i1; break;}
 
@@ -692,7 +692,7 @@ double returnNewSiteRate(int pos)
 
 		return rate;
 	}
-	
+
 	double multiplier=1;
 	if(type==1)
 	{
@@ -704,20 +704,20 @@ double returnNewSiteRate(int pos)
 		//cout<<"Q"<<endl;
 		//if(pos<50)	cout<<"multiplier "<<"  "<<pos<<"  "<<codonpos<<"  "<<multiplier<<endl;
 	}
-	if(codonrates) 
+	if(codonrates)
 	{
-		
+
 	}
 	else if((*m).alpha==0 && (*m).pinv==0)   // no gamma, no codon rates, no proportion invariant
 	{
 		// constant rates across whole sequence
 		rate=multiplier;
 	}
-	///////////////////////////	
+	///////////////////////////
 	else  // proportion invariant with either no gamma, discrete gamma, or continuous gamma
 	{
-		if((*m).alpha==0) 
-		{		
+		if((*m).alpha==0)
+		{
 			//this is proportion invariant
 			if(mtrand1()<(*m).pinv) rate=0; else rate=multiplier/(1- ((*m).pinv) );
 		}
@@ -729,7 +729,7 @@ double returnNewSiteRate(int pos)
 		else if((*m).alpha>0 && (*m).ngamcat>0)
 		{
 			//Discrete Gamma + Proportion invariant
-			
+
 			if(mtrand1()>(*m).pinv)  rate=GDrates.at( (int)( mtrand1() * ((*m).ngamcat) ) )/(1-((*m).pinv));  else rate=0;
 
 		}
@@ -744,26 +744,26 @@ double returnNewSiteRate(int pos)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double returnsitesubrate(double rate, int siteclass, int currentbase)
 {
-	
-	
-	if(type==3)	return ( ( (*m).myratesvec).at(siteclass) ).at( currentbase ); 
 
-	else		return rate * (((*m).myrates).at(currentbase)); 
+
+	if(type==3)	return ( ( (*m).myratesvec).at(siteclass) ).at( currentbase );
+
+	else		return rate * (((*m).myrates).at(currentbase));
 
 //	cout<<"X"<<endl;
 //	if(type==3)	{cout<<"Y"<<endl; return ( ( (*m).myratesvec).at(siteclass) ).at( currentbase ); }
 //
 //	else		{cout<<"Z "<<((*m).myrates).size()<<"  "<<currentbase<<endl; return rate * (((*m).myrates).at(currentbase)); }
-		
+
 }
 
 int returnsiteclass()
 {
 	int i1;
 
-	double rate=mtrand1(); 
-				
-	for(i1=0; i1<((*m).cumfreqs).size(); i1++) 
+	double rate=mtrand1();
+
+	for(i1=0; i1<((*m).cumfreqs).size(); i1++)
 	{
 		if(rate<=((*m).cumfreqs).at(i1)) break; //{ ratevec.push_back(i1);   break;}
 	}
@@ -773,18 +773,18 @@ int returnsiteclass()
 }
 double returnsiterate(int &rateclass, bool core)
 {
-	if((*m).continuousgamma) 
+	if((*m).continuousgamma)
 	{
 		double rand=mtrand1();
 
 		rateclass=0;
 
-		if(rand<(*m).pinv) {if(core) corepinvcount++; else inspinvcount++; return 0;} 
+		if(rand<(*m).pinv) {if(core) corepinvcount++; else inspinvcount++; return 0;}
 
 		else return rndgamma(  ((*m).alpha)  )/(  ((*m).alpha)* (1- ((*m).pinv) )  ) ;
 	}
-	else {rateclass=returnsiteclass(); 	double myrate=((*m).Rrates).at(rateclass); 
-	
+	else {rateclass=returnsiteclass(); 	double myrate=((*m).Rrates).at(rateclass);
+
 
 	if(myrate==0) {if(core) corepinvcount++; else inspinvcount++;} return myrate; }
 
@@ -799,29 +799,29 @@ void SetSiteRates2(RATES &rates, string name, int repnumber, int mysize)
 //	if(oldmethod)
 //	{
 //		if(type==3) for(int t1=0; t1<rates.rootlength; t1++) {siteclassvec.push_back(returnsiteclass()); ratevec.push_back(0);}
-		
+
 //		else for(int t1=0; t1<rates.rootlength; t1++) {int myclass; ratevec.push_back(returnsiterate(myclass,true)); siteclassvec.push_back(0);}
 //	}
 //	else
 //	{
-		if(type==3) 
+		if(type==3)
 		{
 			if(fixtrueproportions)
 			{
 				// this option was just for me to use in one of my papers.
-				siteclassvec.push_back(0);		
+				siteclassvec.push_back(0);
 				for(int x=0; x<10; x++) for(int y=0; y<20; y++) siteclassvec.push_back(x);
 
-				for(int t1=0; t1<rates.rootlength; t1++) 
+				for(int t1=0; t1<rates.rootlength; t1++)
 				{
-				//	siteclassvec.push_back(returnsiteclass2()); 
+				//	siteclassvec.push_back(returnsiteclass2());
 					ratevec.push_back(0);
 				}
 				cout<<rates.rootlength<<"  "<<ratevec.size()<<"  "<<siteclassvec.size()<<endl;
 			}
 			else for(int t1=0; t1<rates.rootlength; t1++) {siteclassvec.push_back(returnsiteclass()); ratevec.push_back(0);}
 		}
-		
+
 		else for(int t1=0; t1<rates.rootlength; t1++) {int myclass; ratevec.push_back(returnsiterate(myclass,true)); siteclassvec.push_back(myclass);}
 
 //	}
@@ -841,7 +841,7 @@ void SetSiteRates2(RATES &rates, string name, int repnumber, int mysize)
 
 vector<double> makecumfreqs(vector<double> basefreqs)
 {
-	vector<double> boundaries; 
+	vector<double> boundaries;
 	double s=0;
 	for(int yh=0; yh<basefreqs.size(); yh++) {s+=basefreqs.at(yh); /*cout<<"  W "<<basefreqs.at(yh)<<"  A  "<<s<<endl;*/ boundaries.push_back(s);}
 
@@ -860,35 +860,35 @@ void makeseq2(int length,  vector<site> &myseq, double &sdiff, double timeleft)
 	vector<double> boundaries2;
 
 	boundaries2=makecumfreqs((*m).insertfreqs);
-	
+
 	for(int yh2=0; yh2<length; yh2++)
-	{	
-		myrand=mtrand1(); 
+	{
+		myrand=mtrand1();
 		bool wearenotdone=true;
-	
-		for(int yh3=0; yh3<boundaries2.size(); yh3++) if(myrand<=boundaries2.at(yh3) ) 
-		{			
+
+		for(int yh3=0; yh3<boundaries2.size(); yh3++) if(myrand<=boundaries2.at(yh3) )
+		{
 			wearenotdone=false;
 
 			double rate=-1; int siteclass=-1;
-			
+
 			if(type==3) siteclass=returnsiteclass(); else rate=returnsiterate(siteclass, false);
 
 			double sitesubrate; if(oldmethod) {sitesubrate=returnsitesubrate(rate, siteclass,yh3); sdiff+=sitesubrate;}
 
 			#ifndef myevolvedebugger
 
-			myseq.push_back(    site( yh3, rate, siteclass, sitesubrate, timeleft )    ); 
-			
+			myseq.push_back(    site( yh3, rate, siteclass, sitesubrate, timeleft )    );
+
 			#else
-			
-			myseq.push_back(    site( 81, rate, siteclass, sitesubrate, timeleft )    ); 
+
+			myseq.push_back(    site( 81, rate, siteclass, sitesubrate, timeleft )    );
 
 			#endif
-			
+
 			break;
 
-		} 
+		}
 		if(wearenotdone) cout<<"NO BASE PICKED in makeseq2, last boundaries was "<<boundaries2.back()<<" myrand was "<<myrand<<" sdiff is "<<sdiff<<endl;
 	}
 }
@@ -902,7 +902,7 @@ void makeseq(int length2,  vector<int> &myseq)
 
 	int length=length2-1;
 
-	vector<double> boundaries2;	
+	vector<double> boundaries2;
 //	cout<<boundaries2.size()<<endl;
 	if(isitbranches)	boundaries2=makecumfreqs((*b).rootbasefreqs);
 	else				boundaries2=makecumfreqs((*m).rootbasefreqs);
@@ -911,21 +911,21 @@ void makeseq(int length2,  vector<int> &myseq)
 	myseq.push_back(-1);
 //	cout<<"LLL "<<length2<<" "<<length<<endl;
 	for(int yh2=0; yh2<length; yh2++)
-	{	
-		myrand=mtrand1(); 
+	{
+		myrand=mtrand1();
 
-		for(int yh3=0; yh3<boundaries2.size(); yh3++) 
+		for(int yh3=0; yh3<boundaries2.size(); yh3++)
 		{
 			//cout<<"X "<<boundaries2.at(yh3)<<endl;
-			if( myrand<=boundaries2.at(yh3)) 
+			if( myrand<=boundaries2.at(yh3))
 			{
-			
+
 				//cout<<boundaries2.at(yh3)<<endl;
 				myseq.push_back(yh3); break;
-				
-			} 
+
+			}
 		}
-		
+
 	}
 
 
@@ -941,9 +941,9 @@ vector<double> getbasefreqs(vector<int> &seq)
 	int mymax=4;
 	if(type==2) mymax=20;
 	if(type==3) mymax=64;
-	
+
 	basefreqs.assign(mymax,0);
-	for(int y2=1; y2<seq.size(); y2++) basefreqs.at(seq.at(y2))++; 
+	for(int y2=1; y2<seq.size(); y2++) basefreqs.at(seq.at(y2))++;
 	for(int y3=0; y3<mymax;      y3++) basefreqs.at(y3)/=seq.size();
 
 	return basefreqs;
@@ -958,8 +958,8 @@ void fromprintseq(vector<string> &seq, vector<int> &myseq)
 
 	vector<string> myletters, myletters2;
 	int mysize;
-	
-	if(type==1) 
+
+	if(type==1)
 	{
 		mysize=4;
 		myletters=myDUletters;
@@ -974,19 +974,19 @@ void fromprintseq(vector<string> &seq, vector<int> &myseq)
 	else cout<<"error in fromprintseq"<<endl;
 
 
-	for(int gv1=0; gv1<seq.size(); gv1++) 
+	for(int gv1=0; gv1<seq.size(); gv1++)
 	{
 		string bb=seq.at(gv1);
 		int minimatch=-1;
-		
+
 		for(int gv3=0; gv3<myletters.size(); gv3++) { if(bb==myletters.at(gv3)) {minimatch=gv3; break;} }
-	
+
 		if(minimatch==-1) for(int gv4=0; gv4<myletters2.size(); gv4++) { if(bb==myletters2.at(gv4)) {minimatch=gv4; break;} }
 
 		if(minimatch==-1) {cout<<"ERROR in fromprintseq"<<endl<<" ";} else{myseq.push_back(minimatch);}
-	
+
 	}
-		
+
 }
 
 
@@ -1002,10 +1002,10 @@ string nowhitespace(string guidetree)
 	for(int ghy11=0; ghy11<guidetree.size(); ghy11++)
 	{
 		// get rid of white space in tree
-		c=guidetree[ghy11]; 
-		if(c!=' ') guidetree2S+=c; 
-		
-		if(c==')') bracketright++; 
+		c=guidetree[ghy11];
+		if(c!=' ') guidetree2S+=c;
+
+		if(c==')') bracketright++;
 		if(c=='(') bracketleft++;
 	}
 
@@ -1018,7 +1018,7 @@ return guidetree2S;
 int gettaxanames(int partitionnumber, string guidetree, vector<string> &taxanames)
 {
 	// called from the settreeup function
-  
+
 	// gets taxon names from guide tree and puts into vector
 	// also truncates filenames to 10 characters if output in Phylip truncated is chosen
 	// final vector entry is tree with the label integer n replacing taxon name placed in nth position of taxanames vector
@@ -1034,48 +1034,48 @@ int gettaxanames(int partitionnumber, string guidetree, vector<string> &taxaname
 		if(taxanameon==0) {if( c2=='(' || c2==',') {if(c1!='('){ taxanameon=1; taxaname="";}}}
 		if(taxanameon==1 && c1==':') {taxanameon=2;}
 		if(taxanameon==1) taxaname+=c1;
-		if(taxanameon==2) 
+		if(taxanameon==2)
 		{
-			
+
 			taxanameon=0;
 			stringstream fd;
 
 			int minimatch=-1;
 
-			if(partitionnumber==0) {fd<<taxanames.size(); string fddd=fd.str(); guidetree3+=fddd; } 
-			else 
+			if(partitionnumber==0) {fd<<taxanames.size(); string fddd=fd.str(); guidetree3+=fddd; }
+			else
 			{
 				for(int gb2=0; gb2<partonetaxanames.size(); gb2++) {if(taxaname==partonetaxanames.at(gb2)) {minimatch=gb2; break;}}
-						 
+
 				if(minimatch==-1)
 				{
 					stringstream f; f<<partitionnumber+1; string r=f.str();
-					controlerrorprint2("[PARTITIONS]", (*p).name,"","Error with taxon "+taxaname+"\nIt was found in tree for partition "+r+" but not found in tree for partition 1",""	); 
+					controlerrorprint2("[PARTITIONS]", (*p).name,"","Error with taxon "+taxaname+"\nIt was found in tree for partition "+r+" but not found in tree for partition 1",""	);
 					(*LOG)<<guidetree<<endl;
 
 		//			(*LOG)<<endl<<endl<<" ERROR: Taxon "<<taxaname<<" in guide tree for partition "<<partitionnumber+1<<" not found in guide tree for partition 1"<<endl<<endl;
 		//			cout<<endl<<endl<<" ERROR: Taxon "<<taxaname<<" in guide tree for partition "<<partitionnumber+1<<" not found in guide tree for partition 1"<<endl<<endl;
 					return -1;
-				}		
+				}
 				else
 				{
-					fd<<minimatch; string fddd=fd.str(); guidetree3+=fddd; 
+					fd<<minimatch; string fddd=fd.str(); guidetree3+=fddd;
 				}
 			}
-			
+
 			// truncate filename if necessary
 			if(phylipnametruncate && taxaname.size()>10) {string tempstring2=taxaname; taxaname=""; for(int fv=0; fv<10; fv++) taxaname+=tempstring2[fv];}
 			if(phylipnametruncate && taxaname.size()<10) for(int fv=taxaname.size(); fv<10; fv++) taxaname+=" ";
 
 			taxanames.push_back(taxaname);
 			if(taxaname.size()>maxnamesize) maxnamesize=taxaname.size();
-					
+
 		}
 		if(taxanameon==0) guidetree3+=c1;
 	}
-	
+
 	taxanames.push_back(guidetree3);
-	
+
 	int partnowsize=taxanames.size()-1;
 
 	// check whether two taxa have the same name
@@ -1083,32 +1083,32 @@ int gettaxanames(int partitionnumber, string guidetree, vector<string> &taxaname
 	{
 		for(int gn3=0; gn3<partnowsize; gn3++)
 		{
-			if(gn3!=gn2) 
-				if(taxanames.at(gn2)==taxanames.at(gn3)) 
+			if(gn3!=gn2)
+				if(taxanames.at(gn2)==taxanames.at(gn3))
 				{
 					stringstream f; f<<partitionnumber+1; string r=f.str();
-	
-					if(phylipnametruncate) 
+
+					if(phylipnametruncate)
 					{
 						controlerrorprint2("[TREE]", (*treeC).name,"","Two taxa in partition "+r+" tree have the same name after truncation for PHYLIP format: "+(taxanames.at(gn2)),"");
 
-						(*LOG)<<guidetree<<endl; 
-						//(*LOG)<<endl<<endl<<" ERROR: two taxa in the partition "<<partitionnumber+1<<" guidetree have the same name after truncation for PHYLIP format: "<<taxanames.at(gn2)<<endl<<endl; 
+						(*LOG)<<guidetree<<endl;
+						//(*LOG)<<endl<<endl<<" ERROR: two taxa in the partition "<<partitionnumber+1<<" guidetree have the same name after truncation for PHYLIP format: "<<taxanames.at(gn2)<<endl<<endl;
 
 						return -1;
 					}
-					else 
-					{ 
+					else
+					{
 						controlerrorprint2("[TREE]", (*treeC).name,"","Two taxa in partition "+r+" tree have the same name: "+(taxanames.at(gn2)),"");
-						(*LOG)<<guidetree<<endl; 
-						//(*LOG)<<endl<<endl<<" ERROR: two taxa in the partition "<<partitionnumber+1<<" guidetree have the same name: "<<taxanames.at(gn2)<<endl<<endl; 
+						(*LOG)<<guidetree<<endl;
+						//(*LOG)<<endl<<endl<<" ERROR: two taxa in the partition "<<partitionnumber+1<<" guidetree have the same name: "<<taxanames.at(gn2)<<endl<<endl;
 						return -1;
 					}
 				}
-		}			
+		}
 	}
 
-	if(partitionnumber==0) 
+	if(partitionnumber==0)
 	{
 		partonetaxanames=taxanames;
 		taxaspacenames=taxanames;
@@ -1117,9 +1117,9 @@ int gettaxanames(int partitionnumber, string guidetree, vector<string> &taxaname
 		for(int gn1=0; gn1<partnowsize; gn1++)
 		{
 			string tempname=taxanames.at(gn1);
-	
+
 			if(!phylipnametruncate) for(int fg=tempname.size(); fg<maxnamesize+5; fg++) tempname+=" ";
-	
+
 			taxaspacenames.at(gn1)=tempname;
 		}
 
@@ -1129,18 +1129,18 @@ int gettaxanames(int partitionnumber, string guidetree, vector<string> &taxaname
 		// if performing a partitioned analysis check for consistency of taxa names and numbers
 		int partonesize=partonetaxanames.size()-1;
 
-		if(partonesize!=partnowsize) 
-		{ 
+		if(partonesize!=partnowsize)
+		{
 			stringstream f; f<<partitionnumber+1; string r=f.str();
 			stringstream g; g<<partonesize-1;     string s=g.str();
 			stringstream h; h<<partnowsize-1;     string t=h.str();
-	
+
 			controlerrorprint2("[TREE]", (*treeC).name,"","Guide tree for partition 1 has "+s+" taxa\nGuide tree for partition "+r+" has "+t+" taxa.","");
-		
+
 //			(*LOG)<<endl<<endl<<" ERROR: Guide tree for partition 1 has "<<partonesize-1<<" taxa\n";
 //			(*LOG)<<            "        Guide tree for partition "<<partitionnumber+1<<" has "<<partnowsize-1<<" taxa"<<endl<<endl;
 		    return -1;
-		}		
+		}
 
 	}
 
@@ -1151,18 +1151,18 @@ string addnodestostring(string mytree, int &nodelabel)
 {
 	// places internal node labels on tree
 	char c1='q',c='q';
-	
+
 	string workingtree;
-	
+
 	for(int gh11=0; gh11<mytree.size(); gh11++)
 	{
-		c1=c; c=mytree[gh11]; 
+		c1=c; c=mytree[gh11];
 		if(c1==')' && c==':' )
 		{
 			nodelabel++; workingtree+='N'; stringstream g; g<<nodelabel; string h=g.str(); workingtree+=h;
 		}
 
-		if(c!=' ' && c!=';') workingtree+=c; 
+		if(c!=' ' && c!=';') workingtree+=c;
 
 	}
 
@@ -1176,15 +1176,15 @@ void getlabelstring(int &label, double &length,string &mystring)
 	string labelstring, lengthstring;
 	int num=0;
 	char c=mystring[num];
-	while(c!=':'){labelstring+=c;  num++;c=mystring[num]; } 
+	while(c!=':'){labelstring+=c;  num++;c=mystring[num]; }
 
 	c=mystring[num]; num++;
-	
-	while(num<mystring.size()){c=mystring[num]; num++; lengthstring+=c;} 
 
-	length=atof(lengthstring.c_str());		
+	while(num<mystring.size()){c=mystring[num]; num++; lengthstring+=c;}
+
+	length=atof(lengthstring.c_str());
 	label=atoi(labelstring.c_str());
-	
+
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1197,7 +1197,7 @@ void getmynewbits(int &label, double &length,string &mystring, vector<string> &m
 	for(int pi1=1; pi1<mystring.size(); pi1++)
 	{
 		char c=mystring[pi1];
-		
+
 		if(bracketlevel==-3) lengthstring+=c;
 		if(bracketlevel==-2 && c==':') bracketlevel=-3;
 		if(bracketlevel==-2) labelstring+=c;
@@ -1207,28 +1207,28 @@ void getmynewbits(int &label, double &length,string &mystring, vector<string> &m
 		else{if(bracketlevel>0) mynewstring+=c;}
 		if(c=='(') bracketlevel++;
 		if(c==')') bracketlevel--;
-			
-		if(bracketlevel==0) 
+
+		if(bracketlevel==0)
 		{
 			string mynewstring2;  for(int yhb=0; yhb<mynewstring.size()-1; yhb++) mynewstring2+=mynewstring[yhb];
-			
+
 			mynewbits.push_back(mynewstring2); mynewstring=""; bracketlevel=-1;
-		}	
+		}
 
 	}
 
-	length=atof(lengthstring.c_str());		
+	length=atof(lengthstring.c_str());
 	label=atoi(labelstring.c_str());
-	
+
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 vector<string> MAKEmyCAUletters(int partition, int taxon)
 {
-	
+
 	//int gencode=((*p).geneticcodes).at(partition);
 	int gencode=(mycodes.at(partition)).at(taxon);
-	
-	vector<string> output; 
+
+	vector<string> output;
 	for(int ig=0; ig<65; ig++) {string s; s+=GeneticCodeTable[gencode][ig]; output.push_back(s); } //cout<<s<<endl;}
 
 	return output;
@@ -1242,11 +1242,11 @@ vector<string> MAKEmyCALletters(int partition, int taxon)
 	int gencode=(mycodes.at(partition)).at(taxon);
 
 	vector<string> output;
-	for(int ig=0; ig<65; ig++) 
+	for(int ig=0; ig<65; ig++)
 	{
 
 		string s; s+=GeneticCodeTable[gencode][ig];
-		
+
 		     if(s=="A") s="a";
 		else if(s=="R") s="r";
 		else if(s=="N") s="n";
@@ -1268,7 +1268,7 @@ vector<string> MAKEmyCALletters(int partition, int taxon)
 		else if(s=="Y") s="y";
 		else if(s=="V") s="v";
 		else cout<< "GENETIC CODE ERROR IN MAKEmyCALletters()"<<endl;
-		output.push_back(s); 
+		output.push_back(s);
 	} //cout<<s<<endl;}
 
 
@@ -1279,7 +1279,7 @@ vector<string> MAKEmyCALletters(int partition, int taxon)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vector<int> &tempintseq, vector<insert> &insertstuff, int whichseq, ofstream &results3, int whichresults) 
+void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vector<int> &tempintseq, vector<insert> &insertstuff, int whichseq, ofstream &results3, int whichresults)
 {
 	int currentcount=0, seqnow;
 
@@ -1290,15 +1290,15 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 	vector<string> myletters, myletters2;
 
 	if(type==1) {myletters=myDUletters; if(insertaslowercase) myletters2=myDLletters; else myletters2=myletters;}
-	else 
+	else
 	{
 		if(type==2) {myletters=myAUletters; if(insertaslowercase) myletters2=myALletters;  else myletters2=myletters;}
 		else
 		{
 			if(type==3)
 			{
-				if(printcodonsasDNA) {myletters=myCDUletters; if(insertaslowercase) myletters2=myCDLletters;  else myletters2=myletters; } 
-				else {myletters=MAKEmyCAUletters(partition,whichseq);if(insertaslowercase) myletters2=MAKEmyCALletters(partition,whichseq); else myletters2=myletters;} 
+				if(printcodonsasDNA) {myletters=myCDUletters; if(insertaslowercase) myletters2=myCDLletters;  else myletters2=myletters; }
+				else {myletters=MAKEmyCAUletters(partition,whichseq);if(insertaslowercase) myletters2=MAKEmyCALletters(partition,whichseq); else myletters2=myletters;}
 				blank="---";insblank="---"; if( markdeletedinsertions) insblank="***";
 			}
 			else cout<<"/nERROR in makeprintseq"<<endl<<" ";
@@ -1318,7 +1318,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 		vector<site>* s=&( (*ii).insertvec );
 
 		for(int j=0; j<(*s).size(); j++)
-		{	
+		{
 			#ifdef checkpinv
 				if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
 				if(((*s).at(j)).rate==0) continue;
@@ -1337,7 +1337,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 
 
 	for(int i=1; i<tempintseq.size(); i++)
-	{	
+	{
 
 		#ifdef checkpinv
 			if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
@@ -1346,18 +1346,18 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 
 
 		seqnow=tempintseq.at(i);
-		
-		if(seqnow==-1) {results3<<blank; currentcount++;}  
+
+		if(seqnow==-1) {results3<<blank; currentcount++;}
 		#ifdef myevolvedebugger
 		else if(seqnow==90) {results3<<"0"; currentcount++;}
 		else if(seqnow>80) {results3<<seqnow-80; currentcount++;}
 		#endif
-		else {results3<<myletters.at(seqnow);  currentcount++;}	
-		
+		else {results3<<myletters.at(seqnow);  currentcount++;}
+
 		#ifdef checkpinv
 			}
 		#endif
-		
+
 		if(inspos.at(i)!=-1)
 		{
 			insert* ii=&(insertstuff.at(inspos.at(i)));
@@ -1383,11 +1383,11 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 				else {results3<<myletters2.at(seqnow); currentcount++;}
 			}
 		}
-	}  
+	}
 //if(currentcount!=expectedcount) cout<<endl<<"ERROR in length of sequence in this file"<<endl<<"currentcount was "<<currentcount<<" and expectedcount is "<<expectedcount<<endl;
 }
 
-void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vector<int> &tempintseq, vector<insert>  &insertstuff, int whichseq, ofstream &results, ofstream &results2,  int whichresults) 
+void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vector<int> &tempintseq, vector<insert>  &insertstuff, int whichseq, ofstream &results, ofstream &results2,  int whichresults)
 {
 
 	int currentcount=0, seqnow;
@@ -1398,15 +1398,15 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 	vector<string> myletters, myletters2;
 
 	if(type==1) {myletters=myDUletters; if(insertaslowercase) myletters2=myDLletters; else myletters2=myletters;}
-	else 
+	else
 	{
 		if(type==2) {myletters=myAUletters; if(insertaslowercase) myletters2=myALletters; else myletters2=myletters;}
 		else
 		{
 			if(type==3)
 			{
-				if(printcodonsasDNA) {myletters=myCDUletters; if(insertaslowercase) myletters2=myCDLletters; else myletters2=myletters; } 
-				else {myletters=MAKEmyCAUletters(partition,whichseq);if(insertaslowercase) myletters2=MAKEmyCALletters(partition,whichseq); else myletters2=myletters;} 
+				if(printcodonsasDNA) {myletters=myCDUletters; if(insertaslowercase) myletters2=myCDLletters; else myletters2=myletters; }
+				else {myletters=MAKEmyCAUletters(partition,whichseq);if(insertaslowercase) myletters2=MAKEmyCALletters(partition,whichseq); else myletters2=myletters;}
 				blank="---"; insblank="---"; if( markdeletedinsertions) insblank="***";
 			}
 			else cout<<"/nERROR in makeprintseq"<<endl<<" ";
@@ -1438,9 +1438,9 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 			else if(seqnow>80) {results<<seqnow-80; currentcount++;}
 			#endif
 			else
-			{	
-				now=myletters2.at(seqnow);  
-				results<<now; results2<<now;  currentcount++;	
+			{
+				now=myletters2.at(seqnow);
+				results<<now; results2<<now;  currentcount++;
 			}
 		}
 	}
@@ -1457,22 +1457,22 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 
 
 		seqnow=tempintseq.at(i);
-		
-		if(seqnow==-1) {results<<blank;  currentcount++;}  
+
+		if(seqnow==-1) {results<<blank;  currentcount++;}
 		#ifdef myevolvedebugger
 		else if(seqnow==90) {results<<"0"; currentcount++;}
 			else if(seqnow>80)  {results<<seqnow-80; currentcount++;}
 		#endif
 		else
-		{	
-			now=myletters.at(seqnow); 	 	
-			results<<now; results2<<now; currentcount++;	
+		{
+			now=myletters.at(seqnow);
+			results<<now; results2<<now; currentcount++;
 		}
 
 		#ifdef checkpinv
 			}
 		#endif
-		
+
 
 		if(inspos.at(i)!=-1)
 		{
@@ -1497,13 +1497,13 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 				else if(seqnow>80) {results<<seqnow-80; currentcount++;}
 				#endif
 				else
-				{	
-					now=myletters2.at(seqnow); 	
-					results<<now; results2<<now;  currentcount++;	
+				{
+					now=myletters2.at(seqnow);
+					results<<now; results2<<now;  currentcount++;
 				}
 			}
 		}
-	}  
+	}
 //if(currentcount!=expectedcount) cout<<endl<<"ERROR in length of sequence in this file"<<endl<<"currentcount was "<<currentcount<<" and expectedcount is "<<expectedcount<<endl;
 }
 
@@ -1540,7 +1540,7 @@ void PrintProgress3(int blocknumber, int totalblock, int repnumber, int totalrep
 		if(repnumber<100 && totalrep>99) {cout<<" ";}
 		if(repnumber<1000 && totalrep>999) {cout<<" ";}
 		cout<<repnumber<<"/"<<totalrep<<"  ";
-		
+
 	}
 
 
@@ -1553,9 +1553,9 @@ void PrintProgress2( int blocknumber, int numberofevolveblocks, int thisrep,  in
 	stringstream fd1;  fd1<<printcount; string fd1bit=fd1.str();
 
 	string mystring="Printing sequence "+fd1bit;
-	
 
-	
+
+
 	/*
 	string mystring="Printing sequence ";
 	if(total+1>9 && printcount<10) mystring+=" ";
@@ -1565,10 +1565,10 @@ void PrintProgress2( int blocknumber, int numberofevolveblocks, int thisrep,  in
 	string endbit=fd1bit+" of "+fd2bit+"    ";
 	mystring+=endbit;
 	*/
-	
+
 //	cout<<"\t"<<mystring<<endl;
-	
-	PrintProgress( blocknumber,  numberofevolveblocks,  thisrep,  reps,  100, mystring);	
+
+	PrintProgress( blocknumber,  numberofevolveblocks,  thisrep,  reps,  100, mystring);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1585,8 +1585,8 @@ void sumrates(RATES &rates)
 
 
 //specified this way when raw
-	rates.totalrate = rates.coresubrate	+ rates.inssubrate	+(  (rates.totallength -1)*((*m).insertrate + (*m).deleterate)  ) 	
-						
+	rates.totalrate = rates.coresubrate	+ rates.inssubrate	+(  (rates.totallength -1)*((*m).insertrate + (*m).deleterate)  )
+
 						+ (  ((*m).deleterate)*((*m).dellength)  )  + (*m).insertrate - (*m).deleterate;
 
 */
@@ -1598,7 +1598,7 @@ void sumrates(RATES &rates)
 	x1=rates.insdeleterate;  x2=((*m).deleterate)*(rates.inslength);  diff=x2-x1; if(diff<0) diff=-diff; if(diff>0.00001) {cout<<"ERROR in ins deletionrate in buildsums"<<endl;   cout<<rates.insdeleterate <<"  "<<(*m).deleterate<<"  "<<rates.inslength<<"  "<<((*m).deleterate)*(rates.inslength)<<endl;}
 
   (rates.coredeleterate)+=(  ((*m).deleterate)*(((*m).dellength)-1)  );
- 
+
   */
 
 	//so we can just say:
@@ -1614,7 +1614,7 @@ void sumrates(RATES &rates)
 ////////////////////
 
 
-int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> &fromins, vector<int> &inspos) 
+int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> &fromins, vector<int> &inspos)
 {
 	int i, j, y=0,  size=rates.rootlength-1, lastinslength=rates.inslength, lastcorelength=rates.corelength;
 	double x=0, z=0;
@@ -1623,20 +1623,20 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 
 	rates.insinsertrate=0;
 	rates.insdeleterate=0;
-	rates.inssubrate=0;		
+	rates.inssubrate=0;
 	rates.inslength=0;	  // not used in this method
 	rates.corelength=0;  // not used in this method
 	rates.coreinsertrate=0;
 	rates.coredeleterate=0;
-	rates.coresubrate=0;				
-	
+	rates.coresubrate=0;
+
 //	cout<<endl<<"1 "<<(sums.IDsums1).size()<<endl;
 //	cout<<endl<<"2 "<<(sums.IIsums1).size()<<endl;
 //	cout<<endl<<"3 "<<(sums.CDsums1).size()<<endl;
 //	cout<<endl<<"4 "<<(sums.CIsums1).size()<<endl;
 
 	sums.myclear();
-	
+
 //	cout<<endl<<"1 "<<(sums.IDsums1).size()<<endl;
 //	cout<<endl<<"2 "<<(sums.IIsums1).size()<<endl;
 //	cout<<endl<<"3 "<<(sums.CDsums1).size()<<endl;
@@ -1651,7 +1651,7 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 	insert* ii;
 	vector<site>* ss;
 
-	for(i=0; i<rates.rootlength; i++) 
+	for(i=0; i<rates.rootlength; i++)
 	{
 
 		if(inspos.at(i)==-1)
@@ -1662,7 +1662,7 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 		else
 		{
 			//deal with insertion information.
-		
+
 			ii=&(fromins.at(inspos.at(i)));
 
 			ss=&((*ii).insertvec);
@@ -1670,38 +1670,38 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 			int templength=(*ss).size();
 
 			(*ii).subrate=0;
-			(*ii).length=0;		
+			(*ii).length=0;
 
 			for(j=0; j<templength; j++)
 			{
 
 				s=&((*ss).at(j));
 
-				if( ((*s).base)==-1 ) (*s).subrate=0; 
+				if( ((*s).base)==-1 ) (*s).subrate=0;
 
 				else
 				{
-					((*ii).length)++;	
+					((*ii).length)++;
 					(*s).subrate   =returnsitesubrate((*s).rate, (*s).siteclass, (*s).base);
-					
+
 					((*ii).subrate)   +=(*s).subrate;
-					
+
 				}
 			}
 
 			rates.insinsertrate += (  ((*m).insertrate) * ((*ii).length)  );
-			rates.insdeleterate += (  ((*m).deleterate) * ((*ii).length)  ); 
-			
+			rates.insdeleterate += (  ((*m).deleterate) * ((*ii).length)  );
+
 			(sums.IIsums1).push_back((*ii).length);
 			(sums.ISsums1).push_back((*ii).subrate);
 
 
 			//end of dealing with insertion information
 		}
-			
+
 		if(i==0)
 		{
-						
+
 			rates.coreinsertrate+=(*m).insertrate;
 			(sums.CIsums1).push_back(1);
 			(sums.CSsums1).push_back(0);
@@ -1715,18 +1715,18 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 
 			else
 			{
-				
+
 				(sums.CSsums1).push_back(  returnsitesubrate(  ratevec.at(i) , siteclassvec.at(i), test )  );
 
 
 				rates.coreinsertrate+=(*m).insertrate;
 				rates.coredeleterate+=(*m).deleterate;
-				
+
 				(sums.CIsums1).push_back(1);
 			}
-		}		
+		}
 
-		
+
 	}
 
 
@@ -1752,7 +1752,7 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 	size=(sums.CSsums10000000).size()-1;	for(i=0; i<size+1; i++){/*x+=(sums.CDsums10000000).at(i);	*/ y+=(sums.CIsums10000000).at(i);		z+=(sums.CSsums10000000).at(i);		if(i%10==9 || i==size) {/*(sums.CDsums100000000).push_back(x); x=0;	  */ (sums.CIsums100000000).push_back(y); y=0;	(sums.CSsums100000000).push_back(z); z=0;	} }
 	size=(sums.CSsums100000000).size()-1;	for(i=0; i<size+1; i++){/*x+=(sums.CDsums100000000).at(i);	*/ y+=(sums.CIsums100000000).at(i);		z+=(sums.CSsums100000000).at(i);	if(i%10==9 || i==size) {/*(sums.CDsums1000000000).push_back(x); x=0;  */ (sums.CIsums1000000000).push_back(y); y=0;	(sums.CSsums1000000000).push_back(z); z=0;	} }
 	size=(sums.CSsums1000000000).size()-1;	for(i=0; i<size+1; i++){/*x+=(sums.CDsums1000000000).at(i);	*/ y+=(sums.CIsums1000000000).at(i);	z+=(sums.CSsums1000000000).at(i);	if(i%10==9 || i==size) {/*(sums.CDsums10000000000).push_back(x); x=0; */ (sums.CIsums10000000000).push_back(y); y=0;(sums.CSsums10000000000).push_back(z); z=0;	} }
-	size=(sums.CSsums10000000000).size()-1;	for(i=0; i<size+1; i++){/*x+=(sums.CDsums10000000000).at(i);*/ y+=(sums.CIsums10000000000).at(i);	z+=(sums.CSsums10000000000).at(i);	if(i%10==9 || i==size) {/*(sums.CDsums).push_back(x);  				  */ (sums.CIsums).push_back(y);  				(sums.CSsums).push_back(z); 		/*(rates.coredeleterate)+=x;  (rates.coreinsertrate)+=y;*/ (rates.corelength)+=y; (rates.coresubrate)+=z; x=0; y=0; z=0;} } 
+	size=(sums.CSsums10000000000).size()-1;	for(i=0; i<size+1; i++){/*x+=(sums.CDsums10000000000).at(i);*/ y+=(sums.CIsums10000000000).at(i);	z+=(sums.CSsums10000000000).at(i);	if(i%10==9 || i==size) {/*(sums.CDsums).push_back(x);  				  */ (sums.CIsums).push_back(y);  				(sums.CSsums).push_back(z); 		/*(rates.coredeleterate)+=x;  (rates.coreinsertrate)+=y;*/ (rates.corelength)+=y; (rates.coresubrate)+=z; x=0; y=0; z=0;} }
 
 
 	rates.corerate=rates.coreinsertrate + rates.coredeleterate;
@@ -1767,10 +1767,10 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 	x1=rates.insdeleterate;  x2=((*m).deleterate)*double((rates.inslength));    diff=x2-x1; if(diff<0) diff=-diff; if(diff>0.001) {cout<<diff<<" "<<x1<<" "<<x2<<" ERROR in ins deletionrate in buildsums"<<endl;   cout<<rates.insdeleterate <<"  "<<(*m).deleterate<<"  "<<rates.inslength<<"  "<<((*m).deleterate)*double((rates.inslength))<<endl;}
 
 	if(lastinslength  != rates.inslength)  cout<<"ERROR in total inserted sites length in buildsums "<<endl<<"lastinslength was "<<lastinslength<<"  and rates.inslength was "<<rates.inslength<<endl;
-	
+
 //	double dd; dd=lastcorelength - rates.corelength; if(dd<0) dd=-dd;
 //	if(dd>0.0001) cout<<"ERROR in total core sequence length in buildsums "<<endl<<"lastcorelength was "<<lastcorelength<<"  and rates.corelength was "<<rates.corelength<<endl;
-		
+
 	(rates.coredeleterate)+=(  ((*m).deleterate)*(((*m).delmeansize)-1)  );
 	sumrates(rates);
 
@@ -1781,7 +1781,7 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 
 	//if(lastinslength  != rates.inslength)  cout<<"ERROR in total inserted sites length in buildsums "<<endl<<"lastinslength was "<<lastinslength<<"  and rates.inslength was "<<rates.inslength<<endl;
 	//if(lastcorelength != rates.corelength) cout<<"ERROR in total core sequence length in buildsums "<<endl<<"lastcorelength was "<<lastcorelength<<"  and rates.corelength was "<<rates.corelength<<endl;
-	
+
 	sumratesold(rates);
 
 //	cout<<rates.totalrate<<"  is the TOTAL rate"<<endl;
@@ -1789,46 +1789,46 @@ int buildsumsold(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 	return 0;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- 
 
-int buildsumsnew(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> &fromins, vector<int> &inspos) 
+
+int buildsumsnew(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> &fromins, vector<int> &inspos)
 {
 	int i, j, y=0, size=rates.rootlength-1, lastinslength=rates.inslength, lastcorelength=rates.corelength;
 	double x=0;
 
 	rates.insinsertrate=0;
 	rates.insdeleterate=0;
-	rates.inssubrate=0;	// not used in this method		
+	rates.inssubrate=0;	// not used in this method
 	rates.inslength=0;
 	rates.corelength=0;
 	rates.coreinsertrate=0;
 	rates.coredeleterate=0;
-	rates.coresubrate=0;	// not used in this method				
-	
+	rates.coresubrate=0;	// not used in this method
+
 	sums.myclear();
-	
-	(sums.IIsums1).reserve(rates.rootlength);	
+
+	(sums.IIsums1).reserve(rates.rootlength);
 	(sums.CIsums1).reserve(rates.rootlength);
 
-	
-	
+
+
 	site* s;
 	insert* ii;
 	vector<site>* ss;
 
-	for(i=0; i<rates.rootlength; i++) 
+	for(i=0; i<rates.rootlength; i++)
 	{
 		if(inspos.at(i)==-1) (sums.IIsums1).push_back(0);
 		else
 		{
 			//deal with insertion information.
-		
+
 			ii=&(fromins.at(inspos.at(i)));
 
 			ss=&((*ii).insertvec);
 
 			int templength=(*ss).size();
-	
+
 			(*ii).length=0;
 
 			for(j=0; j<templength; j++)
@@ -1842,18 +1842,18 @@ int buildsumsnew(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 			//(rates.inslength)+=((*ii).length);
 
 			rates.insinsertrate += (  ((*m).insertrate) * ((*ii).length)  );
-			rates.insdeleterate += (  ((*m).deleterate) * ((*ii).length)  ); 
-			
+			rates.insdeleterate += (  ((*m).deleterate) * ((*ii).length)  );
+
 			(sums.IIsums1).push_back((*ii).length);
 
 			//end of dealing with insertion information
 		}
-		
+
 		//deal with core information
-		
+
 		if(i==0)
 		{
-						
+
 			rates.coreinsertrate+=(*m).insertrate;
 			(sums.CIsums1).push_back(1);
 		}
@@ -1870,16 +1870,16 @@ int buildsumsnew(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 				rates.coreinsertrate+=(*m).insertrate;
 //cout<<"blah"<<endl;
 				rates.coredeleterate+=(*m).deleterate;
-//cout<<"blah"<<endl;				
+//cout<<"blah"<<endl;
 				(sums.CIsums1).push_back(1);
 			}
-		
+
 //			cout<<"Q"<<endl;
-		}		
+		}
 	}
 //		cout<<"           QWE 2"<<endl;
 
-	
+
 
 
 	size=(sums.IIsums1).size()-1;			for(i=0; i<size+1; i++){y+=(sums.IIsums1).at(i);			if(i%10==9 || i==size) {(sums.IIsums10).push_back(y); y=0;} }
@@ -1916,14 +1916,14 @@ int buildsumsnew(RATES &rates, SUMS &sums, vector<int> &fromseq, vector<insert> 
 	x1=rates.coredeleterate; x2=((*m).deleterate)*double((rates.corelength-1)); diff=x2-x1; if(diff<0) diff=-diff; if(diff>0.001) {cout<<diff<<" "<<x1<<" "<<x2<<" ERROR in core deletionrate in buildsums"<<endl;  cout<<rates.coredeleterate<<"  "<<(*m).deleterate<<"  "<<rates.corelength<<"  "<<((*m).deleterate)*double((rates.corelength))<<endl;}
 	x1=rates.insinsertrate;  x2=((*m).insertrate)*double((rates.inslength));    diff=x2-x1; if(diff<0) diff=-diff; if(diff>0.001) {cout<<diff<<" "<<x1<<" "<<x2<<" ERROR in ins insertionrate in buildsums"<<endl;  cout<<rates.insinsertrate <<"  "<<(*m).insertrate<<"  "<<rates.inslength<<"  "<<((*m).insertrate)*double((rates.inslength))<<endl;}
 	x1=rates.insdeleterate;  x2=((*m).deleterate)*double((rates.inslength));    diff=x2-x1; if(diff<0) diff=-diff; if(diff>0.001) {cout<<diff<<" "<<x1<<" "<<x2<<" ERROR in ins deletionrate in buildsums"<<endl;   cout<<rates.insdeleterate <<"  "<<(*m).deleterate<<"  "<<rates.inslength<<"  "<<((*m).deleterate)*double((rates.inslength))<<endl;}
- 
+
 	if(lastinslength  != rates.inslength)  cout<<"ERROR in total inserted sites length in buildsums "<<endl<<"lastinslength was "<<lastinslength<<"  and rates.inslength was "<<rates.inslength<<endl;
 
 //	double dd; dd=lastcorelength - rates.corelength; if(dd<0) dd=-dd;
 //	if(dd>0.0001) cout<<"ERROR in total core sequence length in buildsums "<<endl<<"lastcorelength was "<<lastcorelength<<"  and rates.corelength was "<<rates.corelength<<endl;
 
 	//if(lastcorelength != rates.corelength-1) cout<<"ERROR in total core sequence length in buildsums "<<endl<<"lastcorelength was "<<lastcorelength<<"  and rates.corelength was "<<rates.corelength<<endl;
-	
+
 	(rates.coredeleterate)+=(  ((*m).deleterate)*(((*m).delmeansize)-1)  );
 
 	sumrates(rates);
@@ -1947,7 +1947,7 @@ int findpos1(int event, vector<int> &updatepositions, double unirand, SUMS &sum,
 		for(i=0; i<(sum.ISsums).size(); i++)			{s=(sum.ISsums).at(i);			if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000000000=i; break;}	else S+=s; } if(pos1000000000==-1) {cout<<"1 ERROR in findpos at event "<<event<<"  unirand-S-s = "<<setprecision(20)<< unirand-S-s<<"  "<<unirand<<"  "<<S<<"  "<<s<<endl; return -1;}
 		for(i=j; i<(sum.ISsums1000000000).size(); i++)	{s=(sum.ISsums1000000000).at(i);if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos100000000=i; break;}	else S+=s; } if(pos100000000==-1) {cout<<"2 ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.ISsums100000000).size(); i++)	{s=(sum.ISsums100000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos10000000=i; break;}	else S+=s; } if(pos10000000==-1) {cout<<"3 ERROR in findpos at event "<<event<<endl; return -1;}
-		for(i=j; i<(sum.ISsums10000000).size(); i++)	{s=(sum.ISsums10000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else S+=s; } if(pos1000000==-1) {cout<<"4 ERROR in findpos at event "<<event<<endl; return -1;}	
+		for(i=j; i<(sum.ISsums10000000).size(); i++)	{s=(sum.ISsums10000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else S+=s; } if(pos1000000==-1) {cout<<"4 ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.ISsums1000000).size(); i++)		{s=(sum.ISsums1000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos100000=i; break;}		else S+=s; } if(pos100000==-1) {cout<<"5 ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.ISsums100000).size(); i++)		{s=(sum.ISsums100000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos10000=i; break;}		else S+=s; } if(pos10000==-1) {cout<<"6 ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.ISsums10000).size(); i++)		{s=(sum.ISsums10000).at(i);		if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000=i; break;}		else S+=s; } if(pos1000==-1) {cout<<"7 ERROR in findpos at event "<<event<<endl; return -1;}
@@ -1980,7 +1980,7 @@ int findpos0(int event, vector<int> &updatepositions, double unirand, SUMS &sum,
 		for(i=0; i<(sum.CSsums).size(); i++)			{s=(sum.CSsums).at(i);			if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000000000=i; break;}	else S+=s; } if(pos1000000000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CSsums1000000000).size(); i++)	{s=(sum.CSsums1000000000).at(i);if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos100000000=i; break;}	else S+=s; } if(pos100000000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CSsums100000000).size(); i++)	{s=(sum.CSsums100000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos10000000=i; break;}	else S+=s; } if(pos10000000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
-		for(i=j; i<(sum.CSsums10000000).size(); i++)	{s=(sum.CSsums10000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else S+=s; } if(pos1000000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}	
+		for(i=j; i<(sum.CSsums10000000).size(); i++)	{s=(sum.CSsums10000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else S+=s; } if(pos1000000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CSsums1000000).size(); i++)		{s=(sum.CSsums1000000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos100000=i; break;}		else S+=s; } if(pos100000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CSsums100000).size(); i++)		{s=(sum.CSsums100000).at(i);	if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos10000=i; break;}		else S+=s; } if(pos10000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CSsums10000).size(); i++)		{s=(sum.CSsums10000).at(i);		if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos1000=i; break;}		else S+=s; } if(pos1000==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
@@ -1990,7 +1990,7 @@ int findpos0(int event, vector<int> &updatepositions, double unirand, SUMS &sum,
 		for(i=j; i<(sum.CSsums1).size(); i++)			{s=(sum.CSsums1).at(i);			if(unirand<=s+S) {j=10*i; updatepositions.push_back(i); pos=i; break;}			else S+=s; } if(pos==-1) {cout<<"ERROR in findpos at event "<<event<<endl; return -1;}
 
 		if(S-unirand>0 || unirand-s-S>0) cout<<"CHOOSING ERROR IN FINDPOS 0"<<endl;
-		
+
 		// not needed now as simply prevent random numbers that are "EXACTLY ZERO" to be used here for that reason.
 		//if(pos==0) pos=1; // guards against pseudo-random values of unirand that are exactly zero to machine precision
 		                   //  - in this case it is possible to choose the "imaginary" eternal link position
@@ -2026,7 +2026,7 @@ int findpos24(int event, vector<int> &updatepositions,  int mypos, SUMS &sum,  i
 		for(i=0; i<(sum.CIsums).size(); i++)			{si=(sum.CIsums).at(i);				if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000000=i; break;}	else SI+=si; } if(pos1000000000==-1) {cout<<"ERROR in findpos1 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums1000000000).size(); i++)	{si=(sum.CIsums1000000000).at(i);	if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos100000000=i; break;}	else SI+=si; } if(pos100000000==-1) {cout<<"ERROR in findpos2 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums100000000).size(); i++)	{si=(sum.CIsums100000000).at(i);	if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos10000000=i; break;}	else SI+=si; } if(pos10000000==-1) {cout<<"ERROR in findpos3 at event "<<event<<endl; return -1;}
-		for(i=j; i<(sum.CIsums10000000).size(); i++)	{si=(sum.CIsums10000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}	
+		for(i=j; i<(sum.CIsums10000000).size(); i++)	{si=(sum.CIsums10000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums1000000).size(); i++)		{si=(sum.CIsums1000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos100000=i; break;}		else SI+=si; } if(pos100000==-1) {cout<<"ERROR in findpos5 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums100000).size(); i++)		{si=(sum.CIsums100000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos10000=i; break;}		else SI+=si; } if(pos10000==-1) {cout<<"ERROR in findpos6 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums10000).size(); i++)		{si=(sum.CIsums10000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000=i; break;}		else SI+=si; } if(pos1000==-1) {cout<<"ERROR in findpos7 at event "<<event<<endl; return -1;}
@@ -2036,7 +2036,7 @@ int findpos24(int event, vector<int> &updatepositions,  int mypos, SUMS &sum,  i
 		for(i=j; i<(sum.CIsums1).size(); i++)			{si=(sum.CIsums1).at(i);			if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos=i; break;}			else SI+=si; } if(pos==-1) {cout<<"ERROR in findpos11 at event "<<event<<endl; return -1;}
 
 	//	int g;
-	//	cout<<"CHECK 1: mypos is "<<mypos<<"  "<<pos<<"  "; si=0; 
+	//	cout<<"CHECK 1: mypos is "<<mypos<<"  "<<pos<<"  "; si=0;
 	//	cout<<(sum.CIsums1).size()<<endl;
 	//	for(g=0; g<(sum.CIsums1).size(); g++) { if(mypos<si+(sum.CIsums1).at(g)) break; else si+=(sum.CIsums1).at(g);}
 	//	cout<<mypos<<"  -g is "<<g<<"  pos is "<<pos<<"  "<<si+(sum.CIsums1).at(g)<<endl;
@@ -2063,7 +2063,7 @@ int findpos35(int event, vector<int> &updatepositions,  int mypos, SUMS &sum,  i
 		for(i=0; i<(sum.IIsums).size(); i++)			{si=(sum.IIsums).at(i);				if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos1000000000=i; break;}	else SI+=si; } if(pos1000000000==-1) {cout<<"ERROR in findpos1 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums1000000000).size(); i++)	{si=(sum.IIsums1000000000).at(i);	if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos100000000=i; break;}	else SI+=si; } if(pos100000000==-1) {cout<<"ERROR in findpos2 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums100000000).size(); i++)	{si=(sum.IIsums100000000).at(i);	if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos10000000=i; break;}	else SI+=si; } if(pos10000000==-1) {cout<<"ERROR in findpos3 at event "<<event<<endl; return -1;}
-		for(i=j; i<(sum.IIsums10000000).size(); i++)	{si=(sum.IIsums10000000).at(i);		if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}	
+		for(i=j; i<(sum.IIsums10000000).size(); i++)	{si=(sum.IIsums10000000).at(i);		if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums1000000).size(); i++)		{si=(sum.IIsums1000000).at(i);		if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos100000=i; break;}		else SI+=si; } if(pos100000==-1) {cout<<"ERROR in findpos5 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums100000).size(); i++)		{si=(sum.IIsums100000).at(i);		if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos10000=i; break;}		else SI+=si; } if(pos10000==-1) {cout<<"ERROR in findpos6 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums10000).size(); i++)		{si=(sum.IIsums10000).at(i);		if(mypos<=si+SI && si+SI!=0) {j=10*i; updatepositions.push_back(i); pos1000=i; break;}		else SI+=si; } if(pos1000==-1) {cout<<"ERROR in findpos7 at event "<<event<<endl; return -1;}
@@ -2090,23 +2090,23 @@ int findposnew(int event, vector<int> &updatepositions,  int mypos, SUMS &sum,  
 
 	updatepositions.clear();
 
-	int pos1=-1;			//position in sums10		
-	int pos10=-1;			//position in sums100		
-	int pos100=-1;			//position in sums1000		
-	int pos1000=-1;			//position in sums10000		
-	int pos10000=-1;		//position in sums100000	
-	int pos100000=-1;		//position in sums1000000	
-	int pos1000000=-1;		//position in sums		
-	int pos10000000=-1;		//position in sums		
-	int pos100000000=-1;	//position in sums		
-	int pos1000000000=-1;	//position in sums		
+	int pos1=-1;			//position in sums10
+	int pos10=-1;			//position in sums100
+	int pos100=-1;			//position in sums1000
+	int pos1000=-1;			//position in sums10000
+	int pos10000=-1;		//position in sums100000
+	int pos100000=-1;		//position in sums1000000
+	int pos1000000=-1;		//position in sums
+	int pos10000000=-1;		//position in sums
+	int pos100000000=-1;	//position in sums
+	int pos1000000000=-1;	//position in sums
 	int pos=-1;
 
 	SI=0;
 	int i,j, si=0;
 
-	
-	
+
+
 	if(event==2 || event==4) // indel in core sequence
 	{
 	//	cout<<"**** "<<(sum.CIsums).back()<<endl;
@@ -2114,7 +2114,7 @@ int findposnew(int event, vector<int> &updatepositions,  int mypos, SUMS &sum,  
 		for(i=0; i<(sum.CIsums).size(); i++)			{si=(sum.CIsums).at(i);			  if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000000=i; break;}	else SI+=si; } if(pos1000000000==-1) {cout<<"ERROR in findpos1 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums1000000000).size(); i++)	{si=(sum.CIsums1000000000).at(i);	if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos100000000=i; break;}	else SI+=si; } if(pos100000000==-1) {cout<<"ERROR in findpos2 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums100000000).size(); i++)	{si=(sum.CIsums100000000).at(i);	if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos10000000=i; break;}	else SI+=si; } if(pos10000000==-1) {cout<<"ERROR in findpos3 at event "<<event<<endl; return -1;}
-		for(i=j; i<(sum.CIsums10000000).size(); i++)	{si=(sum.CIsums10000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}	
+		for(i=j; i<(sum.CIsums10000000).size(); i++)	{si=(sum.CIsums10000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums1000000).size(); i++)		{si=(sum.CIsums1000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos100000=i; break;}		else SI+=si; } if(pos100000==-1) {cout<<"ERROR in findpos5 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums100000).size(); i++)		{si=(sum.CIsums100000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos10000=i; break;}		else SI+=si; } if(pos10000==-1) {cout<<"ERROR in findpos6 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.CIsums10000).size(); i++)		{si=(sum.CIsums10000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000=i; break;}		else SI+=si; } if(pos1000==-1) {cout<<"ERROR in findpos7 at event "<<event<<endl; return -1;}
@@ -2124,7 +2124,7 @@ int findposnew(int event, vector<int> &updatepositions,  int mypos, SUMS &sum,  
 		for(i=j; i<(sum.CIsums1).size(); i++)			{si=(sum.CIsums1).at(i);			if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos=i; break;}			else SI+=si; } if(pos==-1) {cout<<"ERROR in findpos11 at event "<<event<<endl; return -1;}
 
 	//	int g;
-	//	cout<<"CHECK 1: mypos is "<<mypos<<"  "<<pos<<"  "; si=0; 
+	//	cout<<"CHECK 1: mypos is "<<mypos<<"  "<<pos<<"  "; si=0;
 	//	cout<<(sum.CIsums1).size()<<endl;
 	//	for(g=0; g<(sum.CIsums1).size(); g++) { if(mypos<si+(sum.CIsums1).at(g)) break; else si+=(sum.CIsums1).at(g);}
 	//	cout<<mypos<<"  g is "<<g<<"  pos is "<<pos<<"  "<<si+(sum.CIsums1).at(g)<<endl;
@@ -2135,7 +2135,7 @@ int findposnew(int event, vector<int> &updatepositions,  int mypos, SUMS &sum,  
 		for(i=0; i<(sum.IIsums).size(); i++)			{si=(sum.IIsums).at(i);				if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000000=i; break;}	else SI+=si; } if(pos1000000000==-1) {cout<<"ERROR in findpos1 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums1000000000).size(); i++)	{si=(sum.IIsums1000000000).at(i);	if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos100000000=i; break;}	else SI+=si; } if(pos100000000==-1) {cout<<"ERROR in findpos2 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums100000000).size(); i++)	{si=(sum.IIsums100000000).at(i);	if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos10000000=i; break;}	else SI+=si; } if(pos10000000==-1) {cout<<"ERROR in findpos3 at event "<<event<<endl; return -1;}
-		for(i=j; i<(sum.IIsums10000000).size(); i++)	{si=(sum.IIsums10000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}	
+		for(i=j; i<(sum.IIsums10000000).size(); i++)	{si=(sum.IIsums10000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000000=i; break;}	else SI+=si; } if(pos1000000==-1) {cout<<"ERROR in findpos4 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums1000000).size(); i++)		{si=(sum.IIsums1000000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos100000=i; break;}		else SI+=si; } if(pos100000==-1) {cout<<"ERROR in findpos5 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums100000).size(); i++)		{si=(sum.IIsums100000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos10000=i; break;}		else SI+=si; } if(pos10000==-1) {cout<<"ERROR in findpos6 at event "<<event<<endl; return -1;}
 		for(i=j; i<(sum.IIsums10000).size(); i++)		{si=(sum.IIsums10000).at(i);		if(mypos<=si+SI) {j=10*i; updatepositions.push_back(i); pos1000=i; break;}		else SI+=si; } if(pos1000==-1) {cout<<"ERROR in findpos7 at event "<<event<<endl; return -1;}
@@ -2161,9 +2161,9 @@ int chooseevent(RATES &rates)
 					// in inserted sites:      1 for substitution, 3 for insertion, 5 for deletion
 
 	double temprate=rates.coreinsertrate;
-				
+
 	double rand=1; while(rand==1 || rand==0){rand=mtrand1();} // prevents against pseudo-random numbers that are exactly equal to 1 or 0 to machine precision
-			
+
 	rand*=(rates.totalrate);
 
 	if(rand<temprate) return 2; else temprate+=(rates.insinsertrate);
@@ -2175,10 +2175,10 @@ int chooseevent(RATES &rates)
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-int updatesubsums0(vector<int> updatepositions, double sdiff, SUMS &sums) 
+int updatesubsums0(vector<int> updatepositions, double sdiff, SUMS &sums)
 {
 	// substitution in core sequence
-	
+
 		((sums.CSsums).at(updatepositions.at(0)))+=sdiff;
 		((sums.CSsums1000000000).at(updatepositions.at(1)))+=sdiff;
 		((sums.CSsums100000000).at(updatepositions.at(2)))+=sdiff;
@@ -2195,11 +2195,11 @@ int updatesubsums0(vector<int> updatepositions, double sdiff, SUMS &sums)
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-int updatesubsums1(vector<int> updatepositions, double sdiff, SUMS &sums) 
+int updatesubsums1(vector<int> updatepositions, double sdiff, SUMS &sums)
 {
 
 	// substitution in inserted sites
-	
+
 		((sums.ISsums).at(updatepositions.at(0)))+=sdiff;
 		((sums.ISsums1000000000).at(updatepositions.at(1)))+=sdiff;
 		((sums.ISsums100000000).at(updatepositions.at(2)))+=sdiff;
@@ -2210,16 +2210,16 @@ int updatesubsums1(vector<int> updatepositions, double sdiff, SUMS &sums)
 		((sums.ISsums1000).at(updatepositions.at(7)))+=sdiff;
 		((sums.ISsums100).at(updatepositions.at(8)))+=sdiff;
 		((sums.ISsums10).at(updatepositions.at(9)))+=sdiff;
-		((sums.ISsums1).at(updatepositions.at(10)))+=sdiff;	
-	
+		((sums.ISsums1).at(updatepositions.at(10)))+=sdiff;
+
 	return 0;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int updateindelsums24(vector<int> updatepositions, int idiff, SUMS &sums) 
+int updateindelsums24(vector<int> updatepositions, int idiff, SUMS &sums)
 {
 	// indel in core sequence
-	
+
 		((sums.CIsums).at(updatepositions.at(0)))+=idiff;
 		((sums.CIsums1000000000).at(updatepositions.at(1)))+=idiff;
 		((sums.CIsums100000000).at(updatepositions.at(2)))+=idiff;
@@ -2236,10 +2236,10 @@ int updateindelsums24(vector<int> updatepositions, int idiff, SUMS &sums)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int updateindelsums35(vector<int> updatepositions, int idiff, SUMS &sums) 
+int updateindelsums35(vector<int> updatepositions, int idiff, SUMS &sums)
 {
 	// indel in inserted sites
-	
+
 		((sums.IIsums).at(updatepositions.at(0)))+=idiff;
 		((sums.IIsums1000000000).at(updatepositions.at(1)))+=idiff;
 		((sums.IIsums100000000).at(updatepositions.at(2)))+=idiff;
@@ -2250,13 +2250,13 @@ int updateindelsums35(vector<int> updatepositions, int idiff, SUMS &sums)
 		((sums.IIsums1000).at(updatepositions.at(7)))+=idiff;
 		((sums.IIsums100).at(updatepositions.at(8)))+=idiff;
 		((sums.IIsums10).at(updatepositions.at(9)))+=idiff;
-		((sums.IIsums1).at(updatepositions.at(10)))+=idiff;	
+		((sums.IIsums1).at(updatepositions.at(10)))+=idiff;
 
 	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT, 
+void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 				vector<int> &updatepositions, vector<insert> &insINT2, vector<int> &insPOS2, int endlength, int indellength)
 {
 
@@ -2268,16 +2268,16 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 	int coreindellength=0, insindellength=0;
 	//12345567
 	site* s;
-	insert* ii;  
-	vector<site>* ss; 
+	insert* ii;
+	vector<site>* ss;
 
 	deletioncount++;
 
-	int idiff=0; 
-	
+	int idiff=0;
+
 	double csdiff=0, isdiff=0, diffs=0;
 
-	
+
 	int currentev=updatepositions.at(10);
 
 
@@ -2303,33 +2303,33 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 
 				newseqINT.at(currentev)=-1;
 
-				if(oldmethod) 
+				if(oldmethod)
 				{
-					diffs=-((sums.CSsums1).at(currentev)); 	
-					
+					diffs=-((sums.CSsums1).at(currentev));
+
 					csdiff+=diffs;
-					
+
 					updatesubsums0(updatepositions,  diffs, sums);
 
 				}
 
 
 				//idiff=-((sums.CIsums1).at(currentev));
-			
+
 				coreindellength--;
-							
+
 				updateindelsums24(updatepositions,  -1, sums);
 			}
 
 			inspos=0;
 		}
 
-		if(insPOS2.at(currentev)!=-1) 
+		if(insPOS2.at(currentev)!=-1)
 		{
 
 			//ii=&(insINT2.at(currentev));
 			ii=&(insINT2.at(insPOS2.at(currentev)));
-			
+
 			ss=&((*ii).insertvec);
 
 			//`ddiff=0;
@@ -2339,10 +2339,10 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 			{
 				s=&((*ss).at(inspos));
 				inspos++;
-				
+
 				if((*s).base==-1) continue;
 
-				
+
 #ifdef INDELLOG
 	if(tttt==1) {tttt=-1; indellog<<"\tthat went into an insertion"<<endl;}
 		indellog<<" "<<(*s).base<<" ";
@@ -2353,10 +2353,10 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 				if(oldmethod)
 				{
 					diffs-=((*s).subrate);
-	
+
 					((*s).subrate)=0;
 				}
-				
+
 				idiff--;
 				indellength--;
 			}
@@ -2365,7 +2365,7 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 			if(oldmethod)
 			{
 				((*ii).subrate)+=diffs;
-				
+
 				isdiff+=diffs;
 
 				updatesubsums1(updatepositions,  diffs, sums);
@@ -2376,7 +2376,7 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 			((*ii).length)+=idiff;
 
 			insindellength+=idiff;
-								
+
 			updateindelsums35(updatepositions,  idiff, sums);
 		}
 
@@ -2399,13 +2399,13 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 
 	(rates.coreinsertrate)+=(coreindellength*((*m).insertrate));
 	(rates.coredeleterate)+=(coreindellength*((*m).deleterate));
-				
+
 	(rates.insinsertrate) += (insindellength*((*m).insertrate));
 	(rates.insdeleterate) += (insindellength*((*m).deleterate));
 
 	(rates.corelength) +=coreindellength;
 	(rates.inslength)  +=insindellength;
-	
+
 	(rates.coresubrate)   +=csdiff;
 	(rates.inssubrate)    +=isdiff;
 
@@ -2418,7 +2418,7 @@ void dodeletion(int inspos, SUMS &sums,  RATES &rates, vector<int> &newseqINT,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector<int> &newseqINT,  vector<int> &updatepositions, vector<insert> &insINT2, 
+void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector<int> &newseqINT,  vector<int> &updatepositions, vector<insert> &insINT2,
 					vector<vector<insert> > &insINT, int label, vector<vector<int> > &insPOS,   vector<int> &insPOS2, int indellength)
 {
 	//inspos = -1 is insertion beginning in core.
@@ -2429,13 +2429,13 @@ void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector
 	// if "2" i.e. an insertion in core then insertion comes at beginning of vector at <insert> for that core positions.
 
 	site* s;
-	insert* ii;  
-	vector<site>* ss; 
+	insert* ii;
+	vector<site>* ss;
 	vector<insert>* ivec;
 
 	double ddiff=0, sdiff=0;
 
-	
+
 	(rates.insinsertrate) += (indellength*((*m).insertrate));
 	(rates.insdeleterate) += (indellength*((*m).deleterate));
 
@@ -2444,17 +2444,17 @@ void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector
 	dashlength+=indellength;
 	insertioncount++;
 
-	vector<site> insertseq;  
+	vector<site> insertseq;
 
 	makeseq2(indellength, insertseq, sdiff, timeleft);
 
 	int currentev=updatepositions.at(10);
 
 	if(oldmethod) updatesubsums1(updatepositions,  sdiff, sums);
-	
+
 
 	updateindelsums35(updatepositions, indellength, sums);
-	
+
 //	vector<site> blank; for(int j=0; j<indellength; j++) blank.push_back(site(-1,-1,-1,-1,-1));
 
 	vector<site> blank=insertseq; for(int j=0; j<indellength; j++) {s=&(blank.at(j)); (*s).base=-1; (*s).subrate=0; (*s).timeleft=-1; }
@@ -2465,7 +2465,7 @@ void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector
 	//	if(currentev==0) cout<<"BLBL "<<currentev<<"  "<<insINT2.size()<<"  "<<insPOS2.at(currentev)<<endl;
 
 		insPOS2.at(currentev)=insINT2.size();
-				
+
 	//	if(currentev==0) cout<<"BLBL "<<currentev<<"  "<<insINT2.size()<<"  "<<insPOS2.at(currentev)<<endl;
 
 		insINT2.push_back(insert(insertseq,indellength,sdiff));
@@ -2496,7 +2496,7 @@ void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector
  for(int j=0; j<indellength; j++) {s=&(insertseq.at(j)); indellog<<(*s).base; }
  indellog<<endl;
 #endif
-		
+
 	}
 
 	for(int i=0; i<insINT.size(); i++)
@@ -2504,27 +2504,27 @@ void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector
 		if(i==label) continue;
 
 		ivec=&(insINT.at(i)); if((*ivec).empty()) continue;
-		
+
 		vector<int>* myinsPOS=&(insPOS.at(i));
 
 		int* temp=&((*myinsPOS).at(currentev));
 
-		if((*temp)==-1) 
-		{		
+		if((*temp)==-1)
+		{
 			(*temp)=(*ivec).size();
 
-			(*ivec).push_back(insert(blank,0,0)); 
-	
+			(*ivec).push_back(insert(blank,0,0));
+
 		}
 		else
-		{		
+		{
 			ii=&((*ivec).at(*temp));
 
 			ss=&((*ii).insertvec);
-	
+
 			if(inspos==-1)	(*ss).insert( (*ss).end(),          blank.begin(), blank.end() );
 			else			(*ss).insert( (*ss).begin()+inspos, blank.begin(), blank.end() );
-	
+
 		}
 
 	}
@@ -2536,7 +2536,7 @@ void doinsertion(double timeleft, int inspos, SUMS &sums, RATES &rates,   vector
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void func(int branchID, double branchlength, RATES &rates, vector<int> &newseqINT, vector<insert > &insINT2, 
+void func(int branchID, double branchlength, RATES &rates, vector<int> &newseqINT, vector<insert > &insINT2,
 		   SUMS &sums, vector<vector<insert > >  &insINT, int label, vector<int> &insPOS2, vector<vector<int> > &insPOS)
 {
 
@@ -2547,7 +2547,7 @@ void func(int branchID, double branchlength, RATES &rates, vector<int> &newseqIN
 
 
 //	cout<<"NEW BRANCH"<<endl;
-	vector<int> updatepositions;  
+	vector<int> updatepositions;
 
 	double currenttime=branchlength, lastlength;
 
@@ -2567,28 +2567,28 @@ void func(int branchID, double branchlength, RATES &rates, vector<int> &newseqIN
 int goodcount=0, badcount=0;
 
 	site* s;
-	insert* ii;  
-	vector<site>* ss; 
+	insert* ii;
+	vector<site>* ss;
 
-			
+
 
 
 //	cout<<"***********"<<endl;
 
 //	cout<<"branchID  "<<branchID<<endl;
- //cout<<"parent ID is "<<parentID<<endl; 
+ //cout<<"parent ID is "<<parentID<<endl;
 
 //	cout<<currenttime<<"  "<<exprand<<endl;
 #ifndef checkingindelsubs
-	if(oldmethod || (*m).insertrate!=0 || (*m).deleterate!=0  ) 
-#endif		
+	if(oldmethod || (*m).insertrate!=0 || (*m).deleterate!=0  )
+#endif
 #ifdef checkingindelsubs
 	if(mytest || oldmethod || (*m).insertrate!=0 || (*m).deleterate!=0  )
-#endif	
+#endif
 
-	while(currenttime>exprand) 
+	while(currenttime>exprand)
 	{
-	
+
 		//cout<<currenttime<<"\t"<<exprand<<"\t"<<currenttime-exprand<<endl;
 
 		currenttime-=exprand; //(((*m).Rrates).at(  ratevec.at(currentev)  ));
@@ -2598,27 +2598,27 @@ int goodcount=0, badcount=0;
 		int    intrand=0,   sumreached=0, indellength,  currentev=-99,  j, pos=-1, siteclass;
 
 		lastevent=event;
-		
-		
+
+
 		#ifdef checkingindelsubs
-			if(mytest) event=2; else 
+			if(mytest) event=2; else
 		#endif
 
 		event=chooseevent(rates);	// in core sequence sites: 2 for insertion, 4 for deletion
 										// in inserted sites:      3 for insertion, 5 for deletion
-		
+
 	//cout<<event<<endl;
 //		if(event!=0) cout<<"WO WO WO "<<event<<endl;
 
 	//	event=0;
 
-		
-		
+
+
 
 		if(event>1)
 		{
 			// choose indel length
-			
+
 			#ifdef fixedindels
 				indellength=fixedsize;
 			#endif
@@ -2641,60 +2641,60 @@ int goodcount=0, badcount=0;
 			else	    {indellength=(*m).delrandomsize( (*m).delI, (*m).delD, (*m).delV ); deletiontotlength+=indellength; }	//length of deletion
 
 			#ifdef printmaxindelsize
-				if(maxindelsize<indellength) 
+				if(maxindelsize<indellength)
 				{
 					cout<<"************************************"<<endl;
-					cout<<"max was "<<maxindelsize<<" now it is "<<indellength<<endl;					
+					cout<<"max was "<<maxindelsize<<" now it is "<<indellength<<endl;
 					cout<<"************************************"<<endl;
 					maxindelsize=indellength;
 				}
-			#endif 
+			#endif
 
 
 			#ifdef checkingindelsubs
 				}
 			#endif
-			
+
 
 
 			int takeoff=0;
 			int inspos=-1;
 
-			if(event==2) 
+			if(event==2)
 			{
 				double blahrand=1; while(blahrand==1 || blahrand==0){blahrand=mtrand1();} // prevents against pseudo-random numbers that are exactly equal to 1 or 0 to machine precision
-			
+
 				intrand=int( (rates.corelength)*blahrand ) ;	//position of insertion in core sequence
 
 
 
 				//else
-				currentev=findpos24(event, updatepositions, intrand, sums, sumreached); 
+				currentev=findpos24(event, updatepositions, intrand, sums, sumreached);
 
 			}
 			else if(event==4)
 			{
 				// if rates.corelength is 1 and rates.inslength=0 then every position in the core sequence has been deleted.
 				// "core deletions" still have a non-zero positive probability due to the possibility of
-				// deletions occuring before the core sequence and therefore deleting some of the beginning 
+				// deletions occuring before the core sequence and therefore deleting some of the beginning
 				// of the core sequence.  If there is nothing to delete we just ignore this.
 
 				if(rates.corelength==1 && rates.inslength==0) continue;
 
-				// e.g. Real sequence has length 100, at positions 1,2,...,99,100 but rates.corelength is 101.  
+				// e.g. Real sequence has length 100, at positions 1,2,...,99,100 but rates.corelength is 101.
 				//		Position 0 is a "fictitious" position in core sequence to allow "eternal link" for insertions.
 				//	    Let indellength be 5,
-				//		This means rates.corelength-1 +indellength-1 = 104  
+				//		This means rates.corelength-1 +indellength-1 = 104
 				//		So if x is the possible random numbers of int( (rates.corelength-1 +indellength-1)*mtrand1() )
 				//		 then x can be any of 0,1,....,103
-				//		So if intrand is the possible random numbers of int( (rates.corelength-1 +indellength-1)*mtrand1() )+1-indellength 
+				//		So if intrand is the possible random numbers of int( (rates.corelength-1 +indellength-1)*mtrand1() )+1-indellength
 				//		 then intrand can be any of -4,-3,-2,-1,0,1,2,....,99
 				//		IF intrand<0 then indellength+=intrand, and intrand=0, and inspos=0;
 				//		  i.e. intrand=-4, means *indellength is 1
 				//		  i.e. intrand=-3, means *indellength is 2
 				//		  i.e. intrand=-2, means *indellength is 3
 				//		  i.e. intrand=-1, means *indellength is 4
-				//		  so deletion begins at the beginning of the insertion before "real position" 1, 
+				//		  so deletion begins at the beginning of the insertion before "real position" 1,
 				// 			and has new length *indellength.
 				//		BUT IF intrand>=0, then we have 0<=intrand<=99
 				//		  and we know that position 0 is not allowed and that real sequence is 1,2,...,100
@@ -2704,7 +2704,7 @@ int goodcount=0, badcount=0;
 				oldindellength=indellength;
 				intrand=int( (rates.corelength-1 +indellength-1)*blahrand )+1-indellength ;  //position of deletion in core sequence
 ///			deletiontotlength-=indellength;
-				if(intrand<0) {indellength+=intrand; currentev=0; inspos=0; updatepositions.assign(11,0);  } 
+				if(intrand<0) {indellength+=intrand; currentev=0; inspos=0; updatepositions.assign(11,0);  }
 				else { intrand++; currentev=findpos24(event, updatepositions, intrand, sums, sumreached);  }
 //			deletiontotlength+=indellength;
 
@@ -2712,26 +2712,26 @@ int goodcount=0, badcount=0;
 
 
 			}
-			else 
+			else
 			{
 				double blahrand=1; intrand=0;
-				
+
 				while(blahrand==1){blahrand=mtrand1(); intrand=int( (rates.inslength)*blahrand );}// if(globalthisrep==327) cout<<"blahrand "<<blahrand<<"  rates.inslength "<<rates.inslength<<"  x "<<(rates.inslength)*blahrand <<"  intrand "<<intrand<<endl;}
-				
+
 				//while(intrand==rates.corelength) {intrand=int( (rates.corelength)*mtrand1() ) ;}  // prevents against pseudo-random numbers that are exactly equal to 1 to machine precision
 
-				//if(intrand==0)  {updatepositions.assign(11,0); inspos=0; currentev=0;}  else 
-				currentev=findpos35(event, updatepositions, intrand, sums, sumreached); 
+				//if(intrand==0)  {updatepositions.assign(11,0); inspos=0; currentev=0;}  else
+				currentev=findpos35(event, updatepositions, intrand, sums, sumreached);
 			}
-			
+
 
 			#ifdef checkingindelsubs1
 				intrand=0;
 				currentev=findpos24(event, updatepositions, intrand, sums, sumreached);
-				
+
 			#endif
 			#ifdef checkingindelsubs2
-				if(mytest) {cout<<"NOW NOW "<<newseqINT.size()<<endl; for(int p=0; p<newseqINT.size(); p++) { intrand=p; /*if(p%100==0) cout<<"P "<<p<<endl;*/ currentev=findpos24(event, updatepositions, intrand, sums, sumreached);	
+				if(mytest) {cout<<"NOW NOW "<<newseqINT.size()<<endl; for(int p=0; p<newseqINT.size(); p++) { intrand=p; /*if(p%100==0) cout<<"P "<<p<<endl;*/ currentev=findpos24(event, updatepositions, intrand, sums, sumreached);
 			#endif
 			#ifdef checkingindelsubs3
 				if(mytest) {for(int p=0; p<newseqINT.size(); p++) { intrand=p;/* if(p%100==0) cout<<"P "<<p<<endl; 	*/	currentev=findpos24(event, updatepositions, intrand, sums, sumreached);
@@ -2740,8 +2740,8 @@ int goodcount=0, badcount=0;
 		//	cout<<"HERE XXXXXX "<<currentev<<"  OH MY "<<rates.corelength<<endl;
 
 		//	if(event==4 && intrand==1 && indellength==1) cout<<"HERE 1 "<<currentev<<"  OH MY "<<rates.corelength<<endl;
-			
-			if(currentev==-1) 
+
+			if(currentev==-1)
 			{
 				cout<<"((((((((((((((((((((((((((((((((((((((("<<endl<<updatepositions.size()<<endl;
 				cout<<"blah"<<endl;
@@ -2805,13 +2805,13 @@ int goodcount=0, badcount=0;
 
 
 
-	
- 
+
+
 					}
 				//	cout<<"INTRAND 2 "<<intrand<<"\tSUMREACHED 2 "<<sumreached<<"\tINSPOS "<<inspos<<endl;
 			//		cout<<"BLAH 4"<<endl;
 				//	//			(*LOG)<<"2 "<<intrand<<"  "<<inspos<<"  "<<test<<"  "<<Isumreached<<"  "<<test+Isumreached<<endl;
-					if(inspos==-1)  
+					if(inspos==-1)
 					{
 						cout<<"ERROR 2 IN EVENT "<<event<<" IN funcnew()"<<endl;
 						cout<<rates.inslength<<"  2 "<<intrand<<"  "<<currentev<<"  "<<inspos<<"  "<<test<<"  "<<sumreached<<"  "<<test+sumreached<<endl;
@@ -2825,10 +2825,10 @@ int goodcount=0, badcount=0;
 
 
 		//	cout<<"HERE 2"<<endl;
-			if(event==2 || event==3) 
+			if(event==2 || event==3)
 				doinsertion(currenttime, inspos, sums, rates,  newseqINT,	updatepositions, insINT2, insINT, label, insPOS, insPOS2, indellength);
 		//	cout<<"HERE 3"<<endl;
-			if(event==4 || event==5) 
+			if(event==4 || event==5)
 				dodeletion(inspos, sums, rates, newseqINT, updatepositions, insINT2, insPOS2, newseqINT.size() /*rates.rootlength*/, indellength);
 //12345567
 			#ifdef checkingindelsubs1
@@ -2844,9 +2844,9 @@ int goodcount=0, badcount=0;
 			#ifdef checkingindelsubs3
 				}  mytest=false; }
 			#endif
-				
+
 		} //end of indel bracket
-		
+
 		else if(event==0)
 		{
 			// substitution in core sequence
@@ -2854,20 +2854,20 @@ int goodcount=0, badcount=0;
 			substitutioncount++;
 
 			double blahrand=1; while(blahrand==1 || blahrand==0){blahrand=mtrand1();} // prevents against pseudo-random numbers that are exactly equal to 1 or 0 to machine precision
-			
+
 			unirand=(rates.coresubrate)*blahrand;
 
-			currentev=findpos0(event, updatepositions, unirand,  sums, dsumreached); 
+			currentev=findpos0(event, updatepositions, unirand,  sums, dsumreached);
 
 			if(currentev==-1) {double yh=0; for(int fg=0; fg<sums.CSsums.size(); fg++) yh+=(sums.CSsums).at(fg);	cout<<endl<<endl<<" ERROR ERROR 0  yh total is "<<yh<<" as compared to "<<rates.coresubrate<<" rates and "<<unirand<<" unirand."<<endl<<"yh - rates "<<yh-rates.coresubrate<<" yh-unirand "<<yh-unirand<<" unirand - rates "<<unirand-rates.coresubrate<<endl; }
 
-			currentbase=newseqINT.at(currentev); 
+			currentbase=newseqINT.at(currentev);
 
-			ratepos=ratevec.at(currentev);  
+			ratepos=ratevec.at(currentev);
 
 			siteclass=siteclassvec.at(currentev);
 
-	
+
 			sdiff-=returnsitesubrate(ratepos,siteclass, currentbase);
 
 
@@ -2877,12 +2877,12 @@ int goodcount=0, badcount=0;
 
 			#endif
 
-		
+
 			newseqINT.at(currentev)=currentbase;
 
 
 			sdiff+=returnsitesubrate(ratepos,siteclass, currentbase);
-		
+
 
 			updatesubsums0(updatepositions, sdiff, sums);
 
@@ -2890,20 +2890,20 @@ int goodcount=0, badcount=0;
 //			(rates.coreinsertrate)+=idiff;
 //			(rates.coredeleterate)+=ddiff;
 			(rates.totalrate)     +=sdiff;
-			
-		} 
+
+		}
 		else if(event==1)
-		{	
+		{
 			//substitution in inserted sites
 
 
 			substitutioncount++;
-				
+
 			double blahrand=1; while(blahrand==1 || blahrand==0){blahrand=mtrand1();} // prevents against pseudo-random numbers that are exactly equal to 1 or 0 to machine precision
-			
+
 			unirand=(rates.inssubrate)*blahrand;
 
-			currentev=findpos1(event, updatepositions, unirand, sums, dsumreached); 
+			currentev=findpos1(event, updatepositions, unirand, sums, dsumreached);
 
 			if(currentev==-1) {double yh=0; for(int fg=0; fg<sums.ISsums.size(); fg++) yh+=(sums.ISsums).at(fg);	cout<<endl<<endl<<" ERROR ERROR 0  yh total is "<<yh<<" as compared to "<<rates.coresubrate<<" rates and "<<unirand<<" unirand."<<endl<<"yh - rates "<<yh-rates.inssubrate<<" yh-unirand "<<yh-unirand<<" unirand - rates "<<unirand-rates.inssubrate<<endl; }
 
@@ -2918,10 +2918,10 @@ int goodcount=0, badcount=0;
 			for(j=0; j<templength; j++)
 			{
 				s=&((*ss).at(j));
-				
+
 				dsumreached+=((*s).subrate);
-							
-				if(unirand<dsumreached) 
+
+				if(unirand<dsumreached)
 				{
 					pos=j;
 
@@ -2931,7 +2931,7 @@ int goodcount=0, badcount=0;
 					siteclass=(*s).siteclass;
 
 					#ifndef myevolvedebugger
-					
+
 					sdiff-=returnsitesubrate(ratepos,siteclass, currentbase);
 				//	idiff-=((*m).insertrates).at(currentbase);
 				//	ddiff-=((*m).deleterates).at(currentbase);
@@ -2939,19 +2939,19 @@ int goodcount=0, badcount=0;
 					chooseNEWbase(currentbase,(  ((*m).Jvecs).at(siteclass)  ).at(currentbase)  );		// choose new base
 
 					(*s).subrate=returnsitesubrate(ratepos,siteclass, currentbase);
-					
+
 					sdiff+=((*s).subrate);
 				//	idiff+=((*m).insertrates).at(currentbase);
 				//	ddiff+=((*m).deleterates).at(currentbase);
-					
+
 					#else
 
 					currentbase++;
-		
+
 					#endif
 
 					(*s).base=currentbase;
-						
+
 					updatesubsums1( updatepositions, sdiff,  sums);
 
 					((*ii).subrate)      +=sdiff;
@@ -2966,25 +2966,25 @@ int goodcount=0, badcount=0;
 				}
 			}
 
-			if(pos==-1) 
+			if(pos==-1)
 			{
 				badcount++;
-			
+
 				/*
 				cout<<"*********************"<<endl;
 
 				//cout<<"unirand was "<<itwas1<<" and Dsumreached was "<<itwas2<<endl;
 				//cout<<dsumreached-((*s).subrate)<<" last but one "<<endl;
-				//cout<<endl<<endl<<" ERROR ERROR 1: dsumreached was "<<dsumreached<<"  and unirand was "<<unirand<<" rates.inssubrate was "<<rates.inssubrate<<endl<<endl; 
-				
+				//cout<<endl<<endl<<" ERROR ERROR 1: dsumreached was "<<dsumreached<<"  and unirand was "<<unirand<<" rates.inssubrate was "<<rates.inssubrate<<endl<<endl;
+
 				//cout<<"**********************************"<<endl;
 
-				
+
 				double mynewsum=0;
 				for(j=0; j<templength; j++)
 				{
 					s=&((*ss).at(j));
-					
+
 					mynewsum+=((*s).subrate);
 				}
 				if((*ii).subrate!=mynewsum) cout<<" ii subrate then true sum "<<(*ii).subrate<<"  "<<mynewsum<<endl;
@@ -2997,7 +2997,7 @@ int goodcount=0, badcount=0;
 				cout<<"end dsum "<<dsumreached<<endl;
 				cout<<"*********************"<<endl;
 				*/
-				
+
 
 			}
 			else goodcount++;
@@ -3005,7 +3005,7 @@ int goodcount=0, badcount=0;
 		}
 		else cout<<"ERROR in choosing event for func"<<endl;
 
-		exprand=expmyrand(rates.totalrate); //*(((*m).Rrates).at(  ratevec.at(currentev)  )));	
+		exprand=expmyrand(rates.totalrate); //*(((*m).Rrates).at(  ratevec.at(currentev)  )));
 	//	cout<<"HERE 5"<<endl;
 	}
 
@@ -3037,19 +3037,19 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 				for(int core=1; core<rates.rootlength; core++)
 				{
 
-					currentbase=newseqINT.at(core); 
+					currentbase=newseqINT.at(core);
 
 					if(ratevec.at(core)==0 || currentbase==-1) continue;
 
 
-					PMat=Pt((*m).Qvec, (*m).basefreqs, branchlength*ratevec.at(core)); 
+					PMat=Pt((*m).Qvec, (*m).basefreqs, branchlength*ratevec.at(core));
 
 					chooseNEWbase(currentbase,PMat.at(currentbase));
-					
+
 					newseqINT.at(core)=currentbase;
 				}
 
-				for(int ins=0; ins<insINT2.size(); ins++) 
+				for(int ins=0; ins<insINT2.size(); ins++)
 				{
 					ss=&((insINT2.at(ins)).insertvec);
 
@@ -3057,22 +3057,22 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 					{
 						s=&((*ss).at(j));
 
-						if((*s).base!=-1 && (*s).rate!=0) 
+						if((*s).base!=-1 && (*s).rate!=0)
 						{
 							double lastleft=(*s).timeleft;
-							
-							if(lastleft ==-1) 
+
+							if(lastleft ==-1)
 							{
-								PMat=Pt((*m).Qvec, (*m).basefreqs, branchlength*((*s).rate)); 
+								PMat=Pt((*m).Qvec, (*m).basefreqs, branchlength*((*s).rate));
 
 								chooseNEWbase((*s).base, PMat.at((*s).base));
 							}
-							else 						
+							else
 							{
-								PMat=Pt((*m).Qvec, (*m).basefreqs, lastleft*((*s).rate));  
+								PMat=Pt((*m).Qvec, (*m).basefreqs, lastleft*((*s).rate));
 
 								chooseNEWbase((*s).base, PMat.at((*s).base));
-								
+
 								(*s).timeleft=-1;
 							}
 
@@ -3087,22 +3087,22 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 
 				vector<vector<vector<double> > > PMat2, PMat, blank;  vector<vector<double> > blank2; blank.assign((*m).numberofsiteclasses, blank2);
 
-				for(int b=0; b<(*m).numberofsiteclasses; b++) PMat.push_back(Pt((*m).Qvec, (*m).basefreqs, (((*m).Rrates).at(b))*branchlength)); 
+				for(int b=0; b<(*m).numberofsiteclasses; b++) PMat.push_back(Pt((*m).Qvec, (*m).basefreqs, (((*m).Rrates).at(b))*branchlength));
 
 				lastlength=-1;
 
-				for(int core=1; core<rates.rootlength; core++) 
+				for(int core=1; core<rates.rootlength; core++)
 				{
-					currentbase=newseqINT.at(core); 
+					currentbase=newseqINT.at(core);
 
 					if(ratevec.at(core)==0 || currentbase==-1) continue;
 
-					chooseNEWbase(currentbase,(PMat.at(siteclassvec.at(core))).at(currentbase)); 
+					chooseNEWbase(currentbase,(PMat.at(siteclassvec.at(core))).at(currentbase));
 					newseqINT.at(core)=currentbase;
 
 				}
 
-				for(int ins=0; ins<insINT2.size(); ins++) 
+				for(int ins=0; ins<insINT2.size(); ins++)
 				{
 					ss=&((insINT2.at(ins)).insertvec);
 
@@ -3110,11 +3110,11 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 					{
 						s=&((*ss).at(j));
 
-						if((*s).base!=-1 && (*s).rate!=0) 
+						if((*s).base!=-1 && (*s).rate!=0)
 						{
 							if((*s).timeleft ==-1) chooseNEWbase((*s).base, (PMat.at((*s).siteclass)).at((*s).base));
 
-							else if((*s).timeleft==lastlength) 
+							else if((*s).timeleft==lastlength)
 							{
 								if((PMat2.at((*s).siteclass)).empty())
 								{
@@ -3122,15 +3122,15 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 								}
 
 								chooseNEWbase(  (*s).base, (PMat2.at((*s).siteclass)).at((*s).base)  );
-			
+
 								(*s).timeleft=-1;
 							}
-							else 
+							else
 							{
 								lastlength=(*s).timeleft;
 
 								PMat2=blank;
-								
+
 								PMat2.at((*s).siteclass)=Pt((*m).Qvec, (*m).basefreqs, ((*s).rate)*lastlength) ;
 
 								chooseNEWbase(  (*s).base, (PMat2.at((*s).siteclass)).at((*s).base)  );
@@ -3141,38 +3141,38 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 						}
 					}
 				}
-			}			
+			}
 		}
-		else 
+		else
 		{
 			vector<vector<vector<double> > > PMat2, PMat, blank;  vector<vector<double> > blank2; blank.assign((*m).numberofsiteclasses, blank2);
-			
-			for(int nc=0; nc<(*m).numberofsiteclasses; nc++) PMat.push_back(Pt(((*m).Qvecs).at(nc), (*m).basefreqs, branchlength)); 
+
+			for(int nc=0; nc<(*m).numberofsiteclasses; nc++) PMat.push_back(Pt(((*m).Qvecs).at(nc), (*m).basefreqs, branchlength));
 
 			lastlength=-1;
 
 			//vector<int> fgh; fgh.assign(5,0);
-			for(int core=1; core<rates.rootlength; core++) 
+			for(int core=1; core<rates.rootlength; core++)
 			{
-				currentbase=newseqINT.at(core); 
+				currentbase=newseqINT.at(core);
 
 				if(currentbase==-1) continue;
-				
+
 				//int ghp=siteclassvec.at(core);  (fgh.at(ghp))++;
 				//int ghp=fgh.at(siteclassvec.at(core));  fgh.at(siteclassvec.at(core))=ghp+1;
-				
-				chooseNEWbase(currentbase,(PMat.at(siteclassvec.at(core))).at(currentbase)); 
-				
+
+				chooseNEWbase(currentbase,(PMat.at(siteclassvec.at(core))).at(currentbase));
+
 				newseqINT.at(core)=currentbase;
 			}
-	
+
 
 
 			//fgh.assign(5,0);
 //			cout<<"insINT2.size() "<<insINT2.size()<<endl;
-			for(int ins=0; ins<insINT2.size(); ins++) 
+			for(int ins=0; ins<insINT2.size(); ins++)
 			{
-			
+
 				ss=&((insINT2.at(ins)).insertvec);
 
 //				cout<<"(*ss).size() "<<(*ss).size()<<endl;
@@ -3181,12 +3181,12 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 				{
 					s=&((*ss).at(j));
 
-					if((*s).base!=-1) 
+					if((*s).base!=-1)
 					{
 						//(fgh.at((*s).siteclass))++;
 						if((*s).timeleft ==-1) chooseNEWbase((*s).base, (PMat.at((*s).siteclass)).at((*s).base));
 
-						else if((*s).timeleft==lastlength) 
+						else if((*s).timeleft==lastlength)
 						{
 							if((PMat2.at((*s).siteclass)).empty())
 							{
@@ -3194,15 +3194,15 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 							}
 
 							chooseNEWbase(  (*s).base, (PMat2.at((*s).siteclass)).at((*s).base)  );
-		
+
 							(*s).timeleft=-1;
 						}
-						else 
+						else
 						{
 							lastlength=(*s).timeleft;
 
 							PMat2=blank;
-							
+
 							PMat2.at((*s).siteclass)=Pt(((*m).Qvecs).at((*s).siteclass), (*m).basefreqs, lastlength) ;
 
 							chooseNEWbase(  (*s).base, (PMat2.at((*s).siteclass)).at((*s).base)  );
@@ -3225,11 +3225,11 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 
 int findnext(vector<double> currenttime)
 {
-	
+
 	double max=0;
 	int maxpos=-1;
 
-	for(int yg=0; yg<currenttime.size(); yg++) 
+	for(int yg=0; yg<currenttime.size(); yg++)
 	{
 		double x=currenttime.at(yg);
 		if(x>max)	{max=x; maxpos=yg;}
@@ -3240,8 +3240,8 @@ int findnext(vector<double> currenttime)
 ////////////////////
 // took "&" off of insPOS and insINT.  there is problem. on e.g. ((A,B)AB,(C,D)CD);  root to AB is ok, and AB to A is ok, but AB to B is wrong as insPOS and insINT changed
 
-void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RATES rates, int parentID, int &branchID, int totalpartitions, int partitionnumber, vector<vector<insert > >  &insINT,  
-				 /* vector<insert> &oldinsIN,*/ int parentlabel,  vector<vector<int> > &sequencesINT,  string mystring,/* vector<int>  &oldseqIN, */ 
+void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RATES rates, int parentID, int &branchID, int totalpartitions, int partitionnumber, vector<vector<insert > >  &insINT,
+				 /* vector<insert> &oldinsIN,*/ int parentlabel,  vector<vector<int> > &sequencesINT,  string mystring,/* vector<int>  &oldseqIN, */
 				  int blocknumber, int repnumber, int totalblock, int totalrep,  SUMS sums)
 {
 	// this function performs the main structure of evolving a particular branch.
@@ -3250,7 +3250,7 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 
 	int mymode=0, ev=0, label, newID=0;
 
-	
+
 
 #ifdef checkingindelsubs
 	if(parentlabel==0) mytest=true;
@@ -3269,10 +3269,10 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 
 	int siteclass=-1;
 
-	
+
 	// calculating tree length percent remaining to be evolved
 	currenttreelength-=length;
-	
+
 	int percent=int(100*(treelength-currenttreelength)/treelength);
 
 
@@ -3288,7 +3288,7 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 	insINT.at(label)=insINT.at(parentlabel);
 
 	insPOS.at(label)=insPOS.at(parentlabel);
-	
+
 	/*
 	sequencesINT.at(label)=oldseqIN;
 
@@ -3296,20 +3296,20 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 
 	insPOS.at(label)=oldinsPOSin;
 	*/
-	
+
 	//if(isitbranches) b=&(totalbranches.at( ((*p).mbsposvec).at(partitionnumber) ));
 
 	//cout<<"LABEL "<<label<<"    PARENTLABEL "<<parentlabel<<endl;
 
 
 
-		if(isitbranches) 
+		if(isitbranches)
 		{
 			//branches model OR  sites-branches model
-			
+
 			int oldoldpos=((*b).modelpositions).at(branchID);
-		
-			
+
+
 			branchID++; newID=branchID;
 
 
@@ -3317,36 +3317,36 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 			bool oldcontinuousgamma=(*m).continuousgamma;
 
 			//cout<<"old alpha is "<<oldalpha<<endl;
-		
+
 
 			int oldpos=((*b).modelpositions).at(parentID);
-			
-	
+
+
 			int mypos=((*b).modelpositions).at(branchID);
-		
+
 			//cout<<totalmodels.size()<<"  "<<mypos<<endl;
 			m=&(totalmodels.at( mypos ));
-		
+
 
 			if(oldpos!=mypos || oldoldpos!=mypos)
 			{
 				changezipfrandoms();
 
-				if( ((*m).continuousgamma||oldcontinuousgamma) && oldalpha!=(*m).alpha) 
+				if( ((*m).continuousgamma||oldcontinuousgamma) && oldalpha!=(*m).alpha)
 				{
 					bool nothing=false; if((*m).alpha==0) nothing=true; //  if(((*m).Rrates).size()>0) nothing=true;
 
 					for(int t1=0; t1<rates.rootlength; t1++)
 					{
 						double rand=mtrand1();
-			
-						if(rand<(*m).pinv) ratevec.at(t1)=0; 
-						else 
+
+						if(rand<(*m).pinv) ratevec.at(t1)=0;
+						else
 						{
 							if(nothing) ratevec.at(t1)=1/(1- ((*m).pinv) );
 							else ratevec.at(t1)=rndgamma(  ((*m).alpha)  )/(  ((*m).alpha)* (1- ((*m).pinv) )  );
 						}
-					}	
+					}
 
 
 
@@ -3355,24 +3355,24 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 					for(int t2=0; t2<(*ins).size(); t2++)
 					{
 						insert* ii=&((*ins).at(t2));
-			
+
 						vector<site>* s=&( (*ii).insertvec );
 
 						for(int t3=0; t3<(*s).size(); t3++)
 						{
 							site* ss=&((*s).at(t3));
 
-							if(  (*ss).base >=0  ) 
+							if(  (*ss).base >=0  )
 							{
 								double rand=mtrand1();
-				
-								if(rand<(*m).pinv) (*ss).rate=0; 
+
+								if(rand<(*m).pinv) (*ss).rate=0;
 								else
-								{ 
+								{
 									if(nothing) (*ss).rate=1/(1- ((*m).pinv) );
 									else (*ss).rate=rndgamma(  ((*m).alpha)  )/(  ((*m).alpha)* (1- ((*m).pinv) )  ) ;
 								}
-							}	
+							}
 						}
 					}
 
@@ -3390,10 +3390,10 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 					for(int t2=0; t2<(*ins).size(); t2++)
 					{
 						insert* ii=&((*ins).at(t2));
-			
+
 						vector<site>* s=&( (*ii).insertvec );
 
-						for(int t3=0; t3<(*s).size(); t3++) 
+						for(int t3=0; t3<(*s).size(); t3++)
 						{
 							site* ss=&((*s).at(t3));
 
@@ -3402,7 +3402,7 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 					}
 
 
-				} 
+				}
 			}//end of oldpos mypos if bracket
 
 		} //end of isitbranches if bracket
@@ -3411,24 +3411,24 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 
 		if(oldmethod)	buildsumsold(rates, sums, sequencesINT.at(label), insINT.at(label), insPOS.at(label));
 		else		buildsumsnew(rates, sums, sequencesINT.at(label), insINT.at(label), insPOS.at(label));
-			
 
 
-func(branchID, length, rates, sequencesINT.at(label), insINT.at(label),  sums, insINT, label, insPOS.at(label), insPOS); 
+
+func(branchID, length, rates, sequencesINT.at(label), insINT.at(label),  sums, insINT, label, insPOS.at(label), insPOS);
 
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	deletionlength=0;  
-	// deletionlength is global int.  simply resetting values so that it does not carry over from 
+	deletionlength=0;
+	// deletionlength is global int.  simply resetting values so that it does not carry over from
 	// the end of one sequence to the beginning of the first daughter sequence.
 
 
 
 
-//	string fccc; if(totalpartitions>1) {stringstream fc; fc<<partitionnumber+1; string fcc=fc.str();  fccc="Partition "+fcc+"                         ";} 
+//	string fccc; if(totalpartitions>1) {stringstream fc; fc<<partitionnumber+1; string fcc=fc.str();  fccc="Partition "+fcc+"                         ";}
 //	PrintProgress( blocknumber,  totalblock,  repnumber,  totalrep,  percent,fccc);	// print progress, percentage of treelength complete
 
 	if(mymode!=-1)
@@ -3438,8 +3438,8 @@ func(branchID, length, rates, sequencesINT.at(label), insINT.at(label),  sums, i
 		for(int asdf3=0; asdf3< mynewbits.size(); asdf3++)
 		{
 			string mynextbit=mynewbits.at(asdf3);
-			evolvebranch(insPOS, /*insPOS.at(label),*/ rates, newID, branchID, totalpartitions, partitionnumber, insINT, /*insINT.at(label),*/ label, sequencesINT,mynextbit, 
-			/*	sequencesINT.at(label),*/  blocknumber, repnumber, totalblock, totalrep, sums); 
+			evolvebranch(insPOS, /*insPOS.at(label),*/ rates, newID, branchID, totalpartitions, partitionnumber, insINT, /*insINT.at(label),*/ label, sequencesINT,mynextbit,
+			/*	sequencesINT.at(label),*/  blocknumber, repnumber, totalblock, totalrep, sums);
 
 
 
@@ -3457,7 +3457,7 @@ func(branchID, length, rates, sequencesINT.at(label), insINT.at(label),  sums, i
 
 //		if( !((*b).geneticcodefixed) )
 //		{
-	
+
 			(mycodes.at(partitionnumber)).at(label)=(*m).geneticcode;
 //		}
 
@@ -3486,7 +3486,7 @@ int settreeup(int partitionnumber, string &originaltree, string &nonamestree, st
 	originaltree=nowhitespace(originaltree);
 
 
-	if(printon==1) cout<<originaltree<<endl<<"dgfweg "<<endl<<" wegweg"; 
+	if(printon==1) cout<<originaltree<<endl<<"dgfweg "<<endl<<" wegweg";
 
 	error=gettaxanames(partitionnumber, originaltree,taxanames);
 
@@ -3508,7 +3508,7 @@ int settreeup(int partitionnumber, string &originaltree, string &nonamestree, st
 	startnodelabel++;
 	nonamestreewithnodes+='N'; stringstream sd1; sd1<<startnodelabel; string fv1=sd1.str(); nonamestreewithnodes+=fv1; nonamestreewithnodes+=';';
 	//nonamestreewithnodes+="ROOT;";
-	
+
 
 	// add interior node labels to the taxa names list
 	for(int gn2=taxanames.size(); gn2<startnodelabel+1; gn2++)
@@ -3526,21 +3526,21 @@ int settreeup(int partitionnumber, string &originaltree, string &nonamestree, st
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void sorttreeout(vector<vector<int> > &insPOS, RATES &rates, vector<vector<insert > > &insINT, int mynodelabel, string workingtree, int currentrep, int &ntaxa, vector<string> &taxanames, 
-				 vector<vector<int> > &sequencesINT,  int blocknumber, int repnumber, int totalblock, int totalrep, int partitionnumber, int totalpartitions, 
+void sorttreeout(vector<vector<int> > &insPOS, RATES &rates, vector<vector<insert > > &insINT, int mynodelabel, string workingtree, int currentrep, int &ntaxa, vector<string> &taxanames,
+				 vector<vector<int> > &sequencesINT,  int blocknumber, int repnumber, int totalblock, int totalrep, int partitionnumber, int totalpartitions,
 				SUMS &sums)
 
 {
 
 
 	// this function simply splits the tree into branches from the root and sends them off to be evolved one by one
-	string fccc; if(totalpartitions>1) {stringstream fc; fc<<partitionnumber+1; string fcc=fc.str();  fccc="Partition "+fcc+"                         ";} 
+	string fccc; if(totalpartitions>1) {stringstream fc; fc<<partitionnumber+1; string fcc=fc.str();  fccc="Partition "+fcc+"                         ";}
 
 //	PrintProgress( blocknumber,  totalblock,  repnumber,  totalrep,  0, fccc);
 
 	//	PrintProgress3( blocknumber,  totalblock,  repnumber,  totalrep,  0, fccc);
 
-	char c='Q'; 
+	char c='Q';
 	int mybracketlevel=0;
 	string abranch;
 
@@ -3552,22 +3552,22 @@ void sorttreeout(vector<vector<int> > &insPOS, RATES &rates, vector<vector<inser
 	{
 		// goes through guide tree and seperates into branches from root
 		c=workingtree[yu1];
-		if( (c==',' && mybracketlevel==0) || yu1==mylim) 
-		{	
+		if( (c==',' && mybracketlevel==0) || yu1==mylim)
+		{
 			////
 
 
 			// evolves a branch from root once parsing of that branch is complete
 			evolvebranch(insPOS, rates, currentbranchnumber,currentbranchnumber, totalpartitions, partitionnumber, insINT,
 				0, sequencesINT, abranch,  blocknumber, repnumber, totalblock, totalrep, sums);
-			
-			abranch="";											
+
+			abranch="";
 
 		}
-		else abranch+=c; 
-		
+		else abranch+=c;
+
 		if(c==')') mybracketlevel--; else if(c=='(') mybracketlevel++;
-		
+
 	}
 
 }
@@ -3583,30 +3583,30 @@ void controlerrorprint(int blocknumber, string instring, int linecount, string m
 	cout<<"\r ERROR occurred in block "<<blocknumber<<".  See below for details or consult LOG.txt                       ";
 
 	vector<string> toprint;
-	
+
 	string startline="ERROR in command line number ";
 	stringstream fd1; fd1<<linecount; string fd1s=fd1.str();
 	startline+=fd1s; startline+=" of control file:";
-	
+
 	toprint.push_back(startline);
 
 	string tempstring;
 	char c;
 	int themaxsize=startline.size();
-	
-	for(int j0=0; j0<instring.size(); j0++) 
+
+	for(int j0=0; j0<instring.size(); j0++)
 	{
-		c=instring[j0]; 
-		if(c=='\n') 
+		c=instring[j0];
+		if(c=='\n')
 		{
 			toprint.push_back(tempstring);
 			if(themaxsize<tempstring.size()) themaxsize=tempstring.size();
 			tempstring="";
-		} 
+		}
 		else tempstring+=c;
-	} 
+	}
 	toprint.push_back(tempstring);if(themaxsize<tempstring.size()) themaxsize=tempstring.size();
-	
+
 	string endline="Last Input was: "; endline+=myline; if(themaxsize<endline.size()) themaxsize=endline.size(); toprint.push_back(endline);
 
 	cout<<endl<<endl; (*LOG)<<endl;
@@ -3618,17 +3618,17 @@ void controlerrorprint(int blocknumber, string instring, int linecount, string m
 		toprint.at(i0)=tempstring2;
 	}
 
-	cout<<endl<<" +";  (*LOG)<<endl<<"+";  
+	cout<<endl<<" +";  (*LOG)<<endl<<"+";
 	for(int i1=0; i1<themaxsize+2; i1++) {cout<<"-"; (*LOG)<<"-";}
 	cout<<"+"<<endl;	(*LOG)<<"+"<<endl;
-	
+
 	for(int i2=0; i2<toprint.size(); i2++) {cout<<" | "<<toprint.at(i2)<<" |"<<endl; (*LOG)<<"| "<<toprint.at(i2)<<" |"<<endl;}
-	
-	cout<<" +"; (*LOG)<<"+"; 
+
+	cout<<" +"; (*LOG)<<"+";
 	for(int i3=0; i3<themaxsize+2; i3++) {cout<<"-"; (*LOG)<<"-";}
 	cout<<"+"<<endl<<endl;	(*LOG)<<"+"<<endl<<endl;
 
-	
+
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -3640,12 +3640,12 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 
 
 	// this function provides the skeleton structure of printing results to file.
-	// the actual translation of integer sequences to alphabetical ones, and the 
+	// the actual translation of integer sequences to alphabetical ones, and the
 	// printing to file of these sequences is performed by makeprintseq
 
 
-	int Mlength=mylength-numberofpartitions+dashlength; int lastlengthcount=Mlength;  
-	//string length; 
+	int Mlength=mylength-numberofpartitions+dashlength; int lastlengthcount=Mlength;
+	//string length;
 	//stringstream L;
 
 	#ifdef checkpinv
@@ -3663,10 +3663,10 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 	cout<<endl<<" WARNING: checkpinv compiler option should not be used when indels are on"<<endl<<endl;
 	double inspinvcount=0, corepinvcount=0, instotalcount=0, coretotalcount=ratevec.size();
 
-	for(int i=1; i<ratevec.size(); i++) 
+	for(int i=1; i<ratevec.size(); i++)
 	{
 		coretotalcount++;
-		if(ratevec.at(i)==0) corepinvcount++; 
+		if(ratevec.at(i)==0) corepinvcount++;
 	}
 
  	(TinsPOS.at(j)).at(i), (TsequencesINT.at(j)).at(i), (TinsINT.at(j)).at(i),
@@ -3682,7 +3682,7 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 		vector<site>* s=&( (*ii).insertvec );
 
 		for(int j=0; j<(*s).size(); j++)
-		{	
+		{
 			#ifdef checkpinv
 				if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
 				if(((*s).at(j)).rate==0) continue;
@@ -3710,12 +3710,12 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 
 		// choose file extension depending on desired output type
 		if(outputtype==1) endbit+=fastaextension; else if(outputtype==2) endbit+=phylipextension; else if(outputtype==3) endbit+=nexusextension;
-		filename1+=currentrepS; 
+		filename1+=currentrepS;
 		filename1+=endbit;
-		filename2+=currentrepS; 
-		filename2+="."; 
+		filename2+=currentrepS;
+		filename2+=".";
 		filename2+=fastaextension; //filename2+=endbit;   // unaligned sequences always output in FASTA format
-		filename3+=currentrepS; 
+		filename3+=currentrepS;
 		filename3+=endbit;
 
 	//	ofstream results(filename1.c_str());
@@ -3725,15 +3725,15 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 		(*results).clear();  (*results2).clear();
 
 	//	(*results)=new ofstream;
-		(results)->open(filename1.c_str());   	
+		(results)->open(filename1.c_str());
 	//	(*results2)=new ofstream;
-		(results2)->open(filename2.c_str());  	
+		(results2)->open(filename2.c_str());
 
-		(*results)<<paupstart;		
+		(*results)<<paupstart;
 	}
 
 	//results2<<" "; results3<<" ";
-	
+
 #ifdef INDELLOG
 	(*results)<<"*********************************************************************************"<<endl;
 	(*results)<<origtreewithnodes<<endl;
@@ -3741,29 +3741,29 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 #endif
 
 		if(outputtype==3)
-		{	
+		{
 			// header for nexus file format
-			(*results)<<"#NEXUS"<<endl<<endl<<"BEGIN DATA;"<<endl<<"   DIMENSIONS NTAX = "<<ntaxa<<"  NCHAR = "<<fixed<<setprecision(0)<<Mlength<<";"<<"   FORMAT DATATYPE = "; 
+			(*results)<<"#NEXUS"<<endl<<endl<<"BEGIN DATA;"<<endl<<"   DIMENSIONS NTAX = "<<ntaxa<<"  NCHAR = "<<fixed<<setprecision(0)<<Mlength<<";"<<"   FORMAT DATATYPE = ";
 			if(type==2) (*results)<<"PROTEIN"; else (*results)<<"DNA"; (*results)<<"  MISSING = ?  GAP = - ;"<<endl<<"   MATRIX"<<endl;
 		}
 
 		// header for phylip format
 		if(outputtype==2) (*results)<<ntaxa<<"  "<<fixed<<setprecision(0)<<Mlength<<""<<endl;
 		int printcount=0;
-		
+
 	//	int seqINTsize=sequencesINT.size();
 	//	(*results)<<"     "<<endl; (*results2)<<"     "<<endl;
 		for(int i=1; i<ntaxa+1; i++)
-		{	
-			
+		{
+
 			//Leaf sequences (true sequences in (*results2), and true alignment in results)
 			(*results2)<<">";
-			if(outputtype==1) (*results)<<">"; else if(outputtype==3) (*results)<<"   ";  
+			if(outputtype==1) (*results)<<">"; else if(outputtype==3) (*results)<<"   ";
 			(*results)<<taxaspacenames.at(i);
 			(*results2)<<taxaspacenames.at(i);
-			if(outputtype==1) (*results)<<""<<endl; 
+			if(outputtype==1) (*results)<<""<<endl;
 			(*results2)<<""<<endl;
-				
+
 			printcount++;
 
 		//	PrintProgress2( blocknumber,  numberofevolveblocks,  thisrep,  reps, printcount);
@@ -3783,7 +3783,7 @@ if(ancestralprint)
 		if(fileperrep)
 		{
 		//	(*results3)=new ofstream;
-			
+
 			(*results3).close(); (*results3).clear();
 			(results3)->open(filename3.c_str());
 		}
@@ -3791,22 +3791,22 @@ if(ancestralprint)
 			if(!printonlyroot)
 			{//cout<<endl<<" Printing ancestral sequences:"<<endl;
 				// This if loop will print the ancestral sequences into results3
-				// but only if there is one partition. 
+				// but only if there is one partition.
 				// This is because a multi-partition simulation could have different underlying guide tree topologies
 				for(int i=ntaxa+1; i<(TsequencesINT.at(0)).size()-1; i++)
-				{	
+				{
 					//Ancestral Sequences into results3
 					//if(hf2!=seqINTsize-1)
 					//{
-						if(outputtype==1) (*results3)<<">"; 
+						if(outputtype==1) (*results3)<<">";
 						(*results3)<<"N"<<i<<"\t";
-						if(outputtype==1) (*results3)<<""<<endl; 
-					
+						if(outputtype==1) (*results3)<<""<<endl;
+
 						printcount++;
 
 				//		PrintProgress2( blocknumber,  numberofevolveblocks,  thisrep,  reps, printcount);
-						
-						for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(i), (TsequencesINT.at(j)).at(i),(TinsINT.at(j)).at(i),i,(*results3), 1); 
+
+						for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(i), (TsequencesINT.at(j)).at(i),(TinsINT.at(j)).at(i),i,(*results3), 1);
 						(*results3)<<"     "<<endl;
 
 					//}
@@ -3815,16 +3815,16 @@ if(ancestralprint)
 			}
 
 				//Root Sequnces
-		
-		if(outputtype==1) (*results3)<<">"; 
+
+		if(outputtype==1) (*results3)<<">";
 		(*results3)<<"ROOT\t";
-		if(outputtype==1) (*results3)<<""<<endl; 
+		if(outputtype==1) (*results3)<<""<<endl;
 
 		printcount++;
 //		PrintProgress2( blocknumber,  numberofevolveblocks,  thisrep,  reps, printcount);
 //		cout<<" Printing root."<<endl;
-		
-		for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(0), (TsequencesINT.at(j)).at(0),(TinsINT.at(j)).at(0),0,*results3, 1); 
+
+		for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(0), (TsequencesINT.at(j)).at(0),(TinsINT.at(j)).at(0),0,*results3, 1);
 		(*results3)<<"     "<<endl;
 	}
 	else
@@ -3836,63 +3836,63 @@ if(ancestralprint)
 		{
 		//	cout<<endl<<" Printing ancestral sequences:"<<endl;
 			// This if loop will print the ancestral sequences into (*results3)
-			// but only if there is one partition. 
+			// but only if there is one partition.
 			// This is because a multi-partition simulation could have different underlying guide tree topologies
 			for(int i=ntaxa+1; i<(TsequencesINT.at(0)).size()-1; i++)
-			{	
+			{
 				//Ancestral Sequences into (*results3)
 				if(outputtype==1) (*results)<<">";
-				stringstream hg; hg<<i; string rf="N"+hg.str();  
+				stringstream hg; hg<<i; string rf="N"+hg.str();
 				//results<<"N"<<i<<"\t";
 				(*results)<<rf; for(int gv=0; gv<dsize-rf.size(); gv++) (*results)<<" ";
-				if(outputtype==1) (*results)<<""<<endl; 
-		
+				if(outputtype==1) (*results)<<""<<endl;
+
 				printcount++;
 		//		PrintProgress2( blocknumber,  numberofevolveblocks,  thisrep,  reps, printcount);
-				
-				for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(i), (TsequencesINT.at(j)).at(i),(TinsINT.at(j)).at(i),i,*results, 1); 
+
+				for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(i), (TsequencesINT.at(j)).at(i),(TinsINT.at(j)).at(i),i,*results, 1);
 				(*results)<<"     "<<endl;
 
 			}
-	
+
 		}
 			//Root Sequnces
-		
-		if(outputtype==1) (*results)<<">"; 
+
+		if(outputtype==1) (*results)<<">";
 		(*results)<<"ROOT";
 		for(int gv=0; gv<dsize-4; gv++) (*results)<<" ";
-				
-		if(outputtype==1) (*results)<<""<<endl; 
+
+		if(outputtype==1) (*results)<<""<<endl;
 
 		printcount++;
 		//PrintProgress2( blocknumber,  numberofevolveblocks,  thisrep,  reps, printcount);
 	//	cout<<" Printing root."<<endl;
 
-		for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(0), (TsequencesINT.at(j)).at(0),(TinsINT.at(j)).at(0),0,*results, 1); 
+		for(int j=0; j<TsequencesINT.size(); j++) makeprintseqINT(j,lastlengthcount, (TinsPOS.at(j)).at(0), (TsequencesINT.at(j)).at(0),(TinsINT.at(j)).at(0),0,*results, 1);
 		(*results)<<"     "<<endl;
 
 	}
-		
-	
+
+
 }
 
 
 		if(outputtype==3) (*results)<<"   ;"<<endl<<"END;"<<endl;
 
 //		(*results)<<"     "<<endl;(*results2)<<"     "<<endl;
-		
+
 		if(fileperrep) (*results)<<paupend; else (*results)<<paupmiddle;
-		
+
 		(*results)<<"     "<<endl;(*results2)<<"     "<<endl;
-		
-		
+
+
 
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3917,18 +3917,18 @@ int printfreqs(vector<int> &seq)
 
 //		cout<<"mysize "<<mysize<<endl;
 //		cout<<seq.at(y)<<" seq.at(y)"<<endl;
-		
+
 //		cout<<"CDU.size() "<<CDU.size()<<endl;
 
 		int seqpos=seq.at(y);
-		
+
 		string cod=CDU.at(seqpos);
 
 		for(int k=0; k<stops.size(); k++) if(seqpos==stops.at(k)) {if(stopcount<10) cout<<"STOP CODON "<<seqpos<<"  "<<cod<<endl; stopcount++;}
 
 //		cout<< cod<<endl;
 //		cout<<y<<" y2"<<endl;
-		for(i=0; i<3; i++) 
+		for(i=0; i<3; i++)
 		{
 //			cout<<i<<" i1"<<endl;
 			if(cod[i]=='T') (counts[i][0])++;
@@ -3951,18 +3951,18 @@ return 0;
 }
 
 //////////////////////////////////////////
-void setuprootseq(RATES &rates,	vector<int> &rootseqINT, int partitionnumber, vector<vector<int> > &sequencesINT, vector<vector<int> > &insPOS, 
+void setuprootseq(RATES &rates,	vector<int> &rootseqINT, int partitionnumber, vector<vector<int> > &sequencesINT, vector<vector<int> > &insPOS,
 				  vector<vector<insert > > &insINT, SUMS &sums)
 {
 
 	int mysize=taxanames.size();
 
 
-	vector<int> blank1;		blank1.reserve(rates.rootlength);	 
-	vector<insert> blank2;  //blank2.assign(rates.rootlength, insert());  
+	vector<int> blank1;		blank1.reserve(rates.rootlength);
+	vector<insert> blank2;  //blank2.assign(rates.rootlength, insert());
 
-	sequencesINT.clear();	sequencesINT.assign(mysize,blank1); 
-	insPOS.clear();			insPOS.assign(mysize,blank1); 
+	sequencesINT.clear();	sequencesINT.assign(mysize,blank1);
+	insPOS.clear();			insPOS.assign(mysize,blank1);
 	insINT.clear();			insINT.assign(mysize,blank2);
 
 	//for(int gn1=0; gn1<taxanames.size()+1; gn1++) {sequencesINT.push_back(blank1); insINT.push_back(blank2); 	cout<<"QWERTY   6-"<<gn1<<endl;}
@@ -3974,48 +3974,48 @@ void setuprootseq(RATES &rates,	vector<int> &rootseqINT, int partitionnumber, ve
 
 	if(rootseqINT.empty()) {//cout<<"rates.rootlength "<<rates.rootlength<<endl;
 		 makeseq(rates.rootlength, sequencesINT.at(0));  }
-	else 
+	else
 	{
-		(sequencesINT.at(0)).push_back(-1); 
+		(sequencesINT.at(0)).push_back(-1);
 		(sequencesINT.at(0)).insert((sequencesINT.at(0)).end(), rootseqINT.begin(),rootseqINT.end());
 		rootseqINT.clear();
 	}
 
 	vector<site> blank; (insINT.at(0)).push_back(insert(blank,0,0));
 
-	(insPOS.at(0)).assign(rates.rootlength,-1);                  
-	
+	(insPOS.at(0)).assign(rates.rootlength,-1);
+
 /////////////////////
 	(insPOS.at(0)).at(0)=0;
 /////////////////////
 
 #else
 
-	vector<site> insertseq;  (insINT.at(0)).push_back(insert(insertseq,0,0)); (insPOS.at(0)).push_back(-1); 
+	vector<site> insertseq;  (insINT.at(0)).push_back(insert(insertseq,0,0)); (insPOS.at(0)).push_back(-1);
 
-	 
+
 
 	int num=int(  double(rates.rootlength - 1)/double(10) );
 
 	for(int yg=0; yg<num; yg++) (sequencesINT.at(0)).push_back(-1);
-	
+
 	double sdiff=0,timeleft=0;
 	for(int pp=0; pp<num; pp++)
 	{
 		insertseq.clear(); sdiff=0;
 		makeseq2(10, insertseq, sdiff, timeleft);
-       
+
 		(insPOS.at(0)).push_back(pp);
 		(insINT.at(0)).push_back(insert(insertseq,10,sdiff));
 	}
-				
+
 	rates.corelength=1; rates.rootlength=rates.partitionlength=num; rates.inslength=10*num;
 
 
 
 //	cout<<(insPOS.at(0)).size()<<"  "<<(sequencesINT.at(0)).size()<<"  "<<(insINT.at(0)).size()<<endl;
 
-#endif	
+#endif
 //	cout<<"WHEREww  "<<(sequencesINT.at(0)).size()<<endl;
 	if(oldmethod){ buildsumsold(rates, sums, sequencesINT.at(0), insINT.at(0), insPOS.at(0));	}
 	else         { buildsumsnew(rates, sums, sequencesINT.at(0), insINT.at(0), insPOS.at(0));	}
@@ -4036,7 +4036,7 @@ void printinsertinfo()
 	(*LOG)<<endl;
 
 	string tss,css,ass,gss;  format(tss,css,ass,gss,insertioncount/T1,deletioncount/T1,T1/T2,substitutioncount/T2);
-		
+
 	(*LOG)<<"  Actual Insertion : Deletion Ratio  "<<tss<<" : "<<css<<               "\t(Total indel rate = 1)"<<endl;
 	if(oldmethod) (*LOG)<<"  Actual Indel : Substitution Ratio  "<<ass<<" : "<<gss<< "\t(Total event rate = 1)"<<endl;
 	(*LOG)<<"  Actual average insertion length    "<<insertiontotlength<<endl;
@@ -4049,10 +4049,10 @@ void printinsertinfo()
 ////////////////////////////////////////////////////////////////////////////////////
 
 
-				
+
 
 void printoutrates(int &sitecount,int partition, ofstream &ratesout, vector<int> &inspos, vector<insert>  &insertstuff)
-{			
+{
 
 //	ratesout<<"Site\tRate\tInserted?\tPartition"<<endl;
 
@@ -4066,22 +4066,22 @@ void printoutrates(int &sitecount,int partition, ofstream &ratesout, vector<int>
 
 			vector<site>* s=&( (*ii).insertvec );
 
-			for(int j=0; j<(*s).size(); j++) 
+			for(int j=0; j<(*s).size(); j++)
 			{
-				sitecount++; ratesout<<sitecount<<"\t"; 
-				if((*m).continuousgamma)  {} else ratesout<<((*s).at(j)).siteclass+1<<"\t"; 
+				sitecount++; ratesout<<sitecount<<"\t";
+				if((*m).continuousgamma)  {} else ratesout<<((*s).at(j)).siteclass+1<<"\t";
 				ratesout<<((*s).at(j)).rate<<"\t"<<partition<<"\tINSERTION"<<endl;
 			}
 		}
 
-		vector<string> ratevec2,sitevec2,insYN; int maxsize=0,maxsize2=0,diff2, diff; 
+		vector<string> ratevec2,sitevec2,insYN; int maxsize=0,maxsize2=0,diff2, diff;
 
 		for(i=1 ; i<ratevec.size(); i++)
-		{	
+		{
 			if(i!=0)
 			{
 				stringstream ds; ds<<ratevec.at(i);      string sd=ds.str(); diff=sd.size(); if(diff>maxsize) maxsize=diff; ratevec2.push_back(sd); insYN.push_back(" ");
-				stringstream dq; dq<<siteclassvec.at(i)+1; string sq=dq.str(); diff2=sq.size(); if(diff2>maxsize2) maxsize2=diff; sitevec2.push_back(sq); 
+				stringstream dq; dq<<siteclassvec.at(i)+1; string sq=dq.str(); diff2=sq.size(); if(diff2>maxsize2) maxsize2=diff; sitevec2.push_back(sq);
 			}
 
 			if(inspos.at(i)!=-1)
@@ -4092,36 +4092,36 @@ void printoutrates(int &sitecount,int partition, ofstream &ratesout, vector<int>
 
 				vector<site>* s=&( (*ii).insertvec );
 
-				for(int j=0; j<(*s).size(); j++) 
+				for(int j=0; j<(*s).size(); j++)
 				{
 					stringstream ds; ds<<((*s).at(j)).rate;      string sd=ds.str(); diff=sd.size(); if(diff>maxsize) maxsize=diff; ratevec2.push_back(sd); insYN.push_back("INSERTION");
-					stringstream dq; dq<<((*s).at(j)).siteclass+1; string sq=dq.str(); diff=sq.size(); if(diff2>maxsize2) maxsize2=diff; sitevec2.push_back(sq); 
+					stringstream dq; dq<<((*s).at(j)).siteclass+1; string sq=dq.str(); diff=sq.size(); if(diff2>maxsize2) maxsize2=diff; sitevec2.push_back(sq);
 				}
 			}
-		}  
+		}
 
 
-		if((*m).continuousgamma) 
+		if((*m).continuousgamma)
 		{
-			for(i=0; i<ratevec2.size(); i++) 
-			{	
+			for(i=0; i<ratevec2.size(); i++)
+			{
 				sitecount++;
-				string s1=ratevec2.at(i); diff=maxsize-s1.size();   for(int l=0; l<diff; l++) s1+=" "; 
-				string s2=sitevec2.at(i); diff=maxsize2-s2.size();   for(int l2=0; l2<diff; l2++) s2+=" "; 
-				
+				string s1=ratevec2.at(i); diff=maxsize-s1.size();   for(int l=0; l<diff; l++) s1+=" ";
+				string s2=sitevec2.at(i); diff=maxsize2-s2.size();   for(int l2=0; l2<diff; l2++) s2+=" ";
+
 				ratesout<<sitecount<<"\t"<<s1<<"   \t"<<partition<<"\t"<<insYN.at(i)<<endl;
-			}  
+			}
 		}
 		else
 		{
-			for(i=0; i<ratevec2.size(); i++) 
-			{	
+			for(i=0; i<ratevec2.size(); i++)
+			{
 				sitecount++;
-				string s1=ratevec2.at(i); diff=maxsize-s1.size();   for(int l=0; l<diff; l++) s1+=" "; 
-				string s2=sitevec2.at(i); diff=maxsize2-s2.size();   for(int l2=0; l2<diff; l2++) s2+=" "; 
-				
+				string s1=ratevec2.at(i); diff=maxsize-s1.size();   for(int l=0; l<diff; l++) s1+=" ";
+				string s2=sitevec2.at(i); diff=maxsize2-s2.size();   for(int l2=0; l2<diff; l2++) s2+=" ";
+
 				ratesout<<sitecount<<"\t"<<s2<<"\t"<<s1<<"   \t"<<partition<<"\t"<<insYN.at(i)<<endl;
-			}  
+			}
 		}
 	}
 	else
@@ -4133,18 +4133,18 @@ void printoutrates(int &sitecount,int partition, ofstream &ratesout, vector<int>
 			insert* ii=&(insertstuff.at(inspos.at(0)));
 
 			vector<site>* s=&( (*ii).insertvec );
-			
+
 			//for(int j=0; j<(*s).size(); j++) {sitecount++; ratesout<<sitecount<<"\t"<<myrates.at(((*s).at(j)).siteclass)<<"\tY\t"<<partition<<endl;}
 			for(int j=0; j<(*s).size(); j++) {sitecount++; ratesout<<sitecount<<"\t"<<((*s).at(j)).siteclass<<"\t"<<partition<<"\tINSERTION"<<endl;}
 		}
 
 
 		for(int i=1; i<ratevec.size(); i++)
-		{	
-			sitecount++; 
-			
+		{
+			sitecount++;
+
 			ratesout<<sitecount<<"\t"<<siteclassvec.at(i) <<"\t"<<partition<<endl;
-			
+
 			if(inspos.at(i)!=-1)
 			{
 				insert* ii=&(insertstuff.at(inspos.at(i)));
@@ -4155,7 +4155,7 @@ void printoutrates(int &sitecount,int partition, ofstream &ratesout, vector<int>
 
 				for(int j=0; j<(*s).size(); j++) {sitecount++; ratesout<<sitecount<<"\t"<<((*s).at(j)).siteclass <<"\t"<<partition<<"\tINSERTION"<<endl;}
 			}
-		}  
+		}
 	}
 
 }
@@ -4172,8 +4172,8 @@ int main(int argc, char* argv[])
 	//creates control file for tests
 	ofstream x("controldist.txt");
 
-	x<<endl<<"// controldist"<<endl<<""<<endl<<"// Example control file to check indel length distributions."<<endl<<""<<endl<<"// Each indel model below will be read in and 10m indellengths will be calculated and timed"<<endl<<""<<endl<<"// results are output in lengthdist.txt and should be e.g. copy and pasted in excel for easy viewing"<<endl<<endl<<"[TYPE] CODON 1              // codon simulation using method 1"<<endl<<""<<endl<<"//MODEL decimal integer"<<endl<<"//USER filename"<<endl<<"//NB q r"<<endl<<"//NBOLD q r"<<endl<<"//POW a M"<<endl<<"//POWCUM a M"<<endl<<"//POWDAWG a M"<<endl<<"//LAV b M"<<endl<<""<<endl<<"[MODEL] USER"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel] USER userexample.txt"<<endl<<""<<endl<<"[MODEL] LAV"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  LAV 2.2 1000"<<endl<<""<<endl<<"[MODEL] NB"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel] NB 0.5 4"<<endl<<""<<endl<<"[MODEL] NBOLD"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel] NBOLD 0.5 4"<<endl<<""<<endl<<"[MODEL] POW"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  POW 2.2 1000"<<endl<<""<<endl<<"[MODEL] POWCUM"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  POWCUM 2.2 1000"<<endl<<""<<endl<<"[MODEL] POWDAWG"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  POWDAWG 2.2 1000"<<endl<<""<<endl<<""<<endl<<"// stuff below is just to avoid errors in control file reading function."<<endl<<""<<endl<<"[TREE] t1 [user] "<<endl<<"(a:0.1, b:0.2);"<<endl<<""<<endl<<"[PARTITIONS]   p2"<<endl<<"[t1 USER 10]"<<endl<<""<<endl<<"[EVOLVE]   "<<endl<<"p2 1 p2 "<<endl;  
-		
+	x<<endl<<"// controldist"<<endl<<""<<endl<<"// Example control file to check indel length distributions."<<endl<<""<<endl<<"// Each indel model below will be read in and 10m indellengths will be calculated and timed"<<endl<<""<<endl<<"// results are output in lengthdist.txt and should be e.g. copy and pasted in excel for easy viewing"<<endl<<endl<<"[TYPE] CODON 1              // codon simulation using method 1"<<endl<<""<<endl<<"//MODEL decimal integer"<<endl<<"//USER filename"<<endl<<"//NB q r"<<endl<<"//NBOLD q r"<<endl<<"//POW a M"<<endl<<"//POWCUM a M"<<endl<<"//POWDAWG a M"<<endl<<"//LAV b M"<<endl<<""<<endl<<"[MODEL] USER"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel] USER userexample.txt"<<endl<<""<<endl<<"[MODEL] LAV"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  LAV 2.2 1000"<<endl<<""<<endl<<"[MODEL] NB"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel] NB 0.5 4"<<endl<<""<<endl<<"[MODEL] NBOLD"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel] NBOLD 0.5 4"<<endl<<""<<endl<<"[MODEL] POW"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  POW 2.2 1000"<<endl<<""<<endl<<"[MODEL] POWCUM"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  POWCUM 2.2 1000"<<endl<<""<<endl<<"[MODEL] POWDAWG"<<endl<<"[submodel] 0 2.5 0.5"<<endl<<"[indelmodel]  POWDAWG 2.2 1000"<<endl<<""<<endl<<""<<endl<<"// stuff below is just to avoid errors in control file reading function."<<endl<<""<<endl<<"[TREE] t1 [user] "<<endl<<"(a:0.1, b:0.2);"<<endl<<""<<endl<<"[PARTITIONS]   p2"<<endl<<"[t1 USER 10]"<<endl<<""<<endl<<"[EVOLVE]   "<<endl<<"p2 1 p2 "<<endl;
+
 	//creates user model for tests that should mirror one of the distributions calculated mathematically
 	ofstream y("userexample.txt");
 
@@ -4227,8 +4227,8 @@ y<<"0.000000000025"<<endl<<"0.000000000022"<<endl<<"0.00000000002"<<endl<<"0.000
 
 	//	cout<<"WHERE 0 " <<endl;
 		vector<int> counts; counts.assign(1001,0);
-	
-	//	cout<<"WHERE 9"<<endl;					
+
+	//	cout<<"WHERE 9"<<endl;
 		m=&(totalmodels.at(i));
 
 		changezipfrandoms();
@@ -4245,14 +4245,14 @@ y<<"0.000000000025"<<endl<<"0.000000000022"<<endl<<"0.00000000002"<<endl<<"0.000
 			total++; mean+=indellength;
 	//	cout<<"WHERE 6 "<<(*m).name<<endl;
 			if(indellength>1000) {goal++; continue;}
-			
+
 	//	cout<<"WHERE 5 "<<indellength<<endl;
 			(counts.at(indellength))++;
-			
+
 	//	cout<<"WHERE 4"<<endl;
 		}
 
-		
+
 		means.push_back(double(mean)/double(total)); means2.push_back((*m).delmeansize);
 		finish = clock();
 	   timestaken.push_back( (double)(finish - start) / CLOCKS_PER_SEC);
@@ -4262,7 +4262,7 @@ y<<"0.000000000025"<<endl<<"0.000000000022"<<endl<<"0.00000000002"<<endl<<"0.000
 
 	//	cout<<"WHERE 2 "<<endl;
 		for(int j=0; j<lines.size(); j++) (lines.at(j)).push_back(double(counts.at(j))/double(total));
-	
+
 
 
 	//	cout<<"WHERE 1"<<endl;
@@ -4275,9 +4275,9 @@ y<<"0.000000000025"<<endl<<"0.000000000022"<<endl<<"0.00000000002"<<endl<<"0.000
 		//check insertion models
 
 		vector<int> counts; counts.assign(1001,0);
-						
+
 		m=&(totalmodels.at(i));
-	
+
 		changezipfrandoms();
 		int goal=mygoal;
 
@@ -4290,7 +4290,7 @@ y<<"0.000000000025"<<endl<<"0.000000000022"<<endl<<"0.00000000002"<<endl<<"0.000
 
 			total++; mean+=indellength;
 			if(indellength>1000) {goal++; continue;}
-			
+
 			(counts.at(indellength))++;
 		}
 
@@ -4308,22 +4308,22 @@ y<<"0.000000000025"<<endl<<"0.000000000022"<<endl<<"0.00000000002"<<endl<<"0.000
 	iop<<"mean length\t";for(i=0; i<means.size(); i++) iop<<means.at(i)<<"\t"; iop<<endl;
 	iop<<"true mean  \t";for(i=0; i<means.size(); i++) iop<<means2.at(i)<<"\t"; iop<<endl;
 
-	for(int j=0; j<lines.size(); j++) 
+	for(int j=0; j<lines.size(); j++)
 	{
 		iop<<j<<"\t";
 		vector<double> bits=lines.at(j);
-		for(i=0; i<bits.size(); i++) iop<<bits.at(i)<<"\t"; 
+		for(i=0; i<bits.size(); i++) iop<<bits.at(i)<<"\t";
 		iop<<endl;
 	}
 
 	cout<<endl<<"DONE!"<<endl<<endl;
 
-	return -1;  
-	
-#else	
+	return -1;
+
+#else
 
 
-#ifdef runseedstillbreak   
+#ifdef runseedstillbreak
 int myint;
 cout<<"please enter integer that seed should start from: "<<flush;
 cin>>myint;
@@ -4349,19 +4349,19 @@ ofstream treesout( ("trees"+simtime+".txt").c_str() );
 delete LOG;
 LOG = new ofstream;
 
-(*LOG).close(); 
+(*LOG).close();
 (*LOG).clear();
 
-(LOG)->open( ("LOG"+simtime+".txt").c_str());  	
- #ifdef runseedstillbreak   
+(LOG)->open( ("LOG"+simtime+".txt").c_str());
+ #ifdef runseedstillbreak
 
 (*LOG)<<"qwerty seed was "<<qwerty<<endl;
 #endif
 	// print some initial output to screen and (*LOG) files and set up some timing factors
 
 	start = clock();
-	time_t starttime, endtime, startofblock, endofblock; 
-	struct tm *timeinfo; time(&starttime); timeinfo=localtime(&starttime); 
+	time_t starttime, endtime, startofblock, endofblock;
+	struct tm *timeinfo; time(&starttime); timeinfo=localtime(&starttime);
 	(*LOG) <<"********************************************************************************"<<endl;
 	(*LOG)<<"INDELible V"<<VersionNumber<<" by Will Fletcher : Simulation began at: "<<asctime(timeinfo);
 	(*LOG)<<"********************************************************************************"<<endl;
@@ -4375,7 +4375,7 @@ LOG = new ofstream;
 
 	treesout<<"Tree file : INDELible V"<<VersionNumber<<" (best viewed cut and paste in e.g. excel)"<<endl<<endl;
 	treesout<<"N.B. Simulation blocks with no random trees will have their trees printed for the first replicate only."<<endl;
-	
+
 	if(ancestralprint) treesout<<endl<<"     Interior node labels on the trees match ancestral sequence labels in sequence files."<<endl;
 
 	treesout<<endl<<"FILE\tTREE\tNTAXA\tREP\tPART\tLENGTH\tDEPTH\tMAX PAIRWISE DISTANCE\tTREE STRING"<<endl;
@@ -4421,14 +4421,14 @@ LOG = new ofstream;
 		filename2+="."; filename2+=fastaextension;    // unaligned sequences always output in FASTA format
 		filename3+=endbit;
 
-	
+
 		if(!fileperrep)
 		{
 			if(ancestralprint && ancestralfile)
 			{
 			//	(*results3)=new ofstream;
 				(*results3).close();
-				(*results3).clear();  
+				(*results3).clear();
 				(results3)->open(filename3.c_str());
 			}
 
@@ -4437,8 +4437,8 @@ LOG = new ofstream;
 			(*results).close(); (*results2).close();
 			(*results).clear();  (*results2).clear();
 
-			(results)->open(filename1.c_str());  	
-			
+			(results)->open(filename1.c_str());
+
 			(*results)<<paupstart;
 
 			//(*results2)=new ofstream;
@@ -4452,16 +4452,16 @@ LOG = new ofstream;
 		startofblock=clock();
 
 		// Set everything in place
-		TsequencesINT.clear();  sequencesINT.clear();   TsequencesINT.assign(numberofpartitions,sequencesINT); 
+		TsequencesINT.clear();  sequencesINT.clear();   TsequencesINT.assign(numberofpartitions,sequencesINT);
 		TinsINT.clear();		insINT.clear();			TinsINT.assign(numberofpartitions,insINT);
 		TinsPOS.clear();		insPOS.clear();			TinsPOS.assign(numberofpartitions,insPOS);
 
 
 
-			ofstream ratesout;  
+			ofstream ratesout;
 
 
-			if(printrates) 
+			if(printrates)
 			{
 					string ratefilename=filenamestub+"_RATES.txt";
 					ratesout.open(  ratefilename.c_str()  );
@@ -4492,7 +4492,7 @@ LOG = new ofstream;
 			}
 
 
-			
+
 			int sitecount=0;
 
 			///////////////////////////
@@ -4503,7 +4503,7 @@ LOG = new ofstream;
 
 			totallength=0;
 
-					
+
 			if(numberofpartitions>1) (*LOG)<<"  This dataset contains "<<numberofpartitions<<" partitions as follows:"<<endl<<endl<<"\tLength\tFrom\tTo\tModel\tPartition"<<endl;
 
 			int lastlength=0;
@@ -4525,44 +4525,44 @@ LOG = new ofstream;
 
 				// whether this partition contains a branch class or a model
 				isitbranches = isitbranchesv.at(partitionnumber);
-						
+
 				// guide tree set to become tree from treeposvec that matches the partition
 				treeC=&(totaltrees.at(   treeposvec.at(partitionnumber)   ));
-				
+
 				if(therearerandomtrees)
 				{
 					// if it is random tree then the tree in the class (*treeC) is relaced with new tree
-				
+
 					if((*treeC).treerandom) 	(*treeC).newrandom(thisrep);
 				}
 
-				originaltree=(*treeC).tree; 				
-				
+				originaltree=(*treeC).tree;
+
 				// set tree length for percentage done calculations ------> not used any more.
 				currenttreelength=treelength=(*treeC).treelength;
 
 				// sorts out guide tree, adding node labels for navigation and storage
 				startnodelabel=0;
-				int error=settreeup(partitionnumber,originaltree, nonamestree, origtreewithnodes, nonamestreewithnodes, startnodelabel, taxanames, ntaxa); 
-				
-							
+				int error=settreeup(partitionnumber,originaltree, nonamestree, origtreewithnodes, nonamestreewithnodes, startnodelabel, taxanames, ntaxa);
+
+
 				if(thisrep==1 && partitionnumber==0) treesout<<endl;
 
 				if(therearerandomtrees)
 				{
-					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t"; 
-					
+					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t";
+
 					if(ancestralprint) treesout<<origtreewithnodes<<endl; else treesout<<(*treeC).tree<<endl;
 
 				}
-				
+
 				if(!therearerandomtrees && thisrep==1)
 				{
 
-					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t"; 
-				//					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"; 
-	//				treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t-\t"; 
-					
+					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t";
+				//					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t";
+	//				treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t-\t";
+
 					if(ancestralprint) treesout<<origtreewithnodes<<endl; else treesout<<(*treeC).tree<<endl;
 				}
 
@@ -4573,13 +4573,13 @@ LOG = new ofstream;
 				// create instances of SUMS and RATES to pass down and inherit through the recursive algorithms
 				SUMS sums;
 				RATES rates=RATES();
-				
+
 				// rates.partitionlength is set to and remains as user-specified root length for duration of simulation
 				rates.partitionlength=((*p).rootlengthvec).at(partitionnumber)+1;
 
 				// these others begin as rates.partitionlength but change during course of simulation
-				rates.corelength=rates.rootlength=rates.partitionlength;	
-		
+				rates.corelength=rates.rootlength=rates.partitionlength;
+
 
 // these are used when checking that substitution works in inserted sites
 
@@ -4602,15 +4602,15 @@ LOG = new ofstream;
 				// otherwise it is position of branchclass in total branches
 				mypos=((*p).mbsposvec).at(partitionnumber);
 
-				
+
 				// need to point to root model so that correct stationary frequencies are used for root sequence creation
-				if(isitbranches) 
+				if(isitbranches)
 				{
 					  b=&(totalbranches.at( mypos ));
 
 					  m=&(totalmodels.at( ((*b).rootmodelpos) ));
 
-					  
+
 					  (mycodes.at(partitionnumber)).at(0)=(*m).geneticcode;
 
 				}
@@ -4619,11 +4619,11 @@ LOG = new ofstream;
 				mymods.clear(); mymods.push_back(mypos);
 				// this is done once here to set up the definitions of constants used in Zipfian random number generation
 				changezipfrandoms();
-	
+
 
 				// set up site classes for codon site-models and relative rates for gamma/pinv distributions
 
-				// weareon=(*m).codonratestrue;						// one used for branch classes and 
+				// weareon=(*m).codonratestrue;						// one used for branch classes and
 				// if(!weareon) weareon=(*m).codonratestrue;		// one used for models - not sure which
 				SetSiteRates2(rates, (*p).name, thisrep, rootlength);
 
@@ -4639,13 +4639,13 @@ LOG = new ofstream;
 				#ifdef timewatch
 					startofevolution=clock();
 					(*LOG)<<endl<<"  * Set-up completed.    Time taken: "<<(double)(startofevolution-startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
-				#endif			
+				#endif
 
 				// not currently used?
 				noinsertionsyet=true;
-				// do the evolving	
-				sorttreeout( TinsPOS.at(partitionnumber), rates, TinsINT.at(partitionnumber), startnodelabel, nonamestreewithnodes, thisrep, ntaxa, 
-					taxanames, TsequencesINT.at(partitionnumber), blocknumber, thisrep, numberofevolveblocks, reps, partitionnumber, 
+				// do the evolving
+				sorttreeout( TinsPOS.at(partitionnumber), rates, TinsINT.at(partitionnumber), startnodelabel, nonamestreewithnodes, thisrep, ntaxa,
+					taxanames, TsequencesINT.at(partitionnumber), blocknumber, thisrep, numberofevolveblocks, reps, partitionnumber,
 					numberofpartitions,  sums);
 
 
@@ -4653,7 +4653,7 @@ LOG = new ofstream;
 					startofprinting=clock();
 					(*LOG)<<endl<<"  * Evolution completed. Time taken: "<<(double)(startofprinting - startofevolution) / CLOCKS_PER_SEC <<" seconds."<<endl;
 				#endif
-		
+
 				// updates total length for each partition
 				totallength+=rates.rootlength;
 
@@ -4662,44 +4662,44 @@ LOG = new ofstream;
 
 				//Tpartitionpositions.push_back(partitionpositions);
 
-				if(numberofpartitions>1) 
+				if(numberofpartitions>1)
 				{
 					int R=totallength+dashlength-partitionnumber-1,bit=1;  partitionlengths.push_back(R);
-					
+
 					//if(printcodonsasDNA && type==3) {R*=3;bit=3;}
 
 					int L=lastlength+bit; lastlength=R;
-									
+
 					(*LOG)<<"\t"<<R-L+1<<"\t"<<L<<"\t"<<R<<"\t";
 					if(isitbranches) (*LOG)<<(*b).name; else (*LOG)<<(*m).name;
 					(*LOG)<<"\t"<<partitionnumber+1<<endl;
 				}
 
 
-				if(printrates) 
+				if(printrates)
 				{
-					if(type!=3) 
+					if(type!=3)
 					{
 
-						if((*m).continuousgamma && isitbranches)  
+						if((*m).continuousgamma && isitbranches)
 						{
 							ratesout<<endl<<"This partition uses continuous gamma rate variation and a non-homogenous model."<<endl;
 							ratesout<<      "The rates are not currently logged if alpha has changed on the tree. "<<endl;
 							ratesout<<      "The rates given below correspond to alpha="<<(*m).alpha<<" for model "<<(*m).name<<" only"<<endl<<endl;
-                            ratesout<<"Site\tRate\tPartition\tInserted?"<<endl; 
+                            ratesout<<"Site\tRate\tPartition\tInserted?"<<endl;
 
 							//ratesout<<endl<<"Partition "<<partitionnumber+1<<" uses  Rates are not logged for continuous gamma that changes over the tree. "<<endl<<"Please use discrete gamma if you need to know the specific rates for each site in a changing gamma model. "<<endl<<"Continuous gamma rates *are* logged for models where alpha does not change. Other parameters of the model may still change. "<<endl<<"If this is feature is a necessity for your work then use the [printallrates] command to log rates\nfor non-homogenous continuous gamma models, albeit in a rather crude way."<<endl;
 						}
-						else 
+						else
 						{
-							if(isitbranches) 
+							if(isitbranches)
 							{
 								ratesout<<endl<<"  N.B. For discrete gamma models that change over the tree, individual rates on"<<endl;
 								ratesout<<"       different branches can be calculated from the rates table below. "<<endl;
 								ratesout<<"       Just remember that the site *class* does not change over the tree."<<endl<<endl;
-					
+
 								int iii, jjj; m=&(totalmodels.at( mymods.at(0) )); int gg= ((*m).Rrates).size();
-								
+
 								ratesout<<"The columns below are the rates for the different classes under the different models."<<endl;
 								ratesout<< "The columns correspond to the following values of alpha used in the simulation:"<<endl<<endl;
 
@@ -4713,13 +4713,13 @@ LOG = new ofstream;
 
 								vector<string> vs; vector<vector<string> >vvs; int maxsize=0;
 								for(jjj=0; jjj<gg; jjj++)
-								{	
+								{
 									vs.clear();
 									for(iii=0; iii<mymods.size(); iii++)
 									{
 										m=&(totalmodels.at( mymods.at(iii) ));
 
-										vector<double> rrates=(*m).Rrates;  
+										vector<double> rrates=(*m).Rrates;
 										stringstream jh; jh<<rrates.at(jjj);  string fv=jh.str(); vs.push_back(fv); if(maxsize<fv.size()) maxsize=fv.size();
 									}
 									vvs.push_back(vs);
@@ -4727,7 +4727,7 @@ LOG = new ofstream;
 
 								//cout<<"maxsize "<<maxsize<<endl;
 								for(jjj=0; jjj<gg; jjj++)
-								{	
+								{
 									ratesout<<jjj+1<<"\t";  vs=vvs.at(jjj);
 
 									for(iii=0; iii<mymods.size(); iii++)
@@ -4737,24 +4737,24 @@ LOG = new ofstream;
 									}
 									ratesout<<endl;
 								}
-								m=&(totalmodels.at( ((*b).rootmodelpos) )); 
+								m=&(totalmodels.at( ((*b).rootmodelpos) ));
 							}
 							else ratesout<<endl<<"alpha was "<<(*m).alpha<<" in this partition.";
 
 							if((*m).continuousgamma) ratesout<<endl<<endl<<"Site\tRate\tPartition\tInserted?"<<endl; else ratesout<<endl<<endl<<"Site\tClass\tRate\tPartition\tInserted?"<<endl;
-					
+
 						}
 					}
 					else if(partitionnumber==0)
 					{
 						ratesout<<"  N.B. Site classes are numbered from lowest to highest values of omega."<<endl;
-						ratesout<<"       The omegas are not given explicitly as they are permitted to change on different"<<endl; 
+						ratesout<<"       The omegas are not given explicitly as they are permitted to change on different"<<endl;
 						ratesout<<"       branches whereas the site classes are not allowed to change."<<endl;
 						ratesout<<"       Please consult your control file to find the corresponding omega values"<<endl<<endl;
 						ratesout<<"Site\tClass\tPartition\tInserted?"<<endl;
-						
+
 					}
-			
+
 					printoutrates(sitecount, partitionnumber+1, ratesout, (TinsPOS.at(partitionnumber)).at(0), (TinsINT.at(partitionnumber)).at(0) );
 
 				}
@@ -4765,12 +4765,12 @@ LOG = new ofstream;
 
 
 
-			//	if(printrates) 
+			//	if(printrates)
 			//	{
 			//		if((*m).continuousgamma && isitbranches && type!=3)  {}//ratesout<<"Rates are not logged for continuous gamma that changes over the tree. "<<endl<<"Please use discrete gamma if you need to know the specific rates for each site in a changing gamma model. "<<endl<<"Continuous gamma rates *are* logged for models where alpha does not change. Other parameters of the model may still change. "<<endl<<"If this is feature is a necessity for your work please contact me via the website for an untested version that does log rates\nfor non-homogenous continuous gamma models, albeit in a rather crude way."<<endl;
 			//		else printoutrates(sitecount, partitionnumber+1, ratesout, (TinsPOS.at(partitionnumber)).at(0), (TinsINT.at(partitionnumber)).at(0) );
 			//	}
-			
+
 			} // end of for loop for partitions in a replicate
 
 
@@ -4779,7 +4779,7 @@ LOG = new ofstream;
 
 			//(*LOG)<<endl<<"  "<<totallength+dashlength-numberofpartitions<<"\tis true total alignment length."<<endl<<endl<<"--------------------------------------------------------------------"<<endl<<endl;
 
-			// print results to output files	
+			// print results to output files
 #ifndef runseedstillbreak
 
 			printresultsout( thisrep,  filenamestub, ntaxa, totallength, taxanames, blocknumber, numberofevolveblocks,thisrep,reps,numberofpartitions);
@@ -4790,7 +4790,7 @@ LOG = new ofstream;
 					(*LOG)<<"  * Printing completed.  Time taken: "<<(double)(endofprinting - startofprinting) / CLOCKS_PER_SEC <<" seconds."<<endl;
 				#endif
 
-	
+
 
 		#ifdef printrepstoscreen
 			if(reps>1) cout<<"  * Block "<<blocknumber<<" - Replicate "<<thisrep<<" completed."<<endl;
@@ -4798,24 +4798,24 @@ LOG = new ofstream;
 
 ////////////////////////////////////////////////
 				#ifdef splittree
-					
+
 					// this compiler option is designed to split a 24 taxa tree into three 8 taxa trees at output to check that different parts of tree can evolve with different models.
 					// e.g. a 24 taxa tree where the three 8 taxa subtrees could be
 					// 1) GTR + continuous gamma with alpha = 0.5 + base frequencies 0.1 0.2 0.3 0.4
 					// 2) HKY + discrete gamma with alpha 2 + base frequencies 0.4 0.3 0.2 0.1
-					// 3) UNREST 
+					// 3) UNREST
 
-					if(ntaxa!=24) {cout<<" WARNING: splittree compiler option only works on 24 taxa trees. No split done."<<endl<<endl; continue;} 
+					if(ntaxa!=24) {cout<<" WARNING: splittree compiler option only works on 24 taxa trees. No split done."<<endl<<endl; continue;}
 
 					ofstream waste;
-					
+
 					if(!fileperrep && reps!=1) {cout<<"ERROR: splittree debug compile code is not meant to be used with fileperrep"<<endl<<"Please change the setting and re-try analysis"<<endl<<endl; return -1; }
 
 					if(outputtype!=2) {cout<<"ERROR: splittree debug compile code is only meant to be used with phylip format"<<endl<<endl; return -1;}
 
 
 					stringstream kk; kk<<thisrep; string gg=kk.str();
-										
+
 					string filename=filenamestub+"_TRUE_"+gg;
 
 					string endbit=".";  endbit+=phylipextension;
@@ -4840,37 +4840,37 @@ LOG = new ofstream;
 							iff<<taxaspacenames.at(nx);
 
 							for(int px=0; px<numberofpartitions; px++) makeprintseqLEAF(0, totallength+dashlength-numberofpartitions, (TinsPOS.at(px)).at(nx), (TsequencesINT.at(px)).at(nx), (TinsINT.at(px)).at(nx), nx, iff, waste,  0) ;
-							
+
 							iff<<endl;
 						}
-			
 
-					}		
-	
-					
+
+					}
+
+
 
 				#endif
 
 
-////////////////////////////////////////////////			
+////////////////////////////////////////////////
 				#ifdef rippartitions
-					
-					// this is designed to rip the partitions from a partitioned simulated dataset and spit them in to separate files 
+
+					// this is designed to rip the partitions from a partitioned simulated dataset and spit them in to separate files
 					// that can be subjected to separate analyses to check that the partition system works ok.  number of partitions unlimited for test.
-			
+
 					if(numberofpartitions==1) continue;
 
 					ofstream waste;
 
-					cout<<" WARNING: deletion rate > 0 in any model in any partition will probably"<<endl<<"          cause the rippartitions debug code to crash."<<endl<<endl; 
-					
+					cout<<" WARNING: deletion rate > 0 in any model in any partition will probably"<<endl<<"          cause the rippartitions debug code to crash."<<endl<<endl;
+
 					if(!fileperrep) {cout<<"ERROR: rippartitions debug compile code is not meant to be used with fileperrep"<<endl<<"Please delete the file paupmiddle.txt and re-try analysis"<<endl<<endl; return -1; }
 
 					if(outputtype!=2) {cout<<"ERROR: rippartitions debug compile code is only meant to be used with phylip format"<<endl<<endl; return -1;}
 
 
 					stringstream kk; kk<<thisrep; string gg=kk.str();
-										
+
 					string filename=filenamestub+"_TRUE_"+gg;
 
 					string endbit=".";  endbit+=phylipextension;
@@ -4879,8 +4879,8 @@ LOG = new ofstream;
 
 					if(type==1) myletters=myDUletters; else if(type==2) myletters=myAUletters; else if(type==3) myletters=myCDUletters;
 
-						
-						
+
+
 
 					for(int px=0; px<partitionlengths.size()-1; px++)
 					{
@@ -4891,18 +4891,18 @@ LOG = new ofstream;
 						int L=partitionlengths.at(px),R=partitionlengths.at(px+1), partlength=R-L; if(type==3) partlength*=3;
 
 						iff<<ntaxa<<"   "<<partlength<<endl;
-						
+
 						for(int nx=1; nx<ntaxa+1; nx++)
 						{
-							iff<<taxaspacenames.at(nx);  	
+							iff<<taxaspacenames.at(nx);
 
 							makeprintseqLEAF(0, partlength,  (TinsPOS.at(px)).at(nx), (TsequencesINT.at(px)).at(nx), (TinsINT.at(px)).at(nx), nx, iff, waste,  0) ;
 
 							iff<<endl;
-						}					
-						
+						}
+
 					}
-		
+
 
 				#endif
 //////////////////////////////////////////////////////////////////
@@ -4913,22 +4913,22 @@ LOG = new ofstream;
 
 			if(printrates) ratesout.close();
 
-		
+
 		//prints out paupend if there is one file for all replicates.
-		if(!fileperrep) (*results)<<paupend<<endl; 
+		if(!fileperrep) (*results)<<paupend<<endl;
 
 #ifndef runseedstillbreak
 		// if indels have occurred print the true information about them for this block
 		if((*m).insertrate!=0 || (*m).deleterate!=0 ) printinsertinfo();
 #endif
 	//	cout<<clock()<<endl;
-	
+
 		endofblock=clock();
 		(*LOG)<<endl;
 		cout<<"  * Block "<<blocknumber<<" completed.   Time taken: "<<(double)(endofblock - startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
 		 (*LOG)<<"  * Block "<<blocknumber<<" was completed in "<<(double)(endofblock - startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
 
-	
+
 		(*LOG)<<endl<<"********************************************************************************"<<endl<<endl;
 	}// end of commandblocks for loop, i.e. blocks in a control file
 
@@ -4937,22 +4937,22 @@ LOG = new ofstream;
 		// print out final screen and log output and calculate simulation finish time etc
 
 		finish=clock();
-		time(&endtime); 		
+		time(&endtime);
 		timeinfo=localtime(&endtime);
 
 		if(numberofevolveblocks>1) cout<<"  * All blocks complete. Time taken: "<<(double)(finish - start) / CLOCKS_PER_SEC <<" seconds."<<endl<<endl;
 		cout<<"\n\n *** SIMULATION COMPLETED - PLEASE CONSULT OUTPUT FILES ***                                                                     "<<endl;
 
-	
+
 		(*LOG)<<"  * Simulation completed. Whole batch took: "<<(double)(finish - start) / CLOCKS_PER_SEC <<" seconds."<<endl<<endl;
-	
+
 		(*LOG)<<"INDELible V"<<VersionNumber<<" Simulations completed at: "<<asctime(timeinfo);
 
 		(*LOG)<<endl<<"********************************************************************************"<<endl<<endl;
 
 		cout<<endl<<endl<<" INDELible V"<<VersionNumber<<" Simulations completed at: "<<asctime(timeinfo)<<endl<<endl;
 
-#ifdef runseedstillbreak   
+#ifdef runseedstillbreak
 } //endof qwerty for loop
 #endif
 
@@ -4966,8 +4966,8 @@ LOG = new ofstream;
 	delete results; delete results2; delete results3; delete LOG;
 
 #endif
-  
+
 
 		return 0;
-}				
+}
 

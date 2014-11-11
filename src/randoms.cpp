@@ -1,13 +1,13 @@
-/*  
+/*
    INDELible V1.03
     "A comprehensive and flexible simulator of molecular sequence evolution"
     Copyright (C) 2009 William Fletcher
 
     If using this software please cite the following reference:
 
-    Fletcher, W. and Yang, Z. 2009. 
-	"INDELible: a flexible simulator of biological sequence evolution." 
-	Mol. Biol. and Evol. (in press). 
+    Fletcher, W. and Yang, Z. 2009.
+	"INDELible: a flexible simulator of biological sequence evolution."
+	Mol. Biol. and Evol. (in press).
 
     If you need to contact me with any queries, questions, problems or (god-forbid) bugs
     then please go to http://abacus.gene.ucl.ac.uk/software/indelible/bug.php
@@ -32,7 +32,7 @@
 
 MTRand mtrand1;
 MTRand mtrand2;
-	
+
 // needed for time monitoring
 
 #include <stdio.h>
@@ -43,7 +43,7 @@ MTRand mtrand2;
 clock_t start, finish;
    double  duration;
 
- // Measure the duration of an event. 
+ // Measure the duration of an event.
    printf( "Time to do %ld empty loops is ", i );
    start = clock();
    while( i-- )
@@ -53,7 +53,7 @@ clock_t start, finish;
    printf( "%2.1f seconds\n", duration );
 */
 
-#include <time.h>        
+#include <time.h>
 #include <math.h>
 //////////////////////////////////////////////////////////////
 
@@ -73,7 +73,7 @@ double expmyrand(double myrate)
 
 
 // geometric random number generation
-int oldgeomyrand(double p) 
+int oldgeomyrand(double p)
 {
 	if(p==1) return 1;
 	else
@@ -87,7 +87,7 @@ int oldgeomyrand(double p)
 }
 
 // alternative parameterisation - for testing
-int geomyrand(double q)  
+int geomyrand(double q)
 {
 	if(q==0) return 1;
 	else
@@ -128,22 +128,22 @@ int oldrandnegbin(int r, double q)
 #define H1(x,q1,q2,v) -v+exp(q2*log((1-q)*x))
 
 unsigned int imax = ~0;
-	
-	
+
+
 double Zq1,  Zq2,  ZHx0,  Zs,  ZHimax;
 
 int Zipf(double q, double v)
 {
-	// rejection-inversion method of Hörmann and Derflinger (1996) 
-	
-	// Hörmann, W. and G. Derflinger, G. (1996) Rejection-inversion to generate variates from monotone discrete distributions. ACM Transactions on Modelling and Computer Simulation, 6(3), 169-184 
+	// rejection-inversion method of Hörmann and Derflinger (1996)
+
+	// Hörmann, W. and G. Derflinger, G. (1996) Rejection-inversion to generate variates from monotone discrete distributions. ACM Transactions on Modelling and Computer Simulation, 6(3), 169-184
 
 	// produces random zipf number from distribution with following unnormalised probability function:
 
     // p_k = (v + k)^(-q)  where k=0,1,... and q>1, v>0
 
 	// at least twice as fast as method of Devroye Luc (1986) used in DAWG - see below
-	
+
 	double U, X, K;
 
 	do
@@ -159,11 +159,11 @@ int Zipf(double q, double v)
 		if( K - X <= Zs) return int(K+1);
 
 		else if ( U >= H(K+0.5,Zq1,Zq2,v) - exp(-1 * log(v + K) * q) ) return int(K+1);
-		
-	} while(true); 
+
+	} while(true);
 }
 #define newZipf(a) Zipf(a,1)
-  
+
 
 
 // algorithm from DAWG (Cartwright, 2005).
