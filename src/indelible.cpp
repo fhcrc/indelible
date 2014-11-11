@@ -123,6 +123,7 @@ int inspinvcount, corepinvcount;
 #include <sstream>
 #include <algorithm>
 #include <map>
+#include <assert.h>
 
 #ifdef WINDOWS
 	#include "windows.h"
@@ -4367,6 +4368,10 @@ LOG = new ofstream;
 	(*LOG)<<"********************************************************************************"<<endl;
 	cout<<endl<<" INDELible V"<<VersionNumber<<" by Will Fletcher: Simulation began at "<<asctime(timeinfo)<<endl<<endl;
 
+    if(argc > 1) {
+        assert(argc == 2);
+        masterfilename = argv[1];
+    }
 
 	int isthereanerror=docontrol();			// parse and process control file
 
