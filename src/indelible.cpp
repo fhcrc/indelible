@@ -4367,13 +4367,19 @@ LOG = new ofstream;
 	(*LOG)<<"INDELible V"<<VersionNumber<<" by Will Fletcher : Simulation began at: "<<asctime(timeinfo);
 	(*LOG)<<"********************************************************************************"<<endl;
 	cout<<endl<<" INDELible V"<<VersionNumber<<" by Will Fletcher: Simulation began at "<<asctime(timeinfo)<<endl<<endl;
+    string out_dir = ".";
 
     if(argc > 1) {
-        assert(argc == 2);
+        assert(argc == 3);
+        // First argument is the control file name.
         masterfilename = argv[1];
+        // Second argument is the output directory.
+        out_dir = argv[2];
     }
 
 	int isthereanerror=docontrol();			// parse and process control file
+
+        assert(chdir(argv[2]) >= 0);
 
 	if( isthereanerror==-1) // if parsing and processing of control file returns an error then quits.
 	{delete results; delete results2; delete results3; delete LOG; return -1;}
