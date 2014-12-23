@@ -96,6 +96,7 @@ int inspinvcount, corepinvcount;
 
 // needed for time monitoring
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 /*
@@ -4165,15 +4166,8 @@ void printoutrates(int &sitecount,int partition, ofstream &ratesout, vector<int>
 
 }
 
-
-/////////////////////////////////////   MAIN PROGRAM
-
-int main(int argc, char* argv[])
-{
-
-
 #ifdef checkindeldistributions	// used to check whether indel length distributions are consistent.
-
+int check_indeldistributions() {
 	//creates control file for tests
 	ofstream x("controldist.txt");
 
@@ -4324,662 +4318,694 @@ y<<"0.000000000025"<<endl<<"0.000000000022"<<endl<<"0.00000000002"<<endl<<"0.000
 	cout<<endl<<"DONE!"<<endl<<endl;
 
 	return -1;
+} // end-check_indeldistributions
 
-#else
+#endif // end-ifdef checkindeldistributions
 
 
-#ifdef runseedstillbreak
-int myint;
-cout<<"please enter integer that seed should start from: "<<flush;
-cin>>myint;
-for(int qwerty=myint; qwerty<1000000; qwerty++)
+void usage (const char *program_name)
 {
-mtrand1.seed( qwerty );
-
-
-cout<<"qwerty seed was "<<qwerty<<endl;
-totalmodels.clear();
-totalpartitions.clear();
-totalbranches.clear();
-totalevolve.clear();
-totaltrees.clear();
-totalmodelnames.clear();
-totalpartitionnames.clear();
-totalbranchesnames.clear();
-totaltreenames.clear();
-#endif
-
-if(argc > 1) {
-    assert(argc == 3);
-    // First argument is the control file name (relative to output directory if you give relative path).
-    masterfilename = argv[1];
-    // Second argument is the output directory.
-    assert(chdir(argv[2]) >= 0);
+    cerr << "Usage:  " << program_name << " options [ inputfile ... ]\n";
+    cerr <<"  -h  --help             Display this usage information.\n";
+    cerr <<"  -s  --seed <value>     integer that seed should start from.\n";
+    cerr <<"  -v  --verbose          Print verbose messages.\n";
 }
 
-ofstream treesout( ("trees"+simtime+".txt").c_str() );
 
-delete LOG;
-LOG = new ofstream;
+/////////////////////////////////////   MAIN PROGRAM
+int verbose = false;
 
-(*LOG).close();
-(*LOG).clear();
+int main(int argc, char* argv[])
+{
+    // parse options
+    int c;
+    int this_option_optind = optind ? optind : 1;
+    int option_index = 0;
+    static struct option long_options[] = {
+	{"help",     no_argument, 0,  'h' },
+	{"seed",     required_argument, 0,  's' },
+	{"verbose",  no_argument, 0,  'v' },
+	{0,         0,                 0,  0 }
+    };
 
-(LOG)->open( ("LOG"+simtime+".txt").c_str());
- #ifdef runseedstillbreak
+    int seed = 0;
+    while ((c = getopt_long(argc, argv, "s:vh",
+			    long_options, &option_index)) != -1) {
+	switch (c) {
+	case 'h': // help message
+	    usage(argv[0]);
+	    exit(-1);
+	case 's':
+	    mtrand1.seed( atoi(optarg) );
+	    break;
+	case 'v':
+	    verbose = true;
+	    break;
+	case '?':
+	    if (optopt == 'c')
+		fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+	    else if (isprint (optopt))
+		fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+	    else
+		fprintf (stderr,
+			 "Unknown option character `\\x%x'.\n",
+			 optopt);
+	    return 1;
+	default:
+	    abort ();
+	}
+    }
 
-(*LOG)<<"qwerty seed was "<<qwerty<<endl;
+    // optional first and second positional parameters.
+    // First argument is the control file name (relative to output directory if you give relative path).
+    if (argc > optind)
+	masterfilename = argv[optind];
+
+    // Second argument is the output directory.
+    if (argc > optind+1)
+	assert(chdir(argv[optind+1]) >= 0);
+    
+
+
+
+#ifdef checkindeldistributions
+    return(check_indeldistributions());
 #endif
-	// print some initial output to screen and (*LOG) files and set up some timing factors
 
-	start = clock();
-	time_t starttime, endtime, startofblock, endofblock;
-	struct tm *timeinfo; time(&starttime); timeinfo=localtime(&starttime);
-	(*LOG) <<"********************************************************************************"<<endl;
-	(*LOG)<<"INDELible V"<<VersionNumber<<" by Will Fletcher : Simulation began at: "<<asctime(timeinfo);
-	(*LOG)<<"********************************************************************************"<<endl;
-	cout<<endl<<" INDELible V"<<VersionNumber<<" by Will Fletcher: Simulation began at "<<asctime(timeinfo)<<endl<<endl;
+    ofstream treesout( ("trees"+simtime+".txt").c_str() );
 
-	int isthereanerror=docontrol();			// parse and process control file
+    delete LOG;
+    LOG = new ofstream;
 
-	if( isthereanerror==-1) // if parsing and processing of control file returns an error then quits.
-	{delete results; delete results2; delete results3; delete LOG; return -1;}
+    (*LOG).close();
+    (*LOG).clear();
 
-	treesout<<"Tree file : INDELible V"<<VersionNumber<<" (best viewed cut and paste in e.g. excel)"<<endl<<endl;
-	treesout<<"N.B. Simulation blocks with no random trees will have their trees printed for the first replicate only."<<endl;
-
-	if(ancestralprint) treesout<<endl<<"     Interior node labels on the trees match ancestral sequence labels in sequence files."<<endl;
-
-	treesout<<endl<<"FILE\tTREE\tNTAXA\tREP\tPART\tLENGTH\tDEPTH\tMAX PAIRWISE DISTANCE\tTREE STRING"<<endl;
-
-	int numberofevolveblocks=totalevolve.size();
+    (LOG)->open( ("LOG"+simtime+".txt").c_str());
 
 
-	for(int blocknumber=1; blocknumber<numberofevolveblocks+1; blocknumber++)
-	{
+    // print some initial output to screen and (*LOG) files and set up some timing factors
+
+    start = clock();
+    time_t starttime, endtime, startofblock, endofblock;
+    struct tm *timeinfo; time(&starttime); timeinfo=localtime(&starttime);
+    (*LOG) <<"********************************************************************************"<<endl;
+    (*LOG)<<"INDELible V"<<VersionNumber<<" by Will Fletcher : Simulation began at: "<<asctime(timeinfo);
+    (*LOG)<<"********************************************************************************"<<endl;
+    cout<<endl<<" INDELible V"<<VersionNumber<<" by Will Fletcher: Simulation began at "<<asctime(timeinfo)<<endl<<endl;
+
+    int isthereanerror=docontrol();			// parse and process control file
+
+    if( isthereanerror==-1) // if parsing and processing of control file returns an error then quits.
+    {delete results; delete results2; delete results3; delete LOG; return -1;}
+
+    treesout<<"Tree file : INDELible V"<<VersionNumber<<" (best viewed cut and paste in e.g. excel)"<<endl<<endl;
+    treesout<<"N.B. Simulation blocks with no random trees will have their trees printed for the first replicate only."<<endl;
+
+    if(ancestralprint) treesout<<endl<<"     Interior node labels on the trees match ancestral sequence labels in sequence files."<<endl;
+
+    treesout<<endl<<"FILE\tTREE\tNTAXA\tREP\tPART\tLENGTH\tDEPTH\tMAX PAIRWISE DISTANCE\tTREE STRING"<<endl;
+
+    int numberofevolveblocks=totalevolve.size();
 
 
-		// cycles through every block of simulations defined in the control file
+    for (int blocknumber=1; blocknumber < numberofevolveblocks+1; blocknumber++)
+    {
 
-		// get settings for this block
-		e=&(totalevolve.at(blocknumber-1));
-		reps=(*e).reps;
-		filenamestub=(*e).filenamestub;
-		p=&(totalpartitions.at(  (*e).partitionpos  ));
+	// cycles through every block of simulations defined in the control file
+
+	// get settings for this block
+	e=&(totalevolve.at(blocknumber-1));
+	reps=(*e).reps;
+	filenamestub=(*e).filenamestub;
+	p=&(totalpartitions.at(  (*e).partitionpos  ));
 
 
-		ntaxa=(*p).ntaxa;
-		bool therearerandomtrees=(*p).randomtrees;
-		vector<int> treeposvec=(*p).treeposvec;
+	ntaxa=(*p).ntaxa;
+	bool therearerandomtrees=(*p).randomtrees;
+	vector<int> treeposvec=(*p).treeposvec;
 
 
 //		vector<bool> isitsitesv=(*p).isitsites;
 //		vector<bool> isitrandomv=(*p).isitrandomvec;
-		vector<bool> isitbranchesv=(*p).isitbranches;
-		int numberofpartitions=isitbranchesv.size();
+	vector<bool> isitbranchesv=(*p).isitbranches;
+	int numberofpartitions=isitbranchesv.size();
 
 
-		string filename1=filenamestub+"_TRUE";			// true alignment
-		string filename2=filenamestub+"";				// true unaligned sequences
-		string filename3=filenamestub+"_ANCESTRAL";		// Ancestral sequences
+	string filename1=filenamestub+"_TRUE";			// true alignment
+	string filename2=filenamestub+"";				// true unaligned sequences
+	string filename3=filenamestub+"_ANCESTRAL";		// Ancestral sequences
 
-		// this sets up output files for the case where all replicates are printed to the same file.
-		string endbit=".";
+	// this sets up output files for the case where all replicates are printed to the same file.
+	string endbit=".";
 
-		// choose file extension depending on desired output type
-		if(outputtype==1) endbit+=fastaextension; else if(outputtype==2) endbit+=phylipextension; else if(outputtype==3) endbit+=nexusextension;
+	// choose file extension depending on desired output type
+	if(outputtype==1) endbit+=fastaextension; else if(outputtype==2) endbit+=phylipextension; else if(outputtype==3) endbit+=nexusextension;
 
-		filename1+=endbit;
-		filename2+="."; filename2+=fastaextension;    // unaligned sequences always output in FASTA format
-		filename3+=endbit;
+	filename1+=endbit;
+	filename2+="."; filename2+=fastaextension;    // unaligned sequences always output in FASTA format
+	filename3+=endbit;
 
 
-		if(!fileperrep)
+	if(!fileperrep)
+	{
+	    if(ancestralprint && ancestralfile)
+	    {
+		//	(*results3)=new ofstream;
+		(*results3).close();
+		(*results3).clear();
+		(results3)->open(filename3.c_str());
+	    }
+
+
+	    //	(*results)=new ofstream;
+	    (*results).close(); (*results2).close();
+	    (*results).clear();  (*results2).clear();
+
+	    (results)->open(filename1.c_str());
+
+	    (*results)<<paupstart;
+
+	    //(*results2)=new ofstream;
+	    (results2)->open(filename2.c_str());
+	}
+
+
+
+
+
+	startofblock=clock();
+
+	// Set everything in place
+	TsequencesINT.clear();  sequencesINT.clear();   TsequencesINT.assign(numberofpartitions,sequencesINT);
+	TinsINT.clear();		insINT.clear();			TinsINT.assign(numberofpartitions,insINT);
+	TinsPOS.clear();		insPOS.clear();			TinsPOS.assign(numberofpartitions,insPOS);
+
+
+
+	ofstream ratesout;
+
+
+	if(printrates)
+	{
+	    string ratefilename=filenamestub+"_RATES.txt";
+	    ratesout.open(  ratefilename.c_str()  );
+	    ratesout<<"Rates file : INDELible V"<<VersionNumber<<" "<<endl<<endl; // (best viewed cut and paste in e.g. excel)"<<endl<<endl;
+	}
+
+
+
+	for(int thisrep=1; thisrep<reps+1; thisrep++)
+	{
+	    if(printrates) ratesout<<endl<<"Replicate: "<<thisrep<<endl;
+
+	    globalthisrep=thisrep;
+
+	    // this for loop performs the required number of replicates.
+
+	    //(*LOG)<<endl<<"  * Block "<<blocknumber<<"\tReplicate "<<thisrep<<"\tFilename: "<<filenamestub<<"_TRUE"; if(fileperrep) (*LOG)<<"_"<<thisrep; (*LOG)<<endbit<<endl<<endl;
+
+	    inspinvcount=corepinvcount=0;
+
+	    if(thisrep==1)
+	    {
+		substitutioncount	= 0;	// counts the number of substitution events in a block
+		insertioncount		= 0;	// counts the number of insertion events in a block
+		insertiontotlength	= 0;	// tracks cumulative insertion length in a block
+		deletioncount		= 0;	// counts the number of deletion events in a block
+		deletiontotlength	= 0;	// tracks cumulative deletion length in a block
+	    }
+
+
+
+	    int sitecount=0;
+
+	    ///////////////////////////
+	    // OLD POSITION OF PRINT RATES STUFF
+
+	    // totallength = original root sequence length + dashlength ends up being length of sequences in true alignment
+	    dashlength=0;
+
+	    totallength=0;
+
+
+	    if(numberofpartitions>1) (*LOG)<<"  This dataset contains "<<numberofpartitions<<" partitions as follows:"<<endl<<endl<<"\tLength\tFrom\tTo\tModel\tPartition"<<endl;
+
+	    int lastlength=0;
+
+	    vector<int> partitionlengths; partitionlengths.push_back(0);
+
+	    mycodes.clear(); vector<int> bl; bl.assign(ntaxa*200,0); mycodes.assign(numberofpartitions,bl);
+
+
+	    for(int partitionnumber=0; partitionnumber<numberofpartitions; partitionnumber++)
+	    {
+		// this loop cycles through the different partitions
+
+		//	if(partitionnumber>0) partitionboundariesL.push_back(partitionboundariesR.at(partitionnumber-1)+1);
+
+		weareon=false;
+		//			isitrandom   = isitrandomv.at(partitionnumber);
+		//			isitsites    = isitsitesv.at(partitionnumber);
+
+		// whether this partition contains a branch class or a model
+		isitbranches = isitbranchesv.at(partitionnumber);
+
+		// guide tree set to become tree from treeposvec that matches the partition
+		treeC=&(totaltrees.at(   treeposvec.at(partitionnumber)   ));
+
+		if(therearerandomtrees)
 		{
-			if(ancestralprint && ancestralfile)
+		    // if it is random tree then the tree in the class (*treeC) is relaced with new tree
+
+		    if((*treeC).treerandom) 	(*treeC).newrandom(thisrep);
+		}
+
+		originaltree=(*treeC).tree;
+
+		// set tree length for percentage done calculations ------> not used any more.
+		currenttreelength=treelength=(*treeC).treelength;
+
+		// sorts out guide tree, adding node labels for navigation and storage
+		startnodelabel=0;
+		int error=settreeup(partitionnumber,originaltree, nonamestree, origtreewithnodes, nonamestreewithnodes, startnodelabel, taxanames, ntaxa);
+
+
+		if(thisrep==1 && partitionnumber==0) treesout<<endl;
+
+		if(therearerandomtrees)
+		{
+		    treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t";
+
+		    if(ancestralprint) treesout<<origtreewithnodes<<endl; else treesout<<(*treeC).tree<<endl;
+
+		}
+
+		if(!therearerandomtrees && thisrep==1)
+		{
+
+		    treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t";
+		    //					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t";
+		    //				treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t-\t";
+
+		    if(ancestralprint) treesout<<origtreewithnodes<<endl; else treesout<<(*treeC).tree<<endl;
+		}
+
+
+
+		if(error==-1) return 0;
+
+		// create instances of SUMS and RATES to pass down and inherit through the recursive algorithms
+		SUMS sums;
+		RATES rates=RATES();
+
+		// rates.partitionlength is set to and remains as user-specified root length for duration of simulation
+		rates.partitionlength=((*p).rootlengthvec).at(partitionnumber)+1;
+
+		// these others begin as rates.partitionlength but change during course of simulation
+		rates.corelength=rates.rootlength=rates.partitionlength;
+
+
+// these are used when checking that substitution works in inserted sites
+
+#ifdef checkingindelsubs1
+		// not used much... very slow, it makes core sequence 1 site long and creates one insertion of length rates.partitionlength
+		rates.corelength=rates.rootlength=rates.totallength=2;
+#endif
+#ifdef checkingindelsubs2
+		// creates starting situation where 10% of sites are core and 90% are inserted.
+		rates.corelength=rates.rootlength=rates.totallength=int(0.1*(rates.partitionlength))+1;
+#endif
+#ifdef checkingindelsubs3
+		// creates starting situation where 50% of sites are core and 50% are inserted.
+		rates.corelength=rates.rootlength=rates.totallength=int(0.5*(rates.partitionlength))+1;
+#endif
+
+
+
+		// this is position of model in totalmodels when not a branch class
+		// otherwise it is position of branchclass in total branches
+		mypos=((*p).mbsposvec).at(partitionnumber);
+
+
+		// need to point to root model so that correct stationary frequencies are used for root sequence creation
+		if(isitbranches)
+		{
+		    b=&(totalbranches.at( mypos ));
+
+		    m=&(totalmodels.at( ((*b).rootmodelpos) ));
+
+
+		    (mycodes.at(partitionnumber)).at(0)=(*m).geneticcode;
+
+		}
+		else  m=&(totalmodels.at( mypos ));
+
+		mymods.clear(); mymods.push_back(mypos);
+		// this is done once here to set up the definitions of constants used in Zipfian random number generation
+		changezipfrandoms();
+
+
+		// set up site classes for codon site-models and relative rates for gamma/pinv distributions
+
+		// weareon=(*m).codonratestrue;						// one used for branch classes and
+		// if(!weareon) weareon=(*m).codonratestrue;		// one used for models - not sure which
+		SetSiteRates2(rates, (*p).name, thisrep, rootlength);
+
+
+		// points to root sequence for this partition if defined by user rather than created in setuprootseq
+		vector<int>* myrootseq=&(  ((*p).rootseqints).at(partitionnumber)   );
+
+
+		// create root sequence if necessary and setup
+		setuprootseq(rates, *myrootseq, partitionnumber, TsequencesINT.at(partitionnumber), TinsPOS.at(partitionnumber), TinsINT.at(partitionnumber), sums);
+
+
+#ifdef timewatch
+		startofevolution=clock();
+		(*LOG)<<endl<<"  * Set-up completed.    Time taken: "<<(double)(startofevolution-startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
+#endif
+
+		// not currently used?
+		noinsertionsyet=true;
+		// do the evolving
+		sorttreeout( TinsPOS.at(partitionnumber), rates, TinsINT.at(partitionnumber), startnodelabel, nonamestreewithnodes, thisrep, ntaxa,
+			     taxanames, TsequencesINT.at(partitionnumber), blocknumber, thisrep, numberofevolveblocks, reps, partitionnumber,
+			     numberofpartitions,  sums);
+
+
+#ifdef timewatch
+		startofprinting=clock();
+		(*LOG)<<endl<<"  * Evolution completed. Time taken: "<<(double)(startofprinting - startofevolution) / CLOCKS_PER_SEC <<" seconds."<<endl;
+#endif
+
+		// updates total length for each partition
+		totallength+=rates.rootlength;
+
+
+		//random_shuffle(partitionpositions.begin(), partitionpositions.end()); /* shuffle elements --------> takes too long, so another method used */
+
+		//Tpartitionpositions.push_back(partitionpositions);
+
+		if(numberofpartitions>1)
+		{
+		    int R=totallength+dashlength-partitionnumber-1,bit=1;  partitionlengths.push_back(R);
+
+		    //if(printcodonsasDNA && type==3) {R*=3;bit=3;}
+
+		    int L=lastlength+bit; lastlength=R;
+
+		    (*LOG)<<"\t"<<R-L+1<<"\t"<<L<<"\t"<<R<<"\t";
+		    if(isitbranches) (*LOG)<<(*b).name; else (*LOG)<<(*m).name;
+		    (*LOG)<<"\t"<<partitionnumber+1<<endl;
+		}
+
+
+		if(printrates)
+		{
+		    if(type!=3)
+		    {
+
+			if((*m).continuousgamma && isitbranches)
 			{
-			//	(*results3)=new ofstream;
-				(*results3).close();
-				(*results3).clear();
-				(results3)->open(filename3.c_str());
+			    ratesout<<endl<<"This partition uses continuous gamma rate variation and a non-homogenous model."<<endl;
+			    ratesout<<      "The rates are not currently logged if alpha has changed on the tree. "<<endl;
+			    ratesout<<      "The rates given below correspond to alpha="<<(*m).alpha<<" for model "<<(*m).name<<" only"<<endl<<endl;
+                            ratesout<<"Site\tRate\tPartition\tInserted?"<<endl;
+
+			    //ratesout<<endl<<"Partition "<<partitionnumber+1<<" uses  Rates are not logged for continuous gamma that changes over the tree. "<<endl<<"Please use discrete gamma if you need to know the specific rates for each site in a changing gamma model. "<<endl<<"Continuous gamma rates *are* logged for models where alpha does not change. Other parameters of the model may still change. "<<endl<<"If this is feature is a necessity for your work then use the [printallrates] command to log rates\nfor non-homogenous continuous gamma models, albeit in a rather crude way."<<endl;
 			}
+			else
+			{
+			    if(isitbranches)
+			    {
+				ratesout<<endl<<"  N.B. For discrete gamma models that change over the tree, individual rates on"<<endl;
+				ratesout<<"       different branches can be calculated from the rates table below. "<<endl;
+				ratesout<<"       Just remember that the site *class* does not change over the tree."<<endl<<endl;
+
+				int iii, jjj; m=&(totalmodels.at( mymods.at(0) )); int gg= ((*m).Rrates).size();
+
+				ratesout<<"The columns below are the rates for the different classes under the different models."<<endl;
+				ratesout<< "The columns correspond to the following values of alpha used in the simulation:"<<endl<<endl;
+
+				for(iii=0; iii<mymods.size(); iii++)
+				{
+				    m=&(totalmodels.at( mymods.at(iii) ));  ratesout<<(*m).alpha<<"    ";
+				}
 
 
-		//	(*results)=new ofstream;
-			(*results).close(); (*results2).close();
-			(*results).clear();  (*results2).clear();
+				ratesout<<endl<<endl<<"Class"<<endl;
 
-			(results)->open(filename1.c_str());
+				vector<string> vs; vector<vector<string> >vvs; int maxsize=0;
+				for(jjj=0; jjj<gg; jjj++)
+				{
+				    vs.clear();
+				    for(iii=0; iii<mymods.size(); iii++)
+				    {
+					m=&(totalmodels.at( mymods.at(iii) ));
 
-			(*results)<<paupstart;
+					vector<double> rrates=(*m).Rrates;
+					stringstream jh; jh<<rrates.at(jjj);  string fv=jh.str(); vs.push_back(fv); if(maxsize<fv.size()) maxsize=fv.size();
+				    }
+				    vvs.push_back(vs);
+				}
 
-			//(*results2)=new ofstream;
-			(results2)->open(filename2.c_str());
+				//cout<<"maxsize "<<maxsize<<endl;
+				for(jjj=0; jjj<gg; jjj++)
+				{
+				    ratesout<<jjj+1<<"\t";  vs=vvs.at(jjj);
+
+				    for(iii=0; iii<mymods.size(); iii++)
+				    {
+					string za=vs.at(iii);
+					ratesout<<za; for(int dc=0; dc<maxsize-za.size(); dc++) ratesout<<" "; ratesout<<"\t";
+				    }
+				    ratesout<<endl;
+				}
+				m=&(totalmodels.at( ((*b).rootmodelpos) ));
+			    }
+			    else ratesout<<endl<<"alpha was "<<(*m).alpha<<" in this partition.";
+
+			    if((*m).continuousgamma) ratesout<<endl<<endl<<"Site\tRate\tPartition\tInserted?"<<endl; else ratesout<<endl<<endl<<"Site\tClass\tRate\tPartition\tInserted?"<<endl;
+
+			}
+		    }
+		    else if(partitionnumber==0)
+		    {
+			ratesout<<"  N.B. Site classes are numbered from lowest to highest values of omega."<<endl;
+			ratesout<<"       The omegas are not given explicitly as they are permitted to change on different"<<endl;
+			ratesout<<"       branches whereas the site classes are not allowed to change."<<endl;
+			ratesout<<"       Please consult your control file to find the corresponding omega values"<<endl<<endl;
+			ratesout<<"Site\tClass\tPartition\tInserted?"<<endl;
+
+		    }
+
+		    printoutrates(sitecount, partitionnumber+1, ratesout, (TinsPOS.at(partitionnumber)).at(0), (TinsINT.at(partitionnumber)).at(0) );
+
 		}
 
 
 
 
 
-		startofblock=clock();
 
-		// Set everything in place
-		TsequencesINT.clear();  sequencesINT.clear();   TsequencesINT.assign(numberofpartitions,sequencesINT);
-		TinsINT.clear();		insINT.clear();			TinsINT.assign(numberofpartitions,insINT);
-		TinsPOS.clear();		insPOS.clear();			TinsPOS.assign(numberofpartitions,insPOS);
 
+		//	if(printrates)
+		//	{
+		//		if((*m).continuousgamma && isitbranches && type!=3)  {}//ratesout<<"Rates are not logged for continuous gamma that changes over the tree. "<<endl<<"Please use discrete gamma if you need to know the specific rates for each site in a changing gamma model. "<<endl<<"Continuous gamma rates *are* logged for models where alpha does not change. Other parameters of the model may still change. "<<endl<<"If this is feature is a necessity for your work please contact me via the website for an untested version that does log rates\nfor non-homogenous continuous gamma models, albeit in a rather crude way."<<endl;
+		//		else printoutrates(sitecount, partitionnumber+1, ratesout, (TinsPOS.at(partitionnumber)).at(0), (TinsINT.at(partitionnumber)).at(0) );
+		//	}
 
+	    } // end of for loop for partitions in a replicate
 
-			ofstream ratesout;
 
 
-			if(printrates)
-			{
-					string ratefilename=filenamestub+"_RATES.txt";
-					ratesout.open(  ratefilename.c_str()  );
-					ratesout<<"Rates file : INDELible V"<<VersionNumber<<" "<<endl<<endl; // (best viewed cut and paste in e.g. excel)"<<endl<<endl;
-			}
+	    //if(numberofpartitions==1) (*LOG)<<endl<<"  "<<(*m).name<<"\twas the model used"<<endl;
 
+	    //(*LOG)<<endl<<"  "<<totallength+dashlength-numberofpartitions<<"\tis true total alignment length."<<endl<<endl<<"--------------------------------------------------------------------"<<endl<<endl;
 
-
-		for(int thisrep=1; thisrep<reps+1; thisrep++)
-		{
-			if(printrates) ratesout<<endl<<"Replicate: "<<thisrep<<endl;
-
-			globalthisrep=thisrep;
-
-			// this for loop performs the required number of replicates.
-
-			//(*LOG)<<endl<<"  * Block "<<blocknumber<<"\tReplicate "<<thisrep<<"\tFilename: "<<filenamestub<<"_TRUE"; if(fileperrep) (*LOG)<<"_"<<thisrep; (*LOG)<<endbit<<endl<<endl;
-
-			inspinvcount=corepinvcount=0;
-
-			if(thisrep==1)
-			{
-				substitutioncount	= 0;	// counts the number of substitution events in a block
-				insertioncount		= 0;	// counts the number of insertion events in a block
-				insertiontotlength	= 0;	// tracks cumulative insertion length in a block
-				deletioncount		= 0;	// counts the number of deletion events in a block
-				deletiontotlength	= 0;	// tracks cumulative deletion length in a block
-			}
-
-
-
-			int sitecount=0;
-
-			///////////////////////////
-			// OLD POSITION OF PRINT RATES STUFF
-
-			// totallength = original root sequence length + dashlength ends up being length of sequences in true alignment
-			dashlength=0;
-
-			totallength=0;
-
-
-			if(numberofpartitions>1) (*LOG)<<"  This dataset contains "<<numberofpartitions<<" partitions as follows:"<<endl<<endl<<"\tLength\tFrom\tTo\tModel\tPartition"<<endl;
-
-			int lastlength=0;
-
-			vector<int> partitionlengths; partitionlengths.push_back(0);
-
-			mycodes.clear(); vector<int> bl; bl.assign(ntaxa*200,0); mycodes.assign(numberofpartitions,bl);
-
-
-			for(int partitionnumber=0; partitionnumber<numberofpartitions; partitionnumber++)
-			{
-				// this loop cycles through the different partitions
-
-			//	if(partitionnumber>0) partitionboundariesL.push_back(partitionboundariesR.at(partitionnumber-1)+1);
-
-				weareon=false;
-	//			isitrandom   = isitrandomv.at(partitionnumber);
-	//			isitsites    = isitsitesv.at(partitionnumber);
-
-				// whether this partition contains a branch class or a model
-				isitbranches = isitbranchesv.at(partitionnumber);
-
-				// guide tree set to become tree from treeposvec that matches the partition
-				treeC=&(totaltrees.at(   treeposvec.at(partitionnumber)   ));
-
-				if(therearerandomtrees)
-				{
-					// if it is random tree then the tree in the class (*treeC) is relaced with new tree
-
-					if((*treeC).treerandom) 	(*treeC).newrandom(thisrep);
-				}
-
-				originaltree=(*treeC).tree;
-
-				// set tree length for percentage done calculations ------> not used any more.
-				currenttreelength=treelength=(*treeC).treelength;
-
-				// sorts out guide tree, adding node labels for navigation and storage
-				startnodelabel=0;
-				int error=settreeup(partitionnumber,originaltree, nonamestree, origtreewithnodes, nonamestreewithnodes, startnodelabel, taxanames, ntaxa);
-
-
-				if(thisrep==1 && partitionnumber==0) treesout<<endl;
-
-				if(therearerandomtrees)
-				{
-					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t";
-
-					if(ancestralprint) treesout<<origtreewithnodes<<endl; else treesout<<(*treeC).tree<<endl;
-
-				}
-
-				if(!therearerandomtrees && thisrep==1)
-				{
-
-					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t"<<(*treeC).max_distance<<"\t";
-				//					treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t"<<(*treeC).treedepth<<"\t";
-	//				treesout<<filenamestub<<"\t"<<(*treeC).name<<"\t"<<ntaxa<<"\t"<<thisrep<<"\t"<<partitionnumber+1<<"\t"<<(*treeC).treelength<<"\t-\t";
-
-					if(ancestralprint) treesout<<origtreewithnodes<<endl; else treesout<<(*treeC).tree<<endl;
-				}
-
-
-
-				if(error==-1) return 0;
-
-				// create instances of SUMS and RATES to pass down and inherit through the recursive algorithms
-				SUMS sums;
-				RATES rates=RATES();
-
-				// rates.partitionlength is set to and remains as user-specified root length for duration of simulation
-				rates.partitionlength=((*p).rootlengthvec).at(partitionnumber)+1;
-
-				// these others begin as rates.partitionlength but change during course of simulation
-				rates.corelength=rates.rootlength=rates.partitionlength;
-
-
-// these are used when checking that substitution works in inserted sites
-
-#ifdef checkingindelsubs1
-	// not used much... very slow, it makes core sequence 1 site long and creates one insertion of length rates.partitionlength
-	rates.corelength=rates.rootlength=rates.totallength=2;
-#endif
-#ifdef checkingindelsubs2
-	// creates starting situation where 10% of sites are core and 90% are inserted.
-	rates.corelength=rates.rootlength=rates.totallength=int(0.1*(rates.partitionlength))+1;
-#endif
-#ifdef checkingindelsubs3
-	// creates starting situation where 50% of sites are core and 50% are inserted.
-	rates.corelength=rates.rootlength=rates.totallength=int(0.5*(rates.partitionlength))+1;
-#endif
-
-
-
-				// this is position of model in totalmodels when not a branch class
-				// otherwise it is position of branchclass in total branches
-				mypos=((*p).mbsposvec).at(partitionnumber);
-
-
-				// need to point to root model so that correct stationary frequencies are used for root sequence creation
-				if(isitbranches)
-				{
-					  b=&(totalbranches.at( mypos ));
-
-					  m=&(totalmodels.at( ((*b).rootmodelpos) ));
-
-
-					  (mycodes.at(partitionnumber)).at(0)=(*m).geneticcode;
-
-				}
-				else  m=&(totalmodels.at( mypos ));
-
-				mymods.clear(); mymods.push_back(mypos);
-				// this is done once here to set up the definitions of constants used in Zipfian random number generation
-				changezipfrandoms();
-
-
-				// set up site classes for codon site-models and relative rates for gamma/pinv distributions
-
-				// weareon=(*m).codonratestrue;						// one used for branch classes and
-				// if(!weareon) weareon=(*m).codonratestrue;		// one used for models - not sure which
-				SetSiteRates2(rates, (*p).name, thisrep, rootlength);
-
-
-				// points to root sequence for this partition if defined by user rather than created in setuprootseq
-				vector<int>* myrootseq=&(  ((*p).rootseqints).at(partitionnumber)   );
-
-
-			// create root sequence if necessary and setup
-				setuprootseq(rates, *myrootseq, partitionnumber, TsequencesINT.at(partitionnumber), TinsPOS.at(partitionnumber), TinsINT.at(partitionnumber), sums);
-
-
-				#ifdef timewatch
-					startofevolution=clock();
-					(*LOG)<<endl<<"  * Set-up completed.    Time taken: "<<(double)(startofevolution-startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
-				#endif
-
-				// not currently used?
-				noinsertionsyet=true;
-				// do the evolving
-				sorttreeout( TinsPOS.at(partitionnumber), rates, TinsINT.at(partitionnumber), startnodelabel, nonamestreewithnodes, thisrep, ntaxa,
-					taxanames, TsequencesINT.at(partitionnumber), blocknumber, thisrep, numberofevolveblocks, reps, partitionnumber,
-					numberofpartitions,  sums);
-
-
-				#ifdef timewatch
-					startofprinting=clock();
-					(*LOG)<<endl<<"  * Evolution completed. Time taken: "<<(double)(startofprinting - startofevolution) / CLOCKS_PER_SEC <<" seconds."<<endl;
-				#endif
-
-				// updates total length for each partition
-				totallength+=rates.rootlength;
-
-
-				//random_shuffle(partitionpositions.begin(), partitionpositions.end()); /* shuffle elements --------> takes too long, so another method used */
-
-				//Tpartitionpositions.push_back(partitionpositions);
-
-				if(numberofpartitions>1)
-				{
-					int R=totallength+dashlength-partitionnumber-1,bit=1;  partitionlengths.push_back(R);
-
-					//if(printcodonsasDNA && type==3) {R*=3;bit=3;}
-
-					int L=lastlength+bit; lastlength=R;
-
-					(*LOG)<<"\t"<<R-L+1<<"\t"<<L<<"\t"<<R<<"\t";
-					if(isitbranches) (*LOG)<<(*b).name; else (*LOG)<<(*m).name;
-					(*LOG)<<"\t"<<partitionnumber+1<<endl;
-				}
-
-
-				if(printrates)
-				{
-					if(type!=3)
-					{
-
-						if((*m).continuousgamma && isitbranches)
-						{
-							ratesout<<endl<<"This partition uses continuous gamma rate variation and a non-homogenous model."<<endl;
-							ratesout<<      "The rates are not currently logged if alpha has changed on the tree. "<<endl;
-							ratesout<<      "The rates given below correspond to alpha="<<(*m).alpha<<" for model "<<(*m).name<<" only"<<endl<<endl;
-                            ratesout<<"Site\tRate\tPartition\tInserted?"<<endl;
-
-							//ratesout<<endl<<"Partition "<<partitionnumber+1<<" uses  Rates are not logged for continuous gamma that changes over the tree. "<<endl<<"Please use discrete gamma if you need to know the specific rates for each site in a changing gamma model. "<<endl<<"Continuous gamma rates *are* logged for models where alpha does not change. Other parameters of the model may still change. "<<endl<<"If this is feature is a necessity for your work then use the [printallrates] command to log rates\nfor non-homogenous continuous gamma models, albeit in a rather crude way."<<endl;
-						}
-						else
-						{
-							if(isitbranches)
-							{
-								ratesout<<endl<<"  N.B. For discrete gamma models that change over the tree, individual rates on"<<endl;
-								ratesout<<"       different branches can be calculated from the rates table below. "<<endl;
-								ratesout<<"       Just remember that the site *class* does not change over the tree."<<endl<<endl;
-
-								int iii, jjj; m=&(totalmodels.at( mymods.at(0) )); int gg= ((*m).Rrates).size();
-
-								ratesout<<"The columns below are the rates for the different classes under the different models."<<endl;
-								ratesout<< "The columns correspond to the following values of alpha used in the simulation:"<<endl<<endl;
-
-								for(iii=0; iii<mymods.size(); iii++)
-								{
-										m=&(totalmodels.at( mymods.at(iii) ));  ratesout<<(*m).alpha<<"    ";
-								}
-
-
-								ratesout<<endl<<endl<<"Class"<<endl;
-
-								vector<string> vs; vector<vector<string> >vvs; int maxsize=0;
-								for(jjj=0; jjj<gg; jjj++)
-								{
-									vs.clear();
-									for(iii=0; iii<mymods.size(); iii++)
-									{
-										m=&(totalmodels.at( mymods.at(iii) ));
-
-										vector<double> rrates=(*m).Rrates;
-										stringstream jh; jh<<rrates.at(jjj);  string fv=jh.str(); vs.push_back(fv); if(maxsize<fv.size()) maxsize=fv.size();
-									}
-									vvs.push_back(vs);
-								}
-
-								//cout<<"maxsize "<<maxsize<<endl;
-								for(jjj=0; jjj<gg; jjj++)
-								{
-									ratesout<<jjj+1<<"\t";  vs=vvs.at(jjj);
-
-									for(iii=0; iii<mymods.size(); iii++)
-									{
-										string za=vs.at(iii);
-										ratesout<<za; for(int dc=0; dc<maxsize-za.size(); dc++) ratesout<<" "; ratesout<<"\t";
-									}
-									ratesout<<endl;
-								}
-								m=&(totalmodels.at( ((*b).rootmodelpos) ));
-							}
-							else ratesout<<endl<<"alpha was "<<(*m).alpha<<" in this partition.";
-
-							if((*m).continuousgamma) ratesout<<endl<<endl<<"Site\tRate\tPartition\tInserted?"<<endl; else ratesout<<endl<<endl<<"Site\tClass\tRate\tPartition\tInserted?"<<endl;
-
-						}
-					}
-					else if(partitionnumber==0)
-					{
-						ratesout<<"  N.B. Site classes are numbered from lowest to highest values of omega."<<endl;
-						ratesout<<"       The omegas are not given explicitly as they are permitted to change on different"<<endl;
-						ratesout<<"       branches whereas the site classes are not allowed to change."<<endl;
-						ratesout<<"       Please consult your control file to find the corresponding omega values"<<endl<<endl;
-						ratesout<<"Site\tClass\tPartition\tInserted?"<<endl;
-
-					}
-
-					printoutrates(sitecount, partitionnumber+1, ratesout, (TinsPOS.at(partitionnumber)).at(0), (TinsINT.at(partitionnumber)).at(0) );
-
-				}
-
-
-
-
-
-
-
-			//	if(printrates)
-			//	{
-			//		if((*m).continuousgamma && isitbranches && type!=3)  {}//ratesout<<"Rates are not logged for continuous gamma that changes over the tree. "<<endl<<"Please use discrete gamma if you need to know the specific rates for each site in a changing gamma model. "<<endl<<"Continuous gamma rates *are* logged for models where alpha does not change. Other parameters of the model may still change. "<<endl<<"If this is feature is a necessity for your work please contact me via the website for an untested version that does log rates\nfor non-homogenous continuous gamma models, albeit in a rather crude way."<<endl;
-			//		else printoutrates(sitecount, partitionnumber+1, ratesout, (TinsPOS.at(partitionnumber)).at(0), (TinsINT.at(partitionnumber)).at(0) );
-			//	}
-
-			} // end of for loop for partitions in a replicate
-
-
-
-			//if(numberofpartitions==1) (*LOG)<<endl<<"  "<<(*m).name<<"\twas the model used"<<endl;
-
-			//(*LOG)<<endl<<"  "<<totallength+dashlength-numberofpartitions<<"\tis true total alignment length."<<endl<<endl<<"--------------------------------------------------------------------"<<endl<<endl;
-
-			// print results to output files
+	    // print results to output files
 #ifndef runseedstillbreak
 
-			printresultsout( thisrep,  filenamestub, ntaxa, totallength, taxanames, blocknumber, numberofevolveblocks,thisrep,reps,numberofpartitions);
+	    printresultsout( thisrep,  filenamestub, ntaxa, totallength, taxanames, blocknumber, numberofevolveblocks,thisrep,reps,numberofpartitions);
 #endif
 
-				#ifdef timewatch
-					endofprinting=clock();
-					(*LOG)<<"  * Printing completed.  Time taken: "<<(double)(endofprinting - startofprinting) / CLOCKS_PER_SEC <<" seconds."<<endl;
-				#endif
+#ifdef timewatch
+	    endofprinting=clock();
+	    (*LOG)<<"  * Printing completed.  Time taken: "<<(double)(endofprinting - startofprinting) / CLOCKS_PER_SEC <<" seconds."<<endl;
+#endif
 
 
 
-		#ifdef printrepstoscreen
-			if(reps>1) cout<<"  * Block "<<blocknumber<<" - Replicate "<<thisrep<<" completed."<<endl;
-		#endif
-
-////////////////////////////////////////////////
-				#ifdef splittree
-
-					// this compiler option is designed to split a 24 taxa tree into three 8 taxa trees at output to check that different parts of tree can evolve with different models.
-					// e.g. a 24 taxa tree where the three 8 taxa subtrees could be
-					// 1) GTR + continuous gamma with alpha = 0.5 + base frequencies 0.1 0.2 0.3 0.4
-					// 2) HKY + discrete gamma with alpha 2 + base frequencies 0.4 0.3 0.2 0.1
-					// 3) UNREST
-
-					if(ntaxa!=24) {cout<<" WARNING: splittree compiler option only works on 24 taxa trees. No split done."<<endl<<endl; continue;}
-
-					ofstream waste;
-
-					if(!fileperrep && reps!=1) {cout<<"ERROR: splittree debug compile code is not meant to be used with fileperrep"<<endl<<"Please change the setting and re-try analysis"<<endl<<endl; return -1; }
-
-					if(outputtype!=2) {cout<<"ERROR: splittree debug compile code is only meant to be used with phylip format"<<endl<<endl; return -1;}
-
-
-					stringstream kk; kk<<thisrep; string gg=kk.str();
-
-					string filename=filenamestub+"_TRUE_"+gg;
-
-					string endbit=".";  endbit+=phylipextension;
-
-					vector<string> myletters;
-
-					if(type==1) myletters=myDUletters; else if(type==2) myletters=myAUletters; else if(type==3) myletters=myCDUletters;
-
-
-					for(int a=1; a<4; a++)
-					{
-						stringstream dw; dw<<a; string dd=dw.str();  int myextra;
-
-						ofstream iff; iff.open( (filename+"_subtree"+dd+endbit).c_str() );
-
-						iff<<8<<"   "<<totallength+dashlength-numberofpartitions<<endl;
-
-						if(a==1) myextra=0; else if(a==2) myextra=8; else myextra=16;
-
-						for(int nx=1+myextra; nx<9+myextra; nx++)
-						{
-							iff<<taxaspacenames.at(nx);
-
-							for(int px=0; px<numberofpartitions; px++) makeprintseqLEAF(0, totallength+dashlength-numberofpartitions, (TinsPOS.at(px)).at(nx), (TsequencesINT.at(px)).at(nx), (TinsINT.at(px)).at(nx), nx, iff, waste,  0) ;
-
-							iff<<endl;
-						}
-
-
-					}
-
-
-
-				#endif
-
+#ifdef printrepstoscreen
+	    if(reps>1) cout<<"  * Block "<<blocknumber<<" - Replicate "<<thisrep<<" completed."<<endl;
+#endif
 
 ////////////////////////////////////////////////
-				#ifdef rippartitions
+#ifdef splittree
 
-					// this is designed to rip the partitions from a partitioned simulated dataset and spit them in to separate files
-					// that can be subjected to separate analyses to check that the partition system works ok.  number of partitions unlimited for test.
+	    // this compiler option is designed to split a 24 taxa tree into three 8 taxa trees at output to check that different parts of tree can evolve with different models.
+	    // e.g. a 24 taxa tree where the three 8 taxa subtrees could be
+	    // 1) GTR + continuous gamma with alpha = 0.5 + base frequencies 0.1 0.2 0.3 0.4
+	    // 2) HKY + discrete gamma with alpha 2 + base frequencies 0.4 0.3 0.2 0.1
+	    // 3) UNREST
 
-					if(numberofpartitions==1) continue;
+	    if(ntaxa!=24) {cout<<" WARNING: splittree compiler option only works on 24 taxa trees. No split done."<<endl<<endl; continue;}
 
-					ofstream waste;
+	    ofstream waste;
 
-					cout<<" WARNING: deletion rate > 0 in any model in any partition will probably"<<endl<<"          cause the rippartitions debug code to crash."<<endl<<endl;
+	    if(!fileperrep && reps!=1) {cout<<"ERROR: splittree debug compile code is not meant to be used with fileperrep"<<endl<<"Please change the setting and re-try analysis"<<endl<<endl; return -1; }
 
-					if(!fileperrep) {cout<<"ERROR: rippartitions debug compile code is not meant to be used with fileperrep"<<endl<<"Please delete the file paupmiddle.txt and re-try analysis"<<endl<<endl; return -1; }
-
-					if(outputtype!=2) {cout<<"ERROR: rippartitions debug compile code is only meant to be used with phylip format"<<endl<<endl; return -1;}
-
-
-					stringstream kk; kk<<thisrep; string gg=kk.str();
-
-					string filename=filenamestub+"_TRUE_"+gg;
-
-					string endbit=".";  endbit+=phylipextension;
-
-					vector<string> myletters;
-
-					if(type==1) myletters=myDUletters; else if(type==2) myletters=myAUletters; else if(type==3) myletters=myCDUletters;
+	    if(outputtype!=2) {cout<<"ERROR: splittree debug compile code is only meant to be used with phylip format"<<endl<<endl; return -1;}
 
 
+	    stringstream kk; kk<<thisrep; string gg=kk.str();
+
+	    string filename=filenamestub+"_TRUE_"+gg;
+
+	    string endbit=".";  endbit+=phylipextension;
+
+	    vector<string> myletters;
+
+	    if(type==1) myletters=myDUletters; else if(type==2) myletters=myAUletters; else if(type==3) myletters=myCDUletters;
 
 
-					for(int px=0; px<partitionlengths.size()-1; px++)
-					{
-						stringstream b; b<<px+1; string bb=b.str();
+	    for(int a=1; a<4; a++)
+	    {
+		stringstream dw; dw<<a; string dd=dw.str();  int myextra;
 
-						ofstream iff; iff.open( (filename+"_part"+bb+endbit).c_str() );
+		ofstream iff; iff.open( (filename+"_subtree"+dd+endbit).c_str() );
 
-						int L=partitionlengths.at(px),R=partitionlengths.at(px+1), partlength=R-L; if(type==3) partlength*=3;
+		iff<<8<<"   "<<totallength+dashlength-numberofpartitions<<endl;
 
-						iff<<ntaxa<<"   "<<partlength<<endl;
+		if(a==1) myextra=0; else if(a==2) myextra=8; else myextra=16;
 
-						for(int nx=1; nx<ntaxa+1; nx++)
-						{
-							iff<<taxaspacenames.at(nx);
+		for(int nx=1+myextra; nx<9+myextra; nx++)
+		{
+		    iff<<taxaspacenames.at(nx);
 
-							makeprintseqLEAF(0, partlength,  (TinsPOS.at(px)).at(nx), (TsequencesINT.at(px)).at(nx), (TinsINT.at(px)).at(nx), nx, iff, waste,  0) ;
+		    for(int px=0; px<numberofpartitions; px++) makeprintseqLEAF(0, totallength+dashlength-numberofpartitions, (TinsPOS.at(px)).at(nx), (TsequencesINT.at(px)).at(nx), (TinsINT.at(px)).at(nx), nx, iff, waste,  0) ;
 
-							iff<<endl;
-						}
-
-					}
+		    iff<<endl;
+		}
 
 
-				#endif
+	    }
+
+
+
+#endif// end-ifdef splittree
+
+
+////////////////////////////////////////////////
+#ifdef rippartitions
+
+	    // this is designed to rip the partitions from a partitioned simulated dataset and spit them in to separate files
+	    // that can be subjected to separate analyses to check that the partition system works ok.  number of partitions unlimited for test.
+
+	    if(numberofpartitions==1) continue;
+
+	    ofstream waste;
+
+	    cout<<" WARNING: deletion rate > 0 in any model in any partition will probably"<<endl<<"          cause the rippartitions debug code to crash."<<endl<<endl;
+
+	    if(!fileperrep) {cout<<"ERROR: rippartitions debug compile code is not meant to be used with fileperrep"<<endl<<"Please delete the file paupmiddle.txt and re-try analysis"<<endl<<endl; return -1; }
+
+	    if(outputtype!=2) {cout<<"ERROR: rippartitions debug compile code is only meant to be used with phylip format"<<endl<<endl; return -1;}
+
+
+	    stringstream kk; kk<<thisrep; string gg=kk.str();
+
+	    string filename=filenamestub+"_TRUE_"+gg;
+
+	    string endbit=".";  endbit+=phylipextension;
+
+	    vector<string> myletters;
+
+	    if(type==1) myletters=myDUletters; else if(type==2) myletters=myAUletters; else if(type==3) myletters=myCDUletters;
+
+
+
+
+	    for(int px=0; px<partitionlengths.size()-1; px++)
+	    {
+		stringstream b; b<<px+1; string bb=b.str();
+
+		ofstream iff; iff.open( (filename+"_part"+bb+endbit).c_str() );
+
+		int L=partitionlengths.at(px),R=partitionlengths.at(px+1), partlength=R-L; if(type==3) partlength*=3;
+
+		iff<<ntaxa<<"   "<<partlength<<endl;
+
+		for(int nx=1; nx<ntaxa+1; nx++)
+		{
+		    iff<<taxaspacenames.at(nx);
+
+		    makeprintseqLEAF(0, partlength,  (TinsPOS.at(px)).at(nx), (TsequencesINT.at(px)).at(nx), (TinsINT.at(px)).at(nx), nx, iff, waste,  0) ;
+
+		    iff<<endl;
+		}
+
+	    }
+
+
+#endif // end-ifdef rippartitions
 //////////////////////////////////////////////////////////////////
 
 
 
-		} // end of for loop for replicates in a block
+	} // end of for loop for replicates in a block
 
-			if(printrates) ratesout.close();
+	if(printrates) ratesout.close();
 
 
-		//prints out paupend if there is one file for all replicates.
-		if(!fileperrep) (*results)<<paupend<<endl;
+	//prints out paupend if there is one file for all replicates.
+	if(!fileperrep) (*results)<<paupend<<endl;
 
 #ifndef runseedstillbreak
-		// if indels have occurred print the true information about them for this block
-		if((*m).insertrate!=0 || (*m).deleterate!=0 ) printinsertinfo();
+	// if indels have occurred print the true information about them for this block
+	if((*m).insertrate!=0 || (*m).deleterate!=0 ) printinsertinfo();
 #endif
 	//	cout<<clock()<<endl;
 
-		endofblock=clock();
-		(*LOG)<<endl;
-		cout<<"  * Block "<<blocknumber<<" completed.   Time taken: "<<(double)(endofblock - startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
-		 (*LOG)<<"  * Block "<<blocknumber<<" was completed in "<<(double)(endofblock - startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
+	endofblock=clock();
+	(*LOG)<<endl;
+	cout<<"  * Block "<<blocknumber<<" completed.   Time taken: "<<(double)(endofblock - startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
+	(*LOG)<<"  * Block "<<blocknumber<<" was completed in "<<(double)(endofblock - startofblock) / CLOCKS_PER_SEC <<" seconds."<<endl;
 
 
-		(*LOG)<<endl<<"********************************************************************************"<<endl<<endl;
-	}// end of commandblocks for loop, i.e. blocks in a control file
+	(*LOG)<<endl<<"********************************************************************************"<<endl<<endl;
+    }// end of commandblocks for loop, i.e. blocks in a control file
 
-	(*results).close();	(*results2).close();	(*results3).close();
+    (*results).close();	(*results2).close();	(*results3).close();
 
-		// print out final screen and log output and calculate simulation finish time etc
+    // print out final screen and log output and calculate simulation finish time etc
 
-		finish=clock();
-		time(&endtime);
-		timeinfo=localtime(&endtime);
+    finish=clock();
+    time(&endtime);
+    timeinfo=localtime(&endtime);
 
-		if(numberofevolveblocks>1) cout<<"  * All blocks complete. Time taken: "<<(double)(finish - start) / CLOCKS_PER_SEC <<" seconds."<<endl<<endl;
-		cout<<"\n\n *** SIMULATION COMPLETED - PLEASE CONSULT OUTPUT FILES ***                                                                     "<<endl;
-
-
-		(*LOG)<<"  * Simulation completed. Whole batch took: "<<(double)(finish - start) / CLOCKS_PER_SEC <<" seconds."<<endl<<endl;
-
-		(*LOG)<<"INDELible V"<<VersionNumber<<" Simulations completed at: "<<asctime(timeinfo);
-
-		(*LOG)<<endl<<"********************************************************************************"<<endl<<endl;
-
-		cout<<endl<<endl<<" INDELible V"<<VersionNumber<<" Simulations completed at: "<<asctime(timeinfo)<<endl<<endl;
-
-#ifdef runseedstillbreak
-} //endof qwerty for loop
-#endif
+    if(numberofevolveblocks>1) cout<<"  * All blocks complete. Time taken: "<<(double)(finish - start) / CLOCKS_PER_SEC <<" seconds."<<endl<<endl;
+    cout<<"\n\n *** SIMULATION COMPLETED - PLEASE CONSULT OUTPUT FILES ***                                                                     "<<endl;
 
 
-		(*LOG)<<endl<<" Original Control File "<<endl;
-		(*LOG)<<endl<<"-----------------------"<<endl<<endl<<endl;
+    (*LOG)<<"  * Simulation completed. Whole batch took: "<<(double)(finish - start) / CLOCKS_PER_SEC <<" seconds."<<endl<<endl;
+
+    (*LOG)<<"INDELible V"<<VersionNumber<<" Simulations completed at: "<<asctime(timeinfo);
+
+    (*LOG)<<endl<<"********************************************************************************"<<endl<<endl;
+
+    cout<<endl<<endl<<" INDELible V"<<VersionNumber<<" Simulations completed at: "<<asctime(timeinfo)<<endl<<endl;
 
 
-		for(int bv=0; bv<originalcontrol.size()-1; bv++) (*LOG)<<originalcontrol.at(bv);
-
-	delete results; delete results2; delete results3; delete LOG;
-
-#endif
+    (*LOG)<<endl<<" Original Control File "<<endl;
+    (*LOG)<<endl<<"-----------------------"<<endl<<endl<<endl;
 
 
-		return 0;
+    for(int bv=0; bv<originalcontrol.size()-1; bv++) (*LOG)<<originalcontrol.at(bv);
+
+    delete results; delete results2; delete results3; delete LOG;
+
+
+    return 0;
 }
 

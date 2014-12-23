@@ -178,7 +178,7 @@ private:
 	int makerootseqints(std::vector<int> &rootseqint, std::vector<int> rootlengths, std::string &rootseqtxt, int kk, int mbspos, 
 			    std::vector<std::string> rootfilenames, std::string mbstype, std::vector<std::string> mbnames, std::vector<int> geneticcodevec);
 
-};
+};  // end-class partitionclass
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +199,7 @@ class evolve
 		partitionpos=mypartitionpos;		// position in totalpartitions of the partition in question
 		filenamestub=myfilenamestub;		// filenamestub which is used to create output filenames
 	}
-};
+};  // end-class evolve
 
 
 
@@ -241,7 +241,7 @@ private:
 	
 	std::string rescaledtree(std::string originaltree, double treelength, double newtreelength);
 
-};
+};  // end-class Tree
 
 
 extern std::ofstream* LOG;		// used to print out information from simulations
@@ -282,6 +282,15 @@ extern int guidetreetype;		// used for logfile
 extern std::vector<model>		totalmodels;
 
 extern std::string paupstart, paupmiddle, paupend;
+
+extern std::string simtime;    //disabled time stamp so that output is over-written.
+extern std::vector<evolve> totalevolve;		// storage for the evolve class instances.
+extern std::vector<partitionclass> totalpartitions;   // storage for partitions
+extern std::vector<Tree>	totaltrees;	   // storage for trees!
+extern std::vector<char> originalcontrol;  // used to store control file used.
+extern std::vector<branchclass> totalbranches;			// storage for branch classes
+
+
 
 extern void controlerrorprint2(std::string blocktype, std::string blockname, std::string commandname, std::string instring, std::string myline);
 extern int docontrol();
