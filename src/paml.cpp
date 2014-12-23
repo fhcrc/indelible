@@ -37,15 +37,19 @@
 // and for producing random trees through the birth/death process.
 
 
+#include <stdlib.h>
 #include <math.h>
-#include "randoms.cpp"
+// #include "randoms.cpp"
 #include <string>
 #include <sstream>
 #include <vector>
-#include "float.h"
+#include <float.h>   // for FLT_RADIX
 #include <iostream>
 #include <fstream>
 #include <time.h>
+
+#include "randoms.h"
+#include "paml.h"
 
 #define square(a) ((a)*(a))
 #define min2(a,b) ((a)<(b)?(a):(b))
@@ -53,6 +57,8 @@
 
 extern double myrand;
 extern int idum;
+
+extern MTRand mtrand1;
 
 using namespace std;
 
@@ -2028,137 +2034,3 @@ Yang, Z., Nielsen, R., Goldman, N. and Pedersen, A-M. K. (2000) Codon-Substituti
 }
 
 ///////////////////
-// old testing of routines.......  from Jan 08 I think ....  delete?
-
-/*
-double main(int argc, char* argv[])
-{
-vector<double> params;
-vector<double> output;
-params.push_back(0.2);
-params.push_back(0.2);
-params.push_back(0.2);
-params.push_back(0.2);
-params.push_back(0.2);
-
-//int ng=10;
-//int blah=5;
-//DiscreteNSsites(params,ng , blah, output);
-
-	double parameters[4]=
-	//{3,3,3,3}; //
-	{0.383,0.967,1.452,0.283};
-
-	//int DiscreteNSsites(double par[], int ncatG, int NSsites, double rK[], double freqK[])
-DiscreteNSsites(parameters, 10, 6, output);
-
-   for(int i=0; i<10; i++) cout<<"qwdewf "<<output.at(i)<<endl;
-
-
-	//	parameters);
-cout<<"EEEEEEEEEEEEEEEEE"<<endl;
-//	cout<<com.rK[0]<<"\t"<<com.rK[1]<<"\t"<<com.rK[2]<<"\t"<<com.rK[3]<<"\t"<<com.rK[4]<<"\t"<<com.rK[5]<<"\t"<<com.rK[6]<<"\t"<<com.rK[7]<<"\t"<<com.rK[8]<<"\t"<<com.rK[9]<<endl;
-
-
-	return 0;
-}
-
-/*
-double main(int argc, char* argv[])
-{
-	vector<double> freq,rK, freq1,rK1;
-	double alfa, beta;
-	int K=10, median=0, ig;
-
-	alfa=0.967; beta=1.452;
-	DiscreteGamma (freq, rK,alfa, beta, K, median);
-
-	for( ig=0; ig<K; ig++) cout<<rK.at(ig)<<endl;
-
-	cout<<"*****************"<<endl ;
-	alfa=beta=0.283;
-	DiscreteGamma (freq1, rK1,alfa, beta, K, median);
-
-	for( ig=0; ig<K; ig++) cout<<rK1.at(ig)<<endl;
-
-	cout<<"*****************"<<endl;
-
-	for(ig=0; ig<K; ig++) cout<<0.383*rK.at(ig)+0.617*rK1.at(ig)<<endl;
-
-	cout<<"*****************"<<endl ;
-	alfa=0.967*0.383+0.617*0.283; beta=1.452*0.383+0.283*0.617;
-	DiscreteGamma (freq1, rK1,alfa, beta, K, median);
-
-	for( ig=0; ig<K; ig++) cout<<rK1.at(ig)<<endl;
-
-
-
-
-
-
-	com.NSsites=5;
-	double parameters[4]={3,3,3,3}; //0.383,0.967,1.452,0.283};
-
-	com.ncatG=10;
-	DiscreteNSsites(parameters);
-cout<<"EEEEEEEEEEEEEEEEE"<<endl;
-	cout<<com.rK[0]<<"\t"<<com.rK[1]<<"\t"<<com.rK[2]<<"\t"<<com.rK[3]<<"\t"<<com.rK[4]<<"\t"<<com.rK[5]<<"\t"<<com.rK[6]<<"\t"<<com.rK[7]<<"\t"<<com.rK[8]<<"\t"<<com.rK[9]<<endl;
-cout<<"EEEEEEEEEEEEEEEEE"<<endl;
-	DiscreteGamma (freq1, rK1,3, 3, 10, 0);
-
-	for( ig=0; ig<10; ig++) cout<<rK1.at(ig)<<"\t";
-
-	int a4,b4,c4,d4;
-	double a,b,c,d,a1,b1,c1,d1;
-	a1=0.383;
-	b1=0.967;
-	c1=1.452;
-	d1=0.283;
-/*
-	ofstream rout("bits.txt");
-
-	a=a1; b=b1; c=c1; d=d1; //a=0.303; //a=0.38;
-a=a1;a+=0.0005;
-	for(a4=0; a4<101; a4++)
-	{b=b1;b+=0.0005;
-
-		a-=0.00001;
-	for(b4=0; b4<101; b4++)
-	{
-		c=c1;c+=0.0005;
-
-		b-=0.00001;
-
-	for(c4=0; c4<101; c4++)
-	{
-d=d1;d+=0.0005;
-
-		c-=0.00001;
-
-	for(d4=0; d4<101; d4++)
-	{
-		d-=0.00001;
-		double diff;
-
-		DiscreteNSsites(a,b,c,d); //parameters);
-		//for(ig=0; ig<10; ig++) cout<<com.rK[ig]<<endl;
-		double T[10]={0.0003,0.0135,0.0598,0.1424,0.2621,0.4267,0.6569,1.0037,1.6282,3.5598};
-		double x0=com.rK[0]; diff=T[0]-x0; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x1=com.rK[1]; diff=T[1]-x1; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x2=com.rK[2]; diff=T[2]-x2; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x3=com.rK[3]; diff=T[3]-x3; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x4=com.rK[4]; diff=T[4]-x4; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x5=com.rK[5]; diff=T[5]-x5; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x6=com.rK[6]; diff=T[6]-x6; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x7=com.rK[7]; diff=T[7]-x7; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x8=com.rK[8]; diff=T[8]-x8; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-		double x9=com.rK[9]; diff=T[9]-x9; if(diff<0) diff=-diff; if(diff>0.00005) continue;
-
-		rout<<a4<<"\t"<<b4<<"\t"<<c4<<"\t"<<d4<<"\t"<<com.rK[0]<<"\t"<<com.rK[1]<<"\t"<<com.rK[2]<<"\t"<<com.rK[3]<<"\t"<<com.rK[4]<<"\t"<<com.rK[5]<<"\t"<<com.rK[6]<<"\t"<<com.rK[7]<<"\t"<<com.rK[8]<<"\t"<<com.rK[9]<<endl;
-		cout<<a4<<"\t"<<b4<<"\t"<<c4<<"\t"<<d4<<"\t"<<com.rK[0]<<"\t"<<com.rK[1]<<"\t"<<com.rK[2]<<"\t"<<com.rK[3]<<"\t"<<com.rK[4]<<"\t"<<com.rK[5]<<"\t"<<com.rK[6]<<"\t"<<com.rK[7]<<"\t"<<com.rK[8]<<"\t"<<com.rK[9]<<endl;
-
-	}}}}
-*/
-/*	return 0;
-}
-*/

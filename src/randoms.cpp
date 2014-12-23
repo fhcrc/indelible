@@ -25,18 +25,18 @@
     Please visit http://www.gnu.org/licenses/ for a full copy of the license.
 */
 
-
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // uniform random numbers are produced using the code in this file.
-#include "MersenneTwister.h"
+#include "randoms.h"
 
 MTRand mtrand1;
 MTRand mtrand2;
 
 // needed for time monitoring
 
-#include <stdio.h>
-#include <stdlib.h>
 /*
 // time monitoring stuff works as below:
 
@@ -123,10 +123,6 @@ int oldrandnegbin(int r, double q)
 
 // Zipfian random number generation
 
-#define H(x,q1,q2,v) exp(q1*log(v+x))*q2
-
-#define H1(x,q1,q2,v) -v+exp(q2*log((1-q)*x))
-
 unsigned int imax = ~0;
 
 
@@ -162,8 +158,6 @@ int Zipf(double q, double v)
 
 	} while(true);
 }
-#define newZipf(a) Zipf(a,1)
-
 
 
 // algorithm from DAWG (Cartwright, 2005).

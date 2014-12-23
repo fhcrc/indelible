@@ -35,7 +35,11 @@
 #include <sstream>
 #include <algorithm>
 #include <map>
-#include "models.cpp"
+// #include "models.cpp"
+#include "models.h"
+#include "control.h"
+#include "randoms.h"   // for `idums`
+#include "paml.h"   // for `newrandomtree`
 
 using namespace std;
 
@@ -264,588 +268,483 @@ return !answer;
 
 ////////////////////////////////////////////////
 
-class branchclass
+int branchclass::getrootfreqs(string &testtree2)
 {
-	// this class provides the framework for simulations that use different models on different branches in the guide tree.
+    // this function takes the original tree with root model and strips off the defined model at root.
+    // it then checks that that model exists, and collects information about the model.
 
-public:
-	string treewithrootmodel;         // original tree given in control file, has a model at the root.
-	string tree;                      // tree minus model at root.
-	string baretree;                  // tree expressed as only a pattern of parentheses and commas
-	string name;					  // name of branch class
-	vector<string> modelnames;		  // names of models used, given in same order as modelpositions
-	//vector<model> branchmodels;
-	vector<int> modelpositions;       // position of models used in totalmodels.
-	vector<int> allmodelsused;		  // list of all models used in branch class (listed by model number)
-	vector<double> rootbasefreqs;     // base frequencies of model defined at root of branch class tree.
-	double insertrate;                // insertion rate at root?
-	double deleterate;                // deletion rate at root?
-	int rootmodelpos;                 // position of root model in totalmodels.
+    int testtreesize=testtree2.size()-1;
+    string testtree, rootmodel;
+    int pospos;
 
-	bool geneticcodefixed;			  // whether to allow geneticcode to change on trees.
-	int geneticcode;                  // genetic code used (for codon simulations) must be the same across entire tree
-	int error;                        // whether branch class successfully set itself up without errors.
+    for(int pp=testtreesize; pp>0; pp--) if(testtree2[pp]==')') {pospos=pp; break;}
 
-	int numcats;					  // number of categories in discrete gamma model or in site/branch-site models
-	                                  //    must be the same across the whole tree.
-
-	bool changecats;				  // says whether to rescale root cats and therefore check all for change.
-
-	vector<double> catprops;          // relative proportion of categories (must be same in different models).
-
-	branchclass(string &ttree, string &myname, vector<string> &totalmodelnames, bool iscodefixed)
+    for(int pp2=0; pp2<testtreesize; pp2++)
+    {
+	char c1=testtree2[pp2];
+	if(pp2>pospos)
 	{
-		// constructor
-		geneticcodefixed=iscodefixed;
+	    if(pp2!=pospos+1) rootmodel+=c1;
+	}
+	else testtree+=c1;
+    }
+    testtree+=';';
 
-		error=1;
-		treewithrootmodel=ttree;
-		for(int fd=0; fd<treewithrootmodel.size(); fd++) {char c=treewithrootmodel[fd]; if(c=='(' || c==')' || c==',' || c==';') baretree+=c;}
-		name=myname;
+    if(rootmodel=="") {controlerrorprint2("[BRANCHES]", name ,"","You haven't named a model for the root of this branch class.\nThe branch class tree should be of the form: (...)#m;\nwhere #m represents the (previously defined) root model m.",""	); return -1;}
+    else
+    {
+	int ans=checkthere(rootmodel,totalmodelnames);
 
-		if(error!=-1) error=getrootfreqs(treewithrootmodel);
-		if(error!=-1) error=buildbranches(tree,myname,modelnames);
+	if(ans==-1) {controlerrorprint2("[BRANCHES]", name ,"","The model "+rootmodel+" in this branches block has not been defined",""	); return -1; }
+	else
+	{
+	    modelpositions.push_back(ans);
+	    model* n=&(totalmodels.at(ans));
 
-		if(error!=-1) error=getbranchmodels(modelnames,totalmodelnames,modelpositions); //branchmodels);
+	    //	if(type==3)
+	    //	{
+	    catprops=(*n).cumfreqs;
+	    numcats=catprops.size();
+	    if(numcats==1) changecats=true; else changecats=false;
+	    //	}
 
-		if(error!=-1 /*&& geneticcodefixed*/) error=testgeneticcode2(modelpositions);
+	    insertrate=(*n).insertrate;
+	    deleterate=(*n).deleterate;
+	    rootbasefreqs=(*n).rootbasefreqs;
+	    rootmodelpos=(*n).modelpos;
 
 	}
+    }
 
-private:
+    tree=testtree;
 
-
-	int getrootfreqs(string &testtree2)
-	{
-		// this function takes the original tree with root model and strips off the defined model at root.
-		// it then checks that that model exists, and collects information about the model.
-
-		int testtreesize=testtree2.size()-1;
-		string testtree, rootmodel;
-		int pospos;
-
-		for(int pp=testtreesize; pp>0; pp--) if(testtree2[pp]==')') {pospos=pp; break;}
-
-		for(int pp2=0; pp2<testtreesize; pp2++)
-		{
-			char c1=testtree2[pp2];
-			if(pp2>pospos)
-			{
-				if(pp2!=pospos+1) rootmodel+=c1;
-			}
-			else testtree+=c1;
-		}
- 		testtree+=';';
-
-		if(rootmodel=="") {controlerrorprint2("[BRANCHES]", name ,"","You haven't named a model for the root of this branch class.\nThe branch class tree should be of the form: (...)#m;\nwhere #m represents the (previously defined) root model m.",""	); return -1;}
-		else
-		{
-			int ans=checkthere(rootmodel,totalmodelnames);
-
-			if(ans==-1) {controlerrorprint2("[BRANCHES]", name ,"","The model "+rootmodel+" in this branches block has not been defined",""	); return -1; }
-			else
-			{
-				modelpositions.push_back(ans);
-				model* n=&(totalmodels.at(ans));
-
-			//	if(type==3)
-			//	{
-					catprops=(*n).cumfreqs;
-					numcats=catprops.size();
-					if(numcats==1) changecats=true; else changecats=false;
-			//	}
-
-				insertrate=(*n).insertrate;
-				deleterate=(*n).deleterate;
-				rootbasefreqs=(*n).rootbasefreqs;
-				rootmodelpos=(*n).modelpos;
-
-			}
-		}
-
-		tree=testtree;
-
-		return 0;
-	}
+    return 0;
+}
 
 ///////////////////////////
 
-	int testgeneticcode(vector<int> modelpositions)
-	{
-		// this function simply tests that the genetic code defined in each model on each
-		// branch in the guide tree is the same and throws an error if they are not.
+int branchclass::testgeneticcode(vector<int> modelpositions)
+{
+    // this function simply tests that the genetic code defined in each model on each
+    // branch in the guide tree is the same and throws an error if they are not.
 
-		model* amodel=&(totalmodels.at(modelpositions.at(0)));
-		int mygeneticcode=(*amodel).geneticcode;
-		int lastgeneticcode;
-		string n2;
+    model* amodel=&(totalmodels.at(modelpositions.at(0)));
+    int mygeneticcode=(*amodel).geneticcode;
+    int lastgeneticcode;
+    string n2;
 
-		string n1=totalmodelnames.at(modelpositions.at(0));
+    string n1=totalmodelnames.at(modelpositions.at(0));
 
-		geneticcode=mygeneticcode;
-		for(int ds=1; ds<modelpositions.size(); ds++)
-		{
-			lastgeneticcode=mygeneticcode;
-			n2=n1;
+    geneticcode=mygeneticcode;
+    for(int ds=1; ds<modelpositions.size(); ds++)
+    {
+	lastgeneticcode=mygeneticcode;
+	n2=n1;
 
-			amodel=&(totalmodels.at(modelpositions.at(ds)));
-			mygeneticcode=(*amodel).geneticcode;
+	amodel=&(totalmodels.at(modelpositions.at(ds)));
+	mygeneticcode=(*amodel).geneticcode;
 
-			string n2=totalmodelnames.at(modelpositions.at(ds));
+	string n2=totalmodelnames.at(modelpositions.at(ds));
 
-			stringstream dd1; dd1<<lastgeneticcode;   string d1=dd1.str();
-			stringstream dd2; dd2<<mygeneticcode;     string d2=dd2.str();
+	stringstream dd1; dd1<<lastgeneticcode;   string d1=dd1.str();
+	stringstream dd2; dd2<<mygeneticcode;     string d2=dd2.str();
 
-			if(mygeneticcode!=lastgeneticcode) {controlerrorprint2("[BRANCHES]", name ,"","All models in a branches block should use the same genetic code.\nmodel "+n1+" has genetic code "+d1+"\nmodel "+n2+" has genetic code "+d2+"\nIf you want to allow the genetic code to change then use the command\n[BRANCHES*] instead of [BRANCHES] to turn off this safeguard.",""	); {if(breakonerror) return -1;} }
-		}
+	if(mygeneticcode!=lastgeneticcode) {controlerrorprint2("[BRANCHES]", name ,"","All models in a branches block should use the same genetic code.\nmodel "+n1+" has genetic code "+d1+"\nmodel "+n2+" has genetic code "+d2+"\nIf you want to allow the genetic code to change then use the command\n[BRANCHES*] instead of [BRANCHES] to turn off this safeguard.",""	); {if(breakonerror) return -1;} }
+    }
 
-		return 0;
-	}
+    return 0;
+}
 ///////////////////////////
 
-	int testgeneticcode2(vector<int> modelpositions)
+int branchclass::testgeneticcode2(vector<int> modelpositions)
+{
+    // this function simply tests that the genetic code defined in each model on each
+    // branch in the guide tree is the same and throws an error if they are not.
+
+    model* amodel=&(totalmodels.at(modelpositions.at(0)));
+    int rootgeneticcode=(*amodel).geneticcode;
+    vector<int> myallowedlist=allowedcodes(rootgeneticcode);
+    int lastgeneticcode;
+
+    stringstream dd2; dd2<<rootgeneticcode;     string d2=dd2.str();
+
+    string n1=totalmodelnames.at(modelpositions.at(0)), n2;
+
+    geneticcode=rootgeneticcode;
+    for(int ds=1; ds<modelpositions.size(); ds++)
+    {
+	amodel=&(totalmodels.at(modelpositions.at(ds)));
+	lastgeneticcode=(*amodel).geneticcode;
+
+	string n2=totalmodelnames.at(modelpositions.at(ds));
+
+	stringstream dd1; dd1<<lastgeneticcode;   string d1=dd1.str();
+
+	bool codeerror=true;
+	for(int qwe=0; qwe<myallowedlist.size(); qwe++)
 	{
-		// this function simply tests that the genetic code defined in each model on each
-		// branch in the guide tree is the same and throws an error if they are not.
-
-		model* amodel=&(totalmodels.at(modelpositions.at(0)));
-		int rootgeneticcode=(*amodel).geneticcode;
-		vector<int> myallowedlist=allowedcodes(rootgeneticcode);
-		int lastgeneticcode;
-
-		stringstream dd2; dd2<<rootgeneticcode;     string d2=dd2.str();
-
-		string n1=totalmodelnames.at(modelpositions.at(0)), n2;
-
-		geneticcode=rootgeneticcode;
-		for(int ds=1; ds<modelpositions.size(); ds++)
-		{
-			amodel=&(totalmodels.at(modelpositions.at(ds)));
-			lastgeneticcode=(*amodel).geneticcode;
-
-			string n2=totalmodelnames.at(modelpositions.at(ds));
-
-			stringstream dd1; dd1<<lastgeneticcode;   string d1=dd1.str();
-
-			bool codeerror=true;
-			for(int qwe=0; qwe<myallowedlist.size(); qwe++)
-			{
-				if(lastgeneticcode==myallowedlist.at(qwe)) {codeerror=false; break;}
-			}
-			if(codeerror) {controlerrorprint2("[BRANCHES]", name ,"","All models in a branches block should use genetic codes that share \nthe same stop codons.\nmodel "+n1+" has genetic code "+d1+"\nmodel "+n2+" has genetic code "+d2+"\nThese codes do not share all stop codons and so cannot be combined. ",""	); {if(breakonerror) return -1;} }
-		}
-
-		return 0;
+	    if(lastgeneticcode==myallowedlist.at(qwe)) {codeerror=false; break;}
 	}
+	if(codeerror) {controlerrorprint2("[BRANCHES]", name ,"","All models in a branches block should use genetic codes that share \nthe same stop codons.\nmodel "+n1+" has genetic code "+d1+"\nmodel "+n2+" has genetic code "+d2+"\nThese codes do not share all stop codons and so cannot be combined. ",""	); {if(breakonerror) return -1;} }
+    }
+
+    return 0;
+}
 ///////////////////////////
-	int getbranchmodels(vector<string> &modelnames,vector<string> &totalmodelnames, vector<int> &modelpositions) //vector<model> &branchmodels)
+int branchclass::getbranchmodels(vector<string> &modelnames,vector<string> &totalmodelnames, vector<int> &modelpositions) //vector<model> &branchmodels)
+{
+    // this function tests all the models found by buildbranches function. if the models do not exist, or if they
+    // have the wrong number of categories, or the categories have different proportions then an error is thrown.
+
+    for(int hgg=0; hgg<modelnames.size(); hgg++)
+    {
+	string thisname=modelnames.at(hgg);
+
+	int found=checkthere(thisname,totalmodelnames);
+	if(found==-1) {controlerrorprint2("[BRANCHES]", name ,"","The model "+thisname+" in this branches block has not been defined",""	); return -1;}
+	else
 	{
-		// this function tests all the models found by buildbranches function. if the models do not exist, or if they
-		// have the wrong number of categories, or the categories have different proportions then an error is thrown.
+	    //			if(type==3)
+	    //			{
+	    model *k=&(totalmodels.at(found));
 
-		for(int hgg=0; hgg<modelnames.size(); hgg++)
+	    int x=((*k).cumfreqs).size();
+
+	    if( numcats!=1 && x==1 && type!=3)
+	    {
+		if(numcats!=0)
 		{
-			string thisname=modelnames.at(hgg);
+		    totalmodels.push_back(totalmodels.at(found));
 
-			int found=checkthere(thisname,totalmodelnames);
-			if(found==-1) {controlerrorprint2("[BRANCHES]", name ,"","The model "+thisname+" in this branches block has not been defined",""	); return -1;}
-			else
-			{
-	//			if(type==3)
-	//			{
-					model *k=&(totalmodels.at(found));
+		    model *k2=&(totalmodels.back());
 
-					int x=((*k).cumfreqs).size();
+		    totalmodelnames.push_back(  ((*k2).name)+"_with_all_classes_equal"  );
 
-					if( numcats!=1 && x==1 && type!=3)
-					{
-						if(numcats!=0)
-						{
-							totalmodels.push_back(totalmodels.at(found));
+		    //for(int pq=0; pq<((*k2).cumfreqs).size(); pq++) cout<<"1 "<<pq<<" "<<((*k2).cumfreqs).at(pq)<<endl;
+		    (*k2).cumfreqs=(totalmodels.at(rootmodelpos)).cumfreqs;
+		    //for(int pq=0; pq<((*k2).cumfreqs).size(); pq++) cout<<"2 "<<pq<<" "<<((*k2).cumfreqs).at(pq)<<endl;
 
-							model *k2=&(totalmodels.back());
+		    (*k2).changeQandJ(numcats);
 
-							totalmodelnames.push_back(  ((*k2).name)+"_with_all_classes_equal"  );
+		    modelnames.at(hgg)=(*k2).name;
 
-							//for(int pq=0; pq<((*k2).cumfreqs).size(); pq++) cout<<"1 "<<pq<<" "<<((*k2).cumfreqs).at(pq)<<endl;
-							(*k2).cumfreqs=(totalmodels.at(rootmodelpos)).cumfreqs;
-							//for(int pq=0; pq<((*k2).cumfreqs).size(); pq++) cout<<"2 "<<pq<<" "<<((*k2).cumfreqs).at(pq)<<endl;
-
-							(*k2).changeQandJ(numcats);
-
-							modelnames.at(hgg)=(*k2).name;
-
-							found=totalmodels.size()-1;
-						}
-					}
-					else
-					{
+		    found=totalmodels.size()-1;
+		}
+	    }
+	    else
+	    {
 
 
-						if( numcats!=x )
-						{
+		if( numcats!=x )
+		{
 
-							stringstream s1,s2; s1<<x; s2<<numcats; string ss1=s1.str(), ss2=s2.str();
-							string nn1=totalmodelnames.at(found); string nn2=totalmodelnames.at(rootmodelpos);
-							controlerrorprint2("[BRANCHES]", name ,"","Number of site/rate classes in model "+nn1+" is "+ss1+"\nNumber of site/rate classes in root model "+nn2+" is "+ss2+"\nThese should be equal.","");
+		    stringstream s1,s2; s1<<x; s2<<numcats; string ss1=s1.str(), ss2=s2.str();
+		    string nn1=totalmodelnames.at(found); string nn2=totalmodelnames.at(rootmodelpos);
+		    controlerrorprint2("[BRANCHES]", name ,"","Number of site/rate classes in model "+nn1+" is "+ss1+"\nNumber of site/rate classes in root model "+nn2+" is "+ss2+"\nThese should be equal.","");
 
-							return -1;
-						}
-
-
-
-						for(int op=0; op<numcats; op++)
-						{
-							// cout<<"\t"<<catprops.at(op)<<"\t"<<((*k).cumfreqs).at(op)<<endl;
-
-							if( catprops.at(op)!=((*k).cumfreqs).at(op) )
-							{
-								stringstream s1,s2,s3; s1<<((*k).cumfreqs).at(op); s2<<catprops.at(op); s3<<op+1;
-								string ss1=s1.str(), ss2=s2.str(), op2=s3.str();
-								string nn1=totalmodelnames.at(found); string nn2=totalmodelnames.at(rootmodelpos);
-								controlerrorprint2("[BRANCHES]", name ,"","Site/rate class "+op2+" in model "+nn1+" has proportion "+ss1+"\nSite/rate class "+op2+" in root model "+nn2+" has proportion "+ss2+"\nThese should be equal.","");
-
-								return -1;
-							}
-
-						}
-
-					}
-			//	}
-
-				modelpositions.push_back(found);
-				int minicheck=checkthereN(found,allmodelsused);
-				if(minicheck==-1) allmodelsused.push_back(found);
-
-			}
-
-			//cout<<"model found "<<thisname<<" "<<found<<endl;
+		    return -1;
 		}
 
-		return 0;
+
+
+		for(int op=0; op<numcats; op++)
+		{
+		    // cout<<"\t"<<catprops.at(op)<<"\t"<<((*k).cumfreqs).at(op)<<endl;
+
+		    if( catprops.at(op)!=((*k).cumfreqs).at(op) )
+		    {
+			stringstream s1,s2,s3; s1<<((*k).cumfreqs).at(op); s2<<catprops.at(op); s3<<op+1;
+			string ss1=s1.str(), ss2=s2.str(), op2=s3.str();
+			string nn1=totalmodelnames.at(found); string nn2=totalmodelnames.at(rootmodelpos);
+			controlerrorprint2("[BRANCHES]", name ,"","Site/rate class "+op2+" in model "+nn1+" has proportion "+ss1+"\nSite/rate class "+op2+" in root model "+nn2+" has proportion "+ss2+"\nThese should be equal.","");
+
+			return -1;
+		    }
+
+		}
+
+	    }
+	    //	}
+
+	    modelpositions.push_back(found);
+	    int minicheck=checkthereN(found,allmodelsused);
+	    if(minicheck==-1) allmodelsused.push_back(found);
 
 	}
-	///////////////
 
-		int buildbranches(string &testtree, string &branchesname, vector<string> &modelnames)
+	//cout<<"model found "<<thisname<<" "<<found<<endl;
+    }
+
+    return 0;
+
+}
+///////////////
+
+int branchclass::buildbranches(string &testtree, string &branchesname, vector<string> &modelnames)
+{
+    // this function navigates the branch class guide tree defined in the control file
+    // and extracts model names subject to further testing, whether they exist and so on...
+
+
+    char c1='Q';
+
+    int bracketcount=0;
+    bool istherehash=false;
+    for(int i=0; i<testtree.size(); i++)
+    {
+	c1=testtree[i];
+
+	if(c1=='#') istherehash=true;
+	if(c1=='(') bracketcount++;
+	if(c1==')') bracketcount--;
+    }
+    if(bracketcount!=0) {controlerrorprint2("[BRANCHES]", name ,"","Number of parentheses in tree for this branch class do not match",""); return -1;}
+
+    //cout<<"Number of parentheses in tree for branch class "<<branchesname<<" do not match"<<endl;
+    //if(c1!=';') cout<<"Tree for branch class "<<branchesname<<" must be in newick format and end in a ;"<<endl;
+
+    if(testtree.size()>0 && testtree[testtree.size()-1]==';')
+    {
+	bracketcount=1;
+	string rfstring="";
+
+
+	for(int rf=1; rf<testtree.size(); rf++)
+	{
+	    c1=testtree[rf];
+	    if(c1=='(') bracketcount++;
+	    if(c1==')') bracketcount--;
+	    //		if(bracketcount==0 ||(bracketcount==1 && (c1==','||c1==')')) )
+	    if((bracketcount==1 && c1==',') || bracketcount==0)
+	    {
+		buildbranches(rfstring,branchesname,modelnames);
+		rfstring="";
+	    }
+	    else if(c1!=' ') rfstring+=c1;
+
+	}
+    }
+    else if(istherehash)
+    {
+	bracketcount=1;
+	string teststring, modelnamestring;
+	vector<string>remaining;
+
+	bool modelnamewrite=false;
+
+	if(testtree[0]!='(')
+	{
+	    for(int i1=0; i1<testtree.size(); i1++)
+	    {
+		///////////////////////////////////////////////////////////////////
+		c1=testtree[i1];
+
+		//if(modelnamewrite) cout<<"Q"<<c1<<"Q ";
+		//if((c1==','||c1==')') && modelnamewrite) {modelnames.push_back(modelnamestring); break;}
+		//if(c1=='#' && modelnamewrite) {modelnames.push_back(modelnamestring); break;}
+
+		if(modelnamewrite) {modelnamestring+=c1;}		// cout<<"X "<<modelnamestring<<endl;}
+		if(c1=='#' && !modelnamewrite) modelnamewrite=true;
+	    }
+	    modelnames.push_back(modelnamestring);
+
+	}
+	else
+	{
+	    for(int i=1; i<testtree.size(); i++)
+	    {
+		c1=testtree[i];
+
+		if(c1=='(') bracketcount++;
+		if(c1==')') bracketcount--;
+
+		//		if(bracketcount==0 ||(bracketcount==1 && (c1==','||c1==')')) )
+		if((bracketcount==1 && c1==',') || bracketcount==0)
 		{
-			// this function navigates the branch class guide tree defined in the control file
-			// and extracts model names subject to further testing, whether they exist and so on...
-
-
-			char c1='Q';
-
-			int bracketcount=0;
-			bool istherehash=false;
-			for(int i=0; i<testtree.size(); i++)
-			{
-				c1=testtree[i];
-
-				if(c1=='#') istherehash=true;
-				if(c1=='(') bracketcount++;
-				if(c1==')') bracketcount--;
-			}
-			if(bracketcount!=0) {controlerrorprint2("[BRANCHES]", name ,"","Number of parentheses in tree for this branch class do not match",""); return -1;}
-
-			//cout<<"Number of parentheses in tree for branch class "<<branchesname<<" do not match"<<endl;
-			//if(c1!=';') cout<<"Tree for branch class "<<branchesname<<" must be in newick format and end in a ;"<<endl;
-
-			if(testtree.size()>0 && testtree[testtree.size()-1]==';')
-			{
-				bracketcount=1;
-				string rfstring="";
-
-
-				for(int rf=1; rf<testtree.size(); rf++)
-				{
-					c1=testtree[rf];
-					if(c1=='(') bracketcount++;
-					if(c1==')') bracketcount--;
-			//		if(bracketcount==0 ||(bracketcount==1 && (c1==','||c1==')')) )
-					if((bracketcount==1 && c1==',') || bracketcount==0)
-					{
-						buildbranches(rfstring,branchesname,modelnames);
-						rfstring="";
-					}
-					else if(c1!=' ') rfstring+=c1;
-
-				}
-			}
-			else if(istherehash)
-			{
-				bracketcount=1;
-				string teststring, modelnamestring;
-				vector<string>remaining;
-
-				bool modelnamewrite=false;
-
-				if(testtree[0]!='(')
-				{
-					for(int i1=0; i1<testtree.size(); i1++)
-					{
-						///////////////////////////////////////////////////////////////////
-						c1=testtree[i1];
-
-						//if(modelnamewrite) cout<<"Q"<<c1<<"Q ";
-						//if((c1==','||c1==')') && modelnamewrite) {modelnames.push_back(modelnamestring); break;}
-						//if(c1=='#' && modelnamewrite) {modelnames.push_back(modelnamestring); break;}
-
-						if(modelnamewrite) {modelnamestring+=c1;}		// cout<<"X "<<modelnamestring<<endl;}
-						if(c1=='#' && !modelnamewrite) modelnamewrite=true;
-					}
-					modelnames.push_back(modelnamestring);
-
-				}
-				else
-				{
-					for(int i=1; i<testtree.size(); i++)
-					{
-						c1=testtree[i];
-
-						if(c1=='(') bracketcount++;
-						if(c1==')') bracketcount--;
-
-				//		if(bracketcount==0 ||(bracketcount==1 && (c1==','||c1==')')) )
-						if((bracketcount==1 && c1==',') || bracketcount==0)
-						{
-							//	cout<<"AA "<<teststring<<endl;
-							remaining.push_back(teststring);
-							teststring="";
-							if(bracketcount==0) bracketcount=-99;
-						}
-						else if(bracketcount==-99)
-						{
-								//if((c1==','||c1==')') && modelnamewrite) { modelnames.push_back(modelnamestring); break;}
-								//if(c1=='#' && modelnamewrite) {modelnames.push_back(modelnamestring); break;}
-
-								//if(modelnamewrite) cout<<"Q2"<<c1<<"Q ";
-
-							if(modelnamewrite) {modelnamestring+=c1; }		//cout<<"X2 "<<modelnamestring<<endl;}
-							if(c1=='#' && !modelnamewrite) modelnamewrite=true;
-						}
-						else teststring+=c1;
-					}
-					modelnames.push_back(modelnamestring);
-				}
-				for(int kd=0; kd<remaining.size(); kd++) buildbranches(remaining.at(kd),branchesname,modelnames);
-
-
-
-			}
-
-			return 0;
+		    //	cout<<"AA "<<teststring<<endl;
+		    remaining.push_back(teststring);
+		    teststring="";
+		    if(bracketcount==0) bracketcount=-99;
 		}
-};
+		else if(bracketcount==-99)
+		{
+		    //if((c1==','||c1==')') && modelnamewrite) { modelnames.push_back(modelnamestring); break;}
+		    //if(c1=='#' && modelnamewrite) {modelnames.push_back(modelnamestring); break;}
+
+		    //if(modelnamewrite) cout<<"Q2"<<c1<<"Q ";
+
+		    if(modelnamewrite) {modelnamestring+=c1; }		//cout<<"X2 "<<modelnamestring<<endl;}
+		    if(c1=='#' && !modelnamewrite) modelnamewrite=true;
+		}
+		else teststring+=c1;
+	    }
+	    modelnames.push_back(modelnamestring);
+	}
+	for(int kd=0; kd<remaining.size(); kd++) buildbranches(remaining.at(kd),branchesname,modelnames);
+
+
+
+    }
+
+    return 0;
+}
+
 ///////////////////////////////////////////////////////////
 
 vector<branchclass> totalbranches;			// storage for branch classes
 
 
-
-
-class siteclass
+int siteclass::testgeneticcode()
 {
-	// site class is now disabled.  It allows the use of different models in different proportions along a sequence.
+    int lastgeneticcode;
+    string modelorbranch1="model";
+    string modelorbranch2="model";
+    string n1,n2;
 
-public:
+    model* amodel;
 
-	vector<int> allmodelsused;
-	vector<bool>   trueformodel;  //true for model, false for branch class, in mbnames, mbpositions
-	vector<int>    mbpositions;
-	vector<string> mbnames;
-	vector<double> props;  // cumulative props remember!
-	vector<vector<double> > trootbasefreqs;
+    branchclass* abranchclass;
 
-	int geneticcode;
-	int error;
-	string mbtree;
-	string name;
+    if(trueformodel.at(0))
+    {
+	amodel=&(totalmodels.at(mbpositions.at(0)));
+	geneticcode=(*amodel).geneticcode;
+    }
+    else
+    {
+	abranchclass=&(totalbranches.at(mbpositions.at(0)));
+	geneticcode=(*abranchclass).geneticcode;
 
-	bool therearemodels;
-	bool therearebranches;
+	modelorbranch1="branch class";
+	modelorbranch2="branch class";
+    }
 
-//	siteclasscopy(site copysite)
-//	{
-//		//??????
-//	}
 
-//	createsiteprops()
-//	{
-//		//????
-//	}
-
-	siteclass(string sitename, vector<string> &mynames, vector<double> &myprops, vector<string> &totalmodelnames, vector<string> &totalbranchnames)
+    for(int ds=0; ds<mbpositions.size(); ds++)
+    {
+	lastgeneticcode=geneticcode;
+	n2=n1;
+	int pos=mbpositions.at(ds);
+	modelorbranch2=modelorbranch1;
+	if(trueformodel.at(ds))
 	{
-		error=1;
-		therearemodels=false;
-		therearebranches=false;
-		vector<string> mbtrees;
-
-		name=sitename;
-		props=myprops;
-		mbnames=mynames;
-
-		if(error!=-1) error=sortoutnames(mbtrees,totalmodelnames,totalbranchnames);
-		if(error!=-1) error=sortouttrees(mbtrees);
-		if(error!=-1) error=testgeneticcode();
-
+	    modelorbranch1="model";
+	    n1=totalmodelnames.at(pos);
+	    amodel=&(totalmodels.at(pos));
+	    geneticcode=(*amodel).geneticcode;
+	}
+	else
+	{
+	    modelorbranch1="branch class";
+	    n1=totalbranchesnames.at(pos);
+	    abranchclass=&(totalbranches.at(pos));
+	    geneticcode=(*abranchclass).geneticcode;
 	}
 
 
-///////////////////////////////////
-private:
 
+	stringstream dd1; dd1<<lastgeneticcode; string d1=dd1.str();
+	stringstream dd2; dd2<<geneticcode;     string d2=dd2.str();
 
-	int testgeneticcode()
+	if(geneticcode!=lastgeneticcode) {controlerrorprint2("[SITES]", name ,"","All models/branches in a sites block should use the same genetic code.\n"+modelorbranch1+" "+n1+" has genetic code "+d1+"\n"+modelorbranch2+" "+n2+" has genetic code "+d2,""	); {if(breakonerror) return -1;} }
+
+    }
+    return 0;
+}
+
+int siteclass::sortoutnames(vector<string> &mbtrees, vector<string> &totalmodelnames, vector<string> &totalbranchnames)
+{
+    for(int gh=0; gh<mbnames.size(); gh++)
+    {
+	bool modelorbranch=true;
+	string mbname=mbnames.at(gh);
+	string tree,stree;
+
+	int ans=checkthere(mbname,totalmodelnames);
+
+	//cout<<"ans "<<ans<<endl;
+	if(ans==-1)
 	{
-		int lastgeneticcode;
-		string modelorbranch1="model";
-		string modelorbranch2="model";
-		string n1,n2;
+	    ans=checkthere(mbname,totalbranchnames);
 
-		model* amodel;
 
-		branchclass* abranchclass;
+	    //	cout<<"\tans "<<ans<<endl;
+	    modelorbranch=false;
 
-		if(trueformodel.at(0))
+	    if(ans==-1) {controlerrorprint2("[SITES]", name, "", "You specified \""+mbname+"\" in this sites class.\nNo model/branch class with this name has been defined yet.",""); {if(breakonerror) return -1;} }
+	    else
+	    {
+		branchclass* b=&(totalbranches.at(ans));
+
+		trootbasefreqs.push_back( (*b).rootbasefreqs );
+
+		tree=(*b).tree;
+		therearebranches=true;
+
+		vector<int> modpos=((*b).allmodelsused);
+		for(int o1=0; o1<modpos.size(); o1++)
 		{
-			amodel=&(totalmodels.at(mbpositions.at(0)));
-			geneticcode=(*amodel).geneticcode;
-		}
-		else
-		{
-			abranchclass=&(totalbranches.at(mbpositions.at(0)));
-			geneticcode=(*abranchclass).geneticcode;
-
-			modelorbranch1="branch class";
-			modelorbranch2="branch class";
+		    int y=modpos.at(o1);
+		    int minicheck=checkthereN(y,allmodelsused);
+		    if(minicheck==-1) allmodelsused.push_back(y);
 		}
 
 
-		for(int ds=0; ds<mbpositions.size(); ds++)
-		{
-			lastgeneticcode=geneticcode;
-			n2=n1;
-			int pos=mbpositions.at(ds);
-			modelorbranch2=modelorbranch1;
-			if(trueformodel.at(ds))
-			{
-				modelorbranch1="model";
-				n1=totalmodelnames.at(pos);
-				amodel=&(totalmodels.at(pos));
-				geneticcode=(*amodel).geneticcode;
-			}
-			else
-			{
-				modelorbranch1="branch class";
-				n1=totalbranchesnames.at(pos);
-				abranchclass=&(totalbranches.at(pos));
-				geneticcode=(*abranchclass).geneticcode;
-			}
 
+	    }
 
+	    for(int yf=0; yf<tree.size(); yf++) {char c=tree[yf]; if(c=='(' || c==')' || c==',' || c==';') stree+=c;}
 
-			stringstream dd1; dd1<<lastgeneticcode; string d1=dd1.str();
-			stringstream dd2; dd2<<geneticcode;     string d2=dd2.str();
+	    if(mbtree=="") mbtree=stree;
 
-			if(geneticcode!=lastgeneticcode) {controlerrorprint2("[SITES]", name ,"","All models/branches in a sites block should use the same genetic code.\n"+modelorbranch1+" "+n1+" has genetic code "+d1+"\n"+modelorbranch2+" "+n2+" has genetic code "+d2,""	); {if(breakonerror) return -1;} }
-
-		}
-		return 0;
+	}
+	else
+	{
+	    therearemodels=true;
+	    int minicheck=checkthereN(ans,allmodelsused);
+	    if(minicheck==-1) allmodelsused.push_back(ans);
+	    model* m=&(totalmodels.at(ans));
+	    trootbasefreqs.push_back( (*m).rootbasefreqs );
 	}
 
-	int sortoutnames(vector<string> &mbtrees, vector<string> &totalmodelnames, vector<string> &totalbranchnames)
+	trueformodel.push_back(modelorbranch);
+	mbpositions.push_back(ans);
+
+	mbtrees.push_back(stree);
+    }
+
+    return 0;
+}
+/////////////////
+int siteclass::sortouttrees(vector<string> &mbtrees)
+{
+
+    int lastpos=-1;
+    for(int fc=0; fc<mbtrees.size(); fc++)
+    {
+	string testtree=mbtrees.at(fc);
+
+	if(testtree!="")
 	{
-		for(int gh=0; gh<mbnames.size(); gh++)
-		{
-			bool modelorbranch=true;
-			string mbname=mbnames.at(gh);
-			string tree,stree;
+	    if(lastpos==-1) lastpos=fc;
+	    else if(mbtree!=testtree)
+	    {
+		string s1=mbnames.at(lastpos), s2=mbnames.at(fc), t1=mbtree, t2=testtree, u1;
+		int s1s=s1.size(), s2s=s2.size();
 
-			int ans=checkthere(mbname,totalmodelnames);
+		if(s1s>s2s) {for(int fv=0; fv<s1s-s2s; fv++) s2+=" ";}
+		else        {for(int fv=0; fv<s2s-s1s; fv++) s1+=" ";}
 
-			//cout<<"ans "<<ans<<endl;
-			if(ans==-1)
-			{
-				ans=checkthere(mbname,totalbranchnames);
-
-
-			//	cout<<"\tans "<<ans<<endl;
-				modelorbranch=false;
-
-				if(ans==-1) {controlerrorprint2("[SITES]", name, "", "You specified \""+mbname+"\" in this sites class.\nNo model/branch class with this name has been defined yet.",""); {if(breakonerror) return -1;} }
-				else
-				{
-					branchclass* b=&(totalbranches.at(ans));
-
-					trootbasefreqs.push_back( (*b).rootbasefreqs );
-
-					tree=(*b).tree;
-					therearebranches=true;
-
-					vector<int> modpos=((*b).allmodelsused);
-					for(int o1=0; o1<modpos.size(); o1++)
-					{
-						int y=modpos.at(o1);
-						int minicheck=checkthereN(y,allmodelsused);
-						if(minicheck==-1) allmodelsused.push_back(y);
-					}
-
-
-
-				}
-
-				for(int yf=0; yf<tree.size(); yf++) {char c=tree[yf]; if(c=='(' || c==')' || c==',' || c==';') stree+=c;}
-
-				if(mbtree=="") mbtree=stree;
-
-			}
-			else
-			{
-				therearemodels=true;
-				int minicheck=checkthereN(ans,allmodelsused);
-				if(minicheck==-1) allmodelsused.push_back(ans);
-				model* m=&(totalmodels.at(ans));
-				trootbasefreqs.push_back( (*m).rootbasefreqs );
-			}
-
-			trueformodel.push_back(modelorbranch);
-			mbpositions.push_back(ans);
-
-			mbtrees.push_back(stree);
-		}
-
-		return 0;
+		controlerrorprint2("[SITES]", name, "", "Two branch classes in this site class have different guide trees.\n1) "+s1+"  "+t1+"\n2) "+s2+"  "+t2+"\nTrees must have their taxa/branches written in identical order.","");
+		{if(breakonerror) return -1;}
+	    }
 	}
-	/////////////////
-	int sortouttrees(vector<string> &mbtrees)
-	{
+    }
+    return 0;
+}
+////////
 
-		int lastpos=-1;
-		for(int fc=0; fc<mbtrees.size(); fc++)
-		{
-			string testtree=mbtrees.at(fc);
 
-			if(testtree!="")
-			{
-				if(lastpos==-1) lastpos=fc;
-				else if(mbtree!=testtree)
-				{
-					string s1=mbnames.at(lastpos), s2=mbnames.at(fc), t1=mbtree, t2=testtree, u1;
-					int s1s=s1.size(), s2s=s2.size();
-
-					if(s1s>s2s) {for(int fv=0; fv<s1s-s2s; fv++) s2+=" ";}
-					else        {for(int fv=0; fv<s2s-s1s; fv++) s1+=" ";}
-
-					controlerrorprint2("[SITES]", name, "", "Two branch classes in this site class have different guide trees.\n1) "+s1+"  "+t1+"\n2) "+s2+"  "+t2+"\nTrees must have their taxa/branches written in identical order.","");
-					{if(breakonerror) return -1;}
-				}
-			}
-		}
-		return 0;
-	}
-	////////
-};
 ///////////////////////////////////////////////////////////
 vector<siteclass>	totalsites;	// storage for site classes
 
@@ -2161,433 +2060,417 @@ int dealwithbranches(vector<string> &block, bool iscodefixed)
 vector<unsigned long> treeseeds;   //storage for tree seeds.....
 
 
-class Tree
+
+Tree::Tree(bool myseedgiven, string mtree, double mscaler, double mscalerd, int mntaxa, double mbirth,double mdeath,double msample, double mmut, int mseed, int mguidetreeroot, string mname, string mydoctor, double mscalerm)
 {
-	// this class stores a tree as defined by the user or creates random trees based on user defined settings...
+    tree=mtree;
+    ntaxa=mntaxa;
+    scaler=mscaler;
+    scalerd=mscalerd;
+    treerandom=false;
+    seedgiven=myseedgiven;
+    name=mname;
+    doctorlengths=mydoctor;
+    scalerm=mscalerm;
+    max_distance=0;
 
-public:
-	bool treerandom;
-//	bool randomeveryrep;
-	bool seedgiven;
-	string tree;
-	string name;
-	int ntaxa, seed, guidetreeroot, last;
-	double scaler, scalerd, scalerm, birth, death, sample, mut, max_distance;
-	double treelength, treedepth;
-	MTRand mymtrand;
-	string doctorlengths;
-
-	Tree(bool myseedgiven, string mtree, double mscaler, double mscalerd, int mntaxa, double mbirth,double mdeath,double msample, double mmut, int mseed, int mguidetreeroot, string mname, string mydoctor, double mscalerm)
-	{
-		tree=mtree;
-		ntaxa=mntaxa;
-		scaler=mscaler;
-		scalerd=mscalerd;
-		treerandom=false;
-		seedgiven=myseedgiven;
-		name=mname;
-		doctorlengths=mydoctor;
-		scalerm=mscalerm;
-		max_distance=0;
-
-		if(tree=="RANDOM")
-		{
-			treerandom=true;
-			birth=mbirth;
-			death=mdeath;
-			sample=msample;
-			mut=mmut;
-			seed=mseed;
-			guidetreeroot=mguidetreeroot;
+    if(tree=="RANDOM")
+    {
+	treerandom=true;
+	birth=mbirth;
+	death=mdeath;
+	sample=msample;
+	mut=mmut;
+	seed=mseed;
+	guidetreeroot=mguidetreeroot;
 
 //			if(seedgiven) {mymtrand.seed(seed);tester.seed(seed);}// cout<<"name "<<name<<" SEEDDDD "<<seed<<endl;}
-		}
+    }
 
 
-		if(!treerandom)
-		{
-			if(doctorlengths=="ULTRAMETRIC") tree=randomise_ultrametric(tree);
+    if(!treerandom)
+    {
+	if(doctorlengths=="ULTRAMETRIC") tree=randomise_ultrametric(tree);
 
 //			cout<<"Q"<<max_distance<<"Q"<<endl;
-			treedepth=getmaxtreedepth(tree);
+	treedepth=getmaxtreedepth(tree);
 //			cout<<"R"<<max_distance<<"R"<<endl<<endl;
-			treelength=gettreelength(tree);
+	treelength=gettreelength(tree);
 
-			if(scalerm!=-1) tree=rescaledtree(tree, max_distance, scalerm);
-			if(scaler!=-1)  tree=rescaledtree(tree, treelength,   scaler);
-			if(scalerd!=-1) tree=rescaledtree(tree, treedepth,    scalerd);////tree=redepthtree(tree, gettreelength(tree), scaler);
+	if(scalerm!=-1) tree=rescaledtree(tree, max_distance, scalerm);
+	if(scaler!=-1)  tree=rescaledtree(tree, treelength,   scaler);
+	if(scalerd!=-1) tree=rescaledtree(tree, treedepth,    scalerd);////tree=redepthtree(tree, gettreelength(tree), scaler);
 
-			max_distance=0;
-			treedepth=getmaxtreedepth(tree);
+	max_distance=0;
+	treedepth=getmaxtreedepth(tree);
 //			cout<<"S"<<max_distance<<"S"<<endl<<endl;
-			treelength=gettreelength(tree);
+	treelength=gettreelength(tree);
 //			cout<<"T"<<max_distance<<"T"<<endl<<endl;
 
-			if(scaler!=-1)  { double diff=treelength-scaler;    if(diff<0) diff=-diff; if(diff>0.0001) controlerrorprint2("[TREE]", name,"", "The treelength adjustment is not within the limits I expected.\n Please report this and it will be promptly fixed!","");}
-			if(scalerd!=-1) { double diff=treedepth-scalerd;    if(diff<0) diff=-diff; if(diff>0.0001) controlerrorprint2("[TREE]", name,"", "The treedepth adjustment is not within the limits I expected.\n Please report this and it will be promptly fixed!","");}
-			if(scalerm!=-1) { double diff=max_distance-scalerm; if(diff<0) diff=-diff; if(diff>0.0001) controlerrorprint2("[TREE]", name,"", "The maxdistance adjustment is not within the limits I expected.\n Please report this and it will be promptly fixed!","");}
-		}
+	if(scaler!=-1)  { double diff=treelength-scaler;    if(diff<0) diff=-diff; if(diff>0.0001) controlerrorprint2("[TREE]", name,"", "The treelength adjustment is not within the limits I expected.\n Please report this and it will be promptly fixed!","");}
+	if(scalerd!=-1) { double diff=treedepth-scalerd;    if(diff<0) diff=-diff; if(diff>0.0001) controlerrorprint2("[TREE]", name,"", "The treedepth adjustment is not within the limits I expected.\n Please report this and it will be promptly fixed!","");}
+	if(scalerm!=-1) { double diff=max_distance-scalerm; if(diff<0) diff=-diff; if(diff>0.0001) controlerrorprint2("[TREE]", name,"", "The maxdistance adjustment is not within the limits I expected.\n Please report this and it will be promptly fixed!","");}
+    }
 
 
-	}
+}
 
-	////////////
-	void newrandom(int rep) //, unsigned long &last)
-	{
-		// this function should be called at the beginning of simulating each replicate when using random trees.
+////////////
+void Tree::newrandom(int rep) //, unsigned long &last)
+{
+    // this function should be called at the beginning of simulating each replicate when using random trees.
 
-		/*
-		if(rep==1)
-		{
-			// [globalseed] overrides [seed] and [randomseed]
-			if(globalseed) mymtrand.seed(mtrand1.randInt());
+    /*
+      if(rep==1)
+      {
+      // [globalseed] overrides [seed] and [randomseed]
+      if(globalseed) mymtrand.seed(mtrand1.randInt());
 
-			// otherwise if a [TREE] [seed] has been given it is used
-			else if(seedgiven) mymtrand.seed(seed);
+      // otherwise if a [TREE] [seed] has been given it is used
+      else if(seedgiven) mymtrand.seed(seed);
 
-			// otherwise the random seed is automatically generated.
-			else mymtrand.seed();
+      // otherwise the random seed is automatically generated.
+      else mymtrand.seed();
 
-		}
-		else mymtrand.seed(last);
+      }
+      else mymtrand.seed(last);
 
-		last = mymtrand.randInt();
+      last = mymtrand.randInt();
 
-		string temptree=newrandomtree(ntaxa,birth,death,sample,mut,last,guidetreeroot);
+      string temptree=newrandomtree(ntaxa,birth,death,sample,mut,last,guidetreeroot);
 
-		*/
+    */
 
-		if(rep==1) {if(seedgiven) mymtrand.seed(seed);}
+    if(rep==1) {if(seedgiven) mymtrand.seed(seed);}
 
-		int theseed;  if(seedgiven) theseed=mymtrand.randInt(); else theseed=mtrand1.randInt();
+    int theseed;  if(seedgiven) theseed=mymtrand.randInt(); else theseed=mtrand1.randInt();
 
-		string temptree=newrandomtree(ntaxa,birth,death,sample,mut,theseed,guidetreeroot);
+    string temptree=newrandomtree(ntaxa,birth,death,sample,mut,theseed,guidetreeroot);
 
-		// FOR SOME REASON THE CODE FOR RANDOM TREES FROM ZIHENG'S EVOLVER LABELS SPECIES AS 1, 2, 3,... FOR
-		// NTAXA <20 BUT AS S1, S2, S3... FOR NTAXA>=20!!  THIS FILTERS THE 'S' OUT.
+    // FOR SOME REASON THE CODE FOR RANDOM TREES FROM ZIHENG'S EVOLVER LABELS SPECIES AS 1, 2, 3,... FOR
+    // NTAXA <20 BUT AS S1, S2, S3... FOR NTAXA>=20!!  THIS FILTERS THE 'S' OUT.
 
 //		cout<<"Q "<<temptree<<endl;
 
-		tree="";
-		for(int yq=0; yq<temptree.size(); yq++) if(temptree[yq]!='S') tree+=temptree[yq];
+    tree="";
+    for(int yq=0; yq<temptree.size(); yq++) if(temptree[yq]!='S') tree+=temptree[yq];
 
 //		cout<<"W "<<tree<<endl;
 
-		if(scaler!=-1) tree=rescaledtree(tree, gettreelength(tree), scaler);
+    if(scaler!=-1) tree=rescaledtree(tree, gettreelength(tree), scaler);
 
-		if(scalerd!=-1) tree=rescaledtree(tree, getmaxtreedepth(tree),scalerd);
+    if(scalerd!=-1) tree=rescaledtree(tree, getmaxtreedepth(tree),scalerd);
 
-	//	for(int po=0; po<40; po++) cout<<tree[po]; cout<<endl;
+    //	for(int po=0; po<40; po++) cout<<tree[po]; cout<<endl;
 
-		treelength=gettreelength(tree);
-		treedepth=getmaxtreedepth(tree);
+    treelength=gettreelength(tree);
+    treedepth=getmaxtreedepth(tree);
+}
+
+
+////////////
+
+
+double Tree::correctlastdepth(double maxdepth, string originaltree, double depthsofar, vector<string> &originals, vector<string> &changes)
+{
+    vector<string> bits;
+    string s,t;
+
+    int bracketcount=1, pi;
+
+    if(originaltree[0]=='(')
+    {
+	//cout<<"Q"<<originaltree<<"W"<<endl;
+	for(pi=1; pi<originaltree.size(); pi++)
+	{
+	    char c=originaltree[pi];
+	    if(c=='(') bracketcount++;
+	    if(c==')') bracketcount--;
+
+	    //cout<<c<<"  "<<bracketcount<<endl;
+	    if(bracketcount==1 && c==',') {bits.push_back(s); /*cout<<"S"<<s<<"S"<<endl;*/ s=""; continue;}
+	    if(bracketcount==0) {bits.push_back(s);/* cout<<"SS"<<s<<"SS"<<endl; */break;}
+
+	    s+=c;
 	}
 
-
-private:
-	////////////
-
-
-	double correctlastdepth(double maxdepth, string originaltree, double depthsofar, vector<string> &originals, vector<string> &changes)
-	{
-		vector<string> bits;
-		string s,t;
-
-		int bracketcount=1, pi;
-
-		if(originaltree[0]=='(')
-		{
-			//cout<<"Q"<<originaltree<<"W"<<endl;
-			for(pi=1; pi<originaltree.size(); pi++)
-			{
-				char c=originaltree[pi];
-				if(c=='(') bracketcount++;
-				if(c==')') bracketcount--;
-
-				//cout<<c<<"  "<<bracketcount<<endl;
-				if(bracketcount==1 && c==',') {bits.push_back(s); /*cout<<"S"<<s<<"S"<<endl;*/ s=""; continue;}
-				if(bracketcount==0) {bits.push_back(s);/* cout<<"SS"<<s<<"SS"<<endl; */break;}
-
-				s+=c;
-			}
-
-			//for(int yf=0; yf<bits.size(); yf++) cout<<bits.at(yf)<<endl;
+	//for(int yf=0; yf<bits.size(); yf++) cout<<bits.at(yf)<<endl;
 
 //			if(!isitfirstgoo)
 //			{
-				s="";
+	s="";
 
-				pi++;
-				if(originaltree[pi]!=':') { controlerrorprint2("[TREE]", name,"", "Something is wrong in the getnextdepthcommand.\n Please report this and it will be promptly fixed!",""); }
+	pi++;
+	if(originaltree[pi]!=':') { controlerrorprint2("[TREE]", name,"", "Something is wrong in the getnextdepthcommand.\n Please report this and it will be promptly fixed!",""); }
 
 
-				pi++;
-				for(int yg=pi; yg<originaltree.size(); yg++) s+=originaltree[yg];
+	pi++;
+	for(int yg=pi; yg<originaltree.size(); yg++) s+=originaltree[yg];
 
-				/*cout<<"length to add "<<s<<endl;*/
+	/*cout<<"length to add "<<s<<endl;*/
 
-				depthsofar+=atof(s.c_str());
+	depthsofar+=atof(s.c_str());
 
 //			}
 
-			for(pi=0; pi<bits.size(); pi++) correctlastdepth(maxdepth, bits.at(pi), depthsofar, originals, changes);
-		}
-		else
-		{
-			//end of the tree!!!
+	for(pi=0; pi<bits.size(); pi++) correctlastdepth(maxdepth, bits.at(pi), depthsofar, originals, changes);
+    }
+    else
+    {
+	//end of the tree!!!
 
-			bool lengthon=false;
+	bool lengthon=false;
 
-			for(pi=0; pi<originaltree.size(); pi++)
-			{
-				if(lengthon) s+=originaltree[pi];
+	for(pi=0; pi<originaltree.size(); pi++)
+	{
+	    if(lengthon) s+=originaltree[pi];
 
-				if(!lengthon) {	if(originaltree[pi]==':') lengthon=true;}
-			}
-
-			//cout<<"END LENGTH "<<s<<endl;
-
-			originals.push_back(s);
-
-			double endbranch=atof(s.c_str());
-
-			depthsofar+=endbranch;
-
-			double diff=maxdepth-depthsofar;
-			stringstream newendbranch;
-			newendbranch<<endbranch+diff;
-
-			changes.push_back(newendbranch.str());
-
-			//cout<<"Depth is "<<depthsofar<<" but we have target of "<<maxdepth<<" which is difference of "<<diff<<endl;
-			//cout<<"Old branch was "<<s<<" so now it is "<<newendbranch.str()<<endl;
-			//cout<<"******************"<<endl;
-		}
-
-		return 0;
+	    if(!lengthon) {	if(originaltree[pi]==':') lengthon=true;}
 	}
 
-	string randomise_ultrametric(string originaltree)
+	//cout<<"END LENGTH "<<s<<endl;
+
+	originals.push_back(s);
+
+	double endbranch=atof(s.c_str());
+
+	depthsofar+=endbranch;
+
+	double diff=maxdepth-depthsofar;
+	stringstream newendbranch;
+	newendbranch<<endbranch+diff;
+
+	changes.push_back(newendbranch.str());
+
+	//cout<<"Depth is "<<depthsofar<<" but we have target of "<<maxdepth<<" which is difference of "<<diff<<endl;
+	//cout<<"Old branch was "<<s<<" so now it is "<<newendbranch.str()<<endl;
+	//cout<<"******************"<<endl;
+    }
+
+    return 0;
+}
+
+string Tree::randomise_ultrametric(string originaltree)
+{
+    vector<string> onestochange, whattochangeto;
+    double diff, depthsofar=0;
+    double maxdepth=getmaxtreedepth(originaltree);
+
+    string tree;
+    int sizey=originaltree.size()-1;
+    if(originaltree[sizey]==';')
+    {
+	for(int fr=0; fr<sizey; fr++) tree+=originaltree[fr];
+	tree+=":0.0";
+    }
+    else tree=originaltree;
+
+    correctlastdepth(maxdepth, tree, depthsofar, onestochange, whattochangeto);
+
+    int branch=0;
+    string mylength, newtree;
+    char c;
+
+    tree=originaltree;
+
+    for(int uj=0; uj<tree.size(); uj++)
+    {
+	c=tree[uj];
+	if(c==',' || c==')')
 	{
-		vector<string> onestochange, whattochangeto;
-		double diff, depthsofar=0;
-		double maxdepth=getmaxtreedepth(originaltree);
-
-		string tree;
-		int sizey=originaltree.size()-1;
-		if(originaltree[sizey]==';')
-		{
-			for(int fr=0; fr<sizey; fr++) tree+=originaltree[fr];
-			tree+=":0.0";
-		}
-		else tree=originaltree;
-
-		correctlastdepth(maxdepth, tree, depthsofar, onestochange, whattochangeto);
-
-		int branch=0;
-		string mylength, newtree;
-		char c;
-
-		tree=originaltree;
-
-		for(int uj=0; uj<tree.size(); uj++)
-		{
-			c=tree[uj];
-			if(c==',' || c==')')
-			{
-				branch=0;
-				int pos=-1;
-				for(int rf=0; rf<onestochange.size(); rf++)
-				{
-					//cout<<rf<<" "<<mylength<<"  "<<onestochange.at(rf)<<"  ";
-					if(mylength==onestochange.at(rf)) {pos=rf; /*cout<<whattochangeto.at(pos)<<endl;*/ break;}
-					//cout<<endl;
-				}
-				if(pos==-1) newtree+=mylength;
-				else newtree+=whattochangeto.at(pos);
-				mylength="";
-			}
-			if(branch==1) mylength+=c; else newtree+=c;
-			if(c==':') branch=1;
-		}
-
-	  return newtree;
-
+	    branch=0;
+	    int pos=-1;
+	    for(int rf=0; rf<onestochange.size(); rf++)
+	    {
+		//cout<<rf<<" "<<mylength<<"  "<<onestochange.at(rf)<<"  ";
+		if(mylength==onestochange.at(rf)) {pos=rf; /*cout<<whattochangeto.at(pos)<<endl;*/ break;}
+		//cout<<endl;
+	    }
+	    if(pos==-1) newtree+=mylength;
+	    else newtree+=whattochangeto.at(pos);
+	    mylength="";
 	}
+	if(branch==1) mylength+=c; else newtree+=c;
+	if(c==':') branch=1;
+    }
 
-	double getmaxtreedepth(string originaltree)
-	{
-		string ss, newtree;
-		double depthsofar=0;
-		int sizey=originaltree.size()-1;
-		if(originaltree[sizey]==';')
-		{
-			for(int fr=0; fr<sizey; fr++) newtree+=originaltree[fr];
-			newtree+=":0.0";
-		}
-		else newtree=originaltree;
+    return newtree;
+
+}
+
+double Tree::getmaxtreedepth(string originaltree)
+{
+    string ss, newtree;
+    double depthsofar=0;
+    int sizey=originaltree.size()-1;
+    if(originaltree[sizey]==';')
+    {
+	for(int fr=0; fr<sizey; fr++) newtree+=originaltree[fr];
+	newtree+=":0.0";
+    }
+    else newtree=originaltree;
 
 //		if(depths.empty()) controlerrorprint2("[TREE]", name,"", "The treedepth command has misbehaved and the depths vector is empty.\n Please report this and it will be promptly fixed!","");
 
-		return getnextdepth(newtree,depthsofar);
+    return getnextdepth(newtree,depthsofar);
+}
+
+double Tree::getnextdepth(string originaltree, double depthsofar)
+{
+    vector<string> bits;
+    string s,t;
+
+    int bracketcount=1, pi;
+
+    if(originaltree[0]=='(')
+    {
+	//cout<<"Q"<<originaltree<<"W"<<endl;
+	for(pi=1; pi<originaltree.size(); pi++)
+	{
+	    char c=originaltree[pi];
+	    if(c=='(') bracketcount++;
+	    if(c==')') bracketcount--;
+
+	    //cout<<c<<"  "<<bracketcount<<endl;
+	    if(bracketcount==1 && c==',') {bits.push_back(s); /*cout<<"S"<<s<<"S"<<endl;*/ s=""; continue;}
+	    if(bracketcount==0) {bits.push_back(s);/* cout<<"SS"<<s<<"SS"<<endl; */break;}
+
+	    s+=c;
 	}
 
-	double getnextdepth(string originaltree, double depthsofar)
-	{
-		vector<string> bits;
-		string s,t;
-
-		int bracketcount=1, pi;
-
-		if(originaltree[0]=='(')
-		{
-			//cout<<"Q"<<originaltree<<"W"<<endl;
-			for(pi=1; pi<originaltree.size(); pi++)
-			{
-				char c=originaltree[pi];
-				if(c=='(') bracketcount++;
-				if(c==')') bracketcount--;
-
-				//cout<<c<<"  "<<bracketcount<<endl;
-				if(bracketcount==1 && c==',') {bits.push_back(s); /*cout<<"S"<<s<<"S"<<endl;*/ s=""; continue;}
-				if(bracketcount==0) {bits.push_back(s);/* cout<<"SS"<<s<<"SS"<<endl; */break;}
-
-				s+=c;
-			}
-
-			//for(int yf=0; yf<bits.size(); yf++) cout<<bits.at(yf)<<endl;
+	//for(int yf=0; yf<bits.size(); yf++) cout<<bits.at(yf)<<endl;
 
 //			if(!isitfirstgoo)
 //			{
-				s="";
+	s="";
 
-				pi++;
-				if(originaltree[pi]!=':') { controlerrorprint2("[TREE]", name,"", "Something is wrong in the getnextdepthcommand.\n Please report this and it will be promptly fixed!",""); }
+	pi++;
+	if(originaltree[pi]!=':') { controlerrorprint2("[TREE]", name,"", "Something is wrong in the getnextdepthcommand.\n Please report this and it will be promptly fixed!",""); }
 
 
-				pi++;
-				for(int yg=pi; yg<originaltree.size(); yg++) s+=originaltree[yg];
+	pi++;
+	for(int yg=pi; yg<originaltree.size(); yg++) s+=originaltree[yg];
 
-				/*cout<<"length to add "<<s<<endl;*/
+	/*cout<<"length to add "<<s<<endl;*/
 
-				depthsofar+=atof(s.c_str());
+	depthsofar+=atof(s.c_str());
 
 //			}
 
-			vector<double> mydepths, mydistances;
-			vector<vector<double> > distances;
-			double mymax=0;
-			int sizey=bits.size();
+	vector<double> mydepths, mydistances;
+	vector<vector<double> > distances;
+	double mymax=0;
+	int sizey=bits.size();
 
 //			for(pi=0; pi<sizey; pi++) cout<<"R "<<bits.at(pi)<<endl; cout<<"****"<<endl;
 
 // these two lines ended up stuck in a loop on very deep trees!
 
-		//	for(pi=0; pi<sizey; pi++) mydepths.push_back(getnextdepth(bits.at(pi),depthsofar));
+	//	for(pi=0; pi<sizey; pi++) mydepths.push_back(getnextdepth(bits.at(pi),depthsofar));
 
-		//	for(pi=0; pi<sizey; pi++) mydistances.push_back(getnextdepth(bits.at(pi),0));
+	//	for(pi=0; pi<sizey; pi++) mydistances.push_back(getnextdepth(bits.at(pi),0));
 
-			for(pi=0; pi<sizey; pi++)
-			{
-				double newdepth=getnextdepth(bits.at(pi),depthsofar);
-				mydepths.push_back(newdepth);
-				mydistances.push_back(newdepth-depthsofar);
-			}
-
-
-			for(pi=0; pi<sizey; pi++)
-			{
-	//			cout<<"    "<<mydepths.at(pi)<<endl;
-				if(mydepths.at(pi)>mymax) mymax=mydepths.at(pi);
-
-				for(int pi2=0; pi2<sizey; pi2++)
-				{
-					if(pi==pi2) continue;
-
-					double x=mydistances.at(pi)+mydistances.at(pi2);
-	//				cout<<"Q  "<<mydistances.at(pi)<<"  "<<mydistances.at(pi2)<<"  "<<x<<"  "<<max_distance<<endl;
-					if(x>max_distance) max_distance=x;
-				}
-			}
-
-			return mymax;
-		}
-		else
-		{
-			//end of the tree!!!
-
-			bool lengthon=false;
-
-			for(pi=0; pi<originaltree.size(); pi++)
-			{
-				if(lengthon) s+=originaltree[pi];
-
-				if(!lengthon) {	if(originaltree[pi]==':') lengthon=true;}
-			}
-
-			//cout<<"END LENGTH "<<s<<endl;
-
-			depthsofar+=atof(s.c_str());
-
-			return depthsofar;
-			//depths.push_back(depthsofar);
-
-		}
-
-		return 0;
-	}
-
-	////////////
-	double gettreelength(string originaltree)
+	for(pi=0; pi<sizey; pi++)
 	{
-		// returns tree length of originaltree
-
-		int branch=0;
-		string mylength;
-		double treelength=0;
-		char c;
-
-		for(int uj=0; uj<originaltree.size(); uj++)
-		{
-			c=originaltree[uj];
-			if(c==',' || c==')') {branch=0; double length=atof(mylength.c_str()); treelength+=length; mylength="";}
-			if(branch==1) mylength+=c;
-			if(c==':') branch=1;
-		}
-
-	  return treelength;
+	    double newdepth=getnextdepth(bits.at(pi),depthsofar);
+	    mydepths.push_back(newdepth);
+	    mydistances.push_back(newdepth-depthsofar);
 	}
-	/////
 
-	string rescaledtree(string originaltree, double treelength, double newtreelength)
+
+	for(pi=0; pi<sizey; pi++)
 	{
-		// this function will rescale a tree according to a desired total tree length.
+	    //			cout<<"    "<<mydepths.at(pi)<<endl;
+	    if(mydepths.at(pi)>mymax) mymax=mydepths.at(pi);
 
-		int branch=0;
-		string mylength, newtree;
-		char c;
+	    for(int pi2=0; pi2<sizey; pi2++)
+	    {
+		if(pi==pi2) continue;
 
-		for(int uj=0; uj<originaltree.size(); uj++)
-		{
-			c=originaltree[uj];
-			if(c==',' || c==')')
-			{
-				branch=0; double length=atof(mylength.c_str());
-  				length=length*newtreelength/treelength;
-				stringstream fd; fd<<length; string fg=fd.str();
-				newtree+=fg;
-				mylength="";
-			}
-			if(branch==1) mylength+=c;
-			else newtree+=c;
-			if(c==':') branch=1;
-		}
-
-	  return newtree;
+		double x=mydistances.at(pi)+mydistances.at(pi2);
+		//				cout<<"Q  "<<mydistances.at(pi)<<"  "<<mydistances.at(pi2)<<"  "<<x<<"  "<<max_distance<<endl;
+		if(x>max_distance) max_distance=x;
+	    }
 	}
-	///////////
 
-};
+	return mymax;
+    }
+    else
+    {
+	//end of the tree!!!
+
+	bool lengthon=false;
+
+	for(pi=0; pi<originaltree.size(); pi++)
+	{
+	    if(lengthon) s+=originaltree[pi];
+
+	    if(!lengthon) {	if(originaltree[pi]==':') lengthon=true;}
+	}
+
+	//cout<<"END LENGTH "<<s<<endl;
+
+	depthsofar+=atof(s.c_str());
+
+	return depthsofar;
+	//depths.push_back(depthsofar);
+
+    }
+
+    return 0;
+}
+
+////////////
+double Tree::gettreelength(string originaltree)
+{
+    // returns tree length of originaltree
+
+    int branch=0;
+    string mylength;
+    double treelength=0;
+    char c;
+
+    for(int uj=0; uj<originaltree.size(); uj++)
+    {
+	c=originaltree[uj];
+	if(c==',' || c==')') {branch=0; double length=atof(mylength.c_str()); treelength+=length; mylength="";}
+	if(branch==1) mylength+=c;
+	if(c==':') branch=1;
+    }
+
+    return treelength;
+}
+/////
+
+string Tree::rescaledtree(string originaltree, double treelength, double newtreelength)
+{
+    // this function will rescale a tree according to a desired total tree length.
+
+    int branch=0;
+    string mylength, newtree;
+    char c;
+
+    for(int uj=0; uj<originaltree.size(); uj++)
+    {
+	c=originaltree[uj];
+	if(c==',' || c==')')
+	{
+	    branch=0; double length=atof(mylength.c_str());
+	    length=length*newtreelength/treelength;
+	    stringstream fd; fd<<length; string fg=fd.str();
+	    newtree+=fg;
+	    mylength="";
+	}
+	if(branch==1) mylength+=c;
+	else newtree+=c;
+	if(c==':') branch=1;
+    }
+
+    return newtree;
+}
+///////////
+
+
 //////////////////
 vector<Tree>	totaltrees;	   // storage for trees!
 
@@ -3026,274 +2909,248 @@ int dealwithtrees(vector<string> &block)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-class partitionclass
+
+partitionclass::partitionclass(string myname, vector<int> rootlengths, vector<string> &rootseqtxtvec,  vector<string> rootfilenames, vector<int> mmbsposvec, vector<string> mbstypes, vector<string> mbnames, vector<int> mrootmodelpos, vector<int> geneticcodevec, vector<int> mytreeposvec, vector<string> mytreenamevec, int myntaxa, bool isitrandom)
 {
-	// this class stores the information for simulations that use different partitions
-	// A partition may be a branch class, site class or model class.
+    // constructor
 
+    randomtrees=isitrandom;
+    geneticcodes=geneticcodevec;
+    name=myname;
+    mbsposvec=mmbsposvec;
+    rootlengthvec=rootlengths;
+    treeposvec=mytreeposvec;
 
-public:
-	string name;
-	int ntaxa;
-	bool randomtrees;
+    checktaxaintrees(mytreeposvec);
 
-	vector<int> geneticcodes;
-	vector<vector<int> > rootseqints;
-	vector<int> blank;
-	vector<int> mbsposvec;
-	vector<int> rootmodelpos;
-	vector<int> rootlengthvec;
-//	vector<int> ntaxavec;
-	vector<int> treeposvec;
-
-	vector<bool> isitsites;
-	vector<bool> isitbranches;
-//	vector<bool> isitrandomvec;
-
-
-
-	partitionclass(string myname, vector<int> rootlengths, vector<string> &rootseqtxtvec,  vector<string> rootfilenames, vector<int> mmbsposvec, vector<string> mbstypes, vector<string> mbnames, vector<int> mrootmodelpos, vector<int> geneticcodevec, vector<int> mytreeposvec, vector<string> mytreenamevec, int myntaxa, bool isitrandom)
-	{
-		// constructor
-
-		randomtrees=isitrandom;
-		geneticcodes=geneticcodevec;
-		name=myname;
-		mbsposvec=mmbsposvec;
-		rootlengthvec=rootlengths;
-		treeposvec=mytreeposvec;
-
-		checktaxaintrees(mytreeposvec);
-
-		ntaxa=myntaxa;
-		rootmodelpos=mrootmodelpos;
+    ntaxa=myntaxa;
+    rootmodelpos=mrootmodelpos;
 //		isitrandomvec=myisitrandomvec;
 
-		rootseqints.assign(rootseqtxtvec.size(),blank);
+    rootseqints.assign(rootseqtxtvec.size(),blank);
 
-		for(int kk=0; kk<rootseqtxtvec.size(); kk++)
-		{
-			string mbstype=mbstypes.at(kk);
+    for(int kk=0; kk<rootseqtxtvec.size(); kk++)
+    {
+	string mbstype=mbstypes.at(kk);
 
-			if(mbstype=="model")    {isitsites.push_back(false); isitbranches.push_back(false);}
-			if(mbstype=="branches") {isitsites.push_back(false); isitbranches.push_back(true); }
-			if(mbstype=="sites")
-			{
-				isitsites.push_back(true);
-				siteclass* s=&(totalsites.at(mbsposvec.at(kk)));
-				bool now=(*s).therearebranches;
-				isitbranches.push_back(now);
-			}
-
-			makerootseqints(rootseqints.at(kk),rootlengths, rootseqtxtvec.at(kk), kk, mbsposvec.at(kk), rootfilenames, mbstype, mbnames, geneticcodevec);
-		}
-	}
-
-private:
-
-	int checktaxaintrees(vector<int> posvec)
+	if(mbstype=="model")    {isitsites.push_back(false); isitbranches.push_back(false);}
+	if(mbstype=="branches") {isitsites.push_back(false); isitbranches.push_back(true); }
+	if(mbstype=="sites")
 	{
-		Tree t=totaltrees.at(posvec.at(0));
-
-		int ntaxa=t.ntaxa;
-
-		for(int p=1; p<posvec.size(); p++)
-		{
-			Tree t=totaltrees.at(posvec.at(p));
-			if(t.ntaxa != ntaxa)
-			{
-				stringstream n1, n2; n1<<ntaxa; n2<<t.ntaxa; string s1=n1.str(), s2=n2.str(); string name1=(totaltrees.at(posvec.at(0))).name, name2=(totaltrees.at(posvec.at(p))).name;
-				controlerrorprint2("[PARTITIONS]", name, "", "Two trees in this partition group have a different number of taxa.\nTree "+name1+" has "+s1+" taxa.\nTree "+name2+" has "+s2+" taxa.\nThis is not allowed. Please correct.","");
-				if(breakonerror) return -1;
-			}
-
-		}
-
-		return 0;
+	    isitsites.push_back(true);
+	    siteclass* s=&(totalsites.at(mbsposvec.at(kk)));
+	    bool now=(*s).therearebranches;
+	    isitbranches.push_back(now);
 	}
 
+	makerootseqints(rootseqints.at(kk),rootlengths, rootseqtxtvec.at(kk), kk, mbsposvec.at(kk), rootfilenames, mbstype, mbnames, geneticcodevec);
+    }
+}
 
-	int makerootseqints(vector<int> &rootseqint, vector<int> rootlengths, string &rootseqtxt, int kk, int mbspos, vector<string> rootfilenames, string mbstype, vector<string> mbnames, vector<int> geneticcodevec)
+
+int partitionclass::checktaxaintrees(vector<int> posvec)
+{
+    Tree t=totaltrees.at(posvec.at(0));
+
+    int ntaxa=t.ntaxa;
+
+    for(int p=1; p<posvec.size(); p++)
+    {
+	Tree t=totaltrees.at(posvec.at(p));
+	if(t.ntaxa != ntaxa)
 	{
-		int rootlength=rootlengths.at(kk);
-		int myrootlength=rootseqtxt.size();
-		int geneticcode=geneticcodevec.at(kk);
-
-		string rootfilename=rootfilenames.at(kk);
-		string mbname=mbnames.at(kk);
-
-		if(rootseqtxt=="CREATE")
-		{
-			// CREATION OF ROOT SEQUENCE NOW DONE IN SETUPROOT FUNCTION IN MAIN SKELETON FILE
-
-			/*
-			model* m=&(totalmodels.at(mbspos));
-
-			vector<double> rootbasefreqs=(*m).rootbasefreqs;
-			vector<double> cumfreqs; cumfreqs.push_back(rootbasefreqs.at(0));
-			int rsize=rootbasefreqs.size();
-
-			for(int gh1=1; gh1<rsize; gh1++) cumfreqs.push_back(rootbasefreqs.at(gh1)+cumfreqs.at(gh1-1));
-
-			double diff=1-cumfreqs.back(); if(diff<0) diff=-diff;
-			if(diff>0.0001) {controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR: root base freqs do not sum to 1 in partitions class.",""); {if(breakonerror) return -1;} }
-
-			for(int gf=0; gf<rootlength; gf++)
-			{
-				double rand=mtrand1();
-				for(int ds=0; ds<rsize; ds++) if(rand<cumfreqs.at(ds)) {rootseqint.push_back(ds); break;}
-			}
-
-			//for(int as=0; as<rootseqint.size(); as++) cout<<as<<" "<<rootseqint.at(as)<<endl; cout<<endl;
-			*/
-		}
-		else
-		{
-				if(type==2)
-				{
-					string test="ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
-					if(!allAinB(rootseqtxt,test)) { controlerrorprint2("[PARTITIONS]", name, "", "AMINOACID root sequence in file can only contain following letters:\nARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv",""); {if(breakonerror) return -1;} }
-
-					int size=20;
-
-					/*
-						//always equal now
-					if(rootlength!=myrootlength)
-					{
-						stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
-						stringstream rr2; rr2<<myrootlength; string r2=rr2.str();
-						controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" amino acids.\nThe two numbers should match.  Have you made a mistake?","");
-						{if(breakonerror) return -1;}
-					}
-					*/
-
-					for(int fd0=0; fd0<myrootlength; fd0++)
-					{
-						char c=rootseqtxt[fd0];
-						bool error=true;
-
-						for(int fd1=0; fd1<size; fd1++) if(c==test[fd1] || c==test[fd1+size]) {error=false; rootseqint.push_back(fd1); break;}
-
-						if(error) { controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making NUCLEOTIDE root sequence.",""); {if(breakonerror) return -1;} }
-					}
-				}
-				else
-				{
-					string test="TCAGtcag", bit;
-					if(type==1) bit="NUCLEOTIDE"; else bit="CODON";
-
-					if(!allAinB(rootseqtxt,test)) { controlerrorprint2("[PARTITIONS]", name, "", bit+" root sequence in file can only contain following letters:\nTCAGtcag",""); {if(breakonerror) return -1;} }
-
-
-
-					int size=4;
-					if(type==1)
-					{
-						/*
-						//always equal now
-						if(rootlength!=myrootlength)
-						{
-							stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
-							stringstream rr2; rr2<<myrootlength; string r2=rr2.str();
-							controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" nucleotide bases.\nThe two numbers should match.  Have you made a mistake?","");
-							{if(breakonerror) return -1;}
-						}
-						*/
-						size=4;
-						for(int fd0=0; fd0<myrootlength; fd0++)
-						{
-						//	char cc=s[fd0];
-						//	stringstream ccc; ccc<<cc; string c=ccc.str();
-
-							bool error=true;
-							char c=rootseqtxt[fd0];
-
-							for(int fd1=0; fd1<size; fd1++) if(c==test[fd1] || c==test[fd1+size]) {error=false; rootseqint.push_back(fd1); break;}
-
-							if(error) { controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making "+bit+" root sequence.",""); {if(breakonerror) return -1;} }
-						}
-					}
-					else
-					{
-						if(myrootlength%3!=0)
-						{
-							stringstream rd; rd<<myrootlength; string rdd=rd.str();
-							controlerrorprint2("[PARTITIONS]", name, "", "CODON root sequence length is "+rdd+" nucleotides in the file\nbut must be a multiple of 3.","");
-							{if(breakonerror) return -1;}
-						}
-
-						/*
-						if(rootlength!=myrootlength/3)
-						{
-							stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
-							stringstream rr2; rr2<<myrootlength/3; string r2=rr2.str();
-							controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" codons.\nThe two numbers should match.  Have you made a mistake?","");
-							{if(breakonerror) return -1;}
-						}
-						*/
-
-						///////////////////////////////////////////////////////////////////////
-
-						vector<int> notallowed=getstops(geneticcode);
-
-						/*  //OLD WAY
-						vector<int> notallowed;
-
-						if(geneticcode!=6 && geneticcode!=12) notallowed.push_back(10);
-						if(geneticcode!=6 && geneticcode!=13) notallowed.push_back(11);
-						if(geneticcode==0 || geneticcode==6 || geneticcode==9 || geneticcode==10 || geneticcode==13) notallowed.push_back(14);
-						if(geneticcode==1) {notallowed.push_back(46); notallowed.push_back(47);}
-						*/
-
-						int notsize=notallowed.size();
-
-						stringstream we; we<<geneticcode; string wer=we.str();
-
-						for(int fd0=2; fd0<myrootlength; fd0=fd0+3)
-						{
-							char c1=rootseqtxt[fd0-2], c2=rootseqtxt[fd0-1], c3=rootseqtxt[fd0];
-							bool error1=true, error2=true, error3=true;
-							int i1,i2,i3,tot;
-
-							for(int fd1=0; fd1<size; fd1++)
-							{
-								if(c1==test[fd1])      {i1=fd1; error1=false;}
-								if(c1==test[fd1+size]) {i1=fd1; error1=false;}
-								if(c2==test[fd1])      {i2=fd1; error2=false;}
-								if(c2==test[fd1+size]) {i2=fd1; error2=false;}
-								if(c3==test[fd1])      {i3=fd1; error3=false;}
-								if(c3==test[fd1+size]) {i3=fd1; error3=false;}
-
-							}
-
-							if(error1 || error2 || error3) { controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making "+bit+" root sequence.",""); {if(breakonerror) return -1;} }
-
-							tot=(i1<<4)+(i2<<2)+i3; //cout<<tot<<endl;
-
-							for(int fd2=0; fd2<notsize; fd2++) if(tot==notallowed.at(fd2))
-							{
-								stringstream m; m<<fd0/3+1; string mm=m.str();
-								controlerrorprint2("[PARTITIONS]", name, "", "Root sequence file: "+rootfilename+"\nThis root sequence contains the codon "+c1+c2+c3+" at position "+mm+"\nBut "+mbstype+" class "+mbname+" uses genetic code "+wer+".\nUnder this genetic code "+c1+c2+c3+" is a stop codon and is not allowed.","");
-								{if(breakonerror) return -1;}
-							}
-
-							rootseqint.push_back(tot);
-
-						}
-
-						myrootlength/=3;
-
-					} // end of type=3 else in type1/type3 else
-
-				} // end of type1/type3 else
-
-
-		}
-
-		return 0;
+	    stringstream n1, n2; n1<<ntaxa; n2<<t.ntaxa; string s1=n1.str(), s2=n2.str(); string name1=(totaltrees.at(posvec.at(0))).name, name2=(totaltrees.at(posvec.at(p))).name;
+	    controlerrorprint2("[PARTITIONS]", name, "", "Two trees in this partition group have a different number of taxa.\nTree "+name1+" has "+s1+" taxa.\nTree "+name2+" has "+s2+" taxa.\nThis is not allowed. Please correct.","");
+	    if(breakonerror) return -1;
 	}
 
-};
+    }
+
+    return 0;
+}
+
+
+int partitionclass::makerootseqints(vector<int> &rootseqint, vector<int> rootlengths, string &rootseqtxt, int kk, int mbspos, vector<string> rootfilenames, string mbstype, vector<string> mbnames, vector<int> geneticcodevec)
+{
+    int rootlength=rootlengths.at(kk);
+    int myrootlength=rootseqtxt.size();
+    int geneticcode=geneticcodevec.at(kk);
+
+    string rootfilename=rootfilenames.at(kk);
+    string mbname=mbnames.at(kk);
+
+    if(rootseqtxt=="CREATE")
+    {
+	// CREATION OF ROOT SEQUENCE NOW DONE IN SETUPROOT FUNCTION IN MAIN SKELETON FILE
+
+	/*
+	  model* m=&(totalmodels.at(mbspos));
+
+	  vector<double> rootbasefreqs=(*m).rootbasefreqs;
+	  vector<double> cumfreqs; cumfreqs.push_back(rootbasefreqs.at(0));
+	  int rsize=rootbasefreqs.size();
+
+	  for(int gh1=1; gh1<rsize; gh1++) cumfreqs.push_back(rootbasefreqs.at(gh1)+cumfreqs.at(gh1-1));
+
+	  double diff=1-cumfreqs.back(); if(diff<0) diff=-diff;
+	  if(diff>0.0001) {controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR: root base freqs do not sum to 1 in partitions class.",""); {if(breakonerror) return -1;} }
+
+	  for(int gf=0; gf<rootlength; gf++)
+	  {
+	  double rand=mtrand1();
+	  for(int ds=0; ds<rsize; ds++) if(rand<cumfreqs.at(ds)) {rootseqint.push_back(ds); break;}
+	  }
+
+	  //for(int as=0; as<rootseqint.size(); as++) cout<<as<<" "<<rootseqint.at(as)<<endl; cout<<endl;
+	  */
+    }
+    else
+    {
+	if(type==2)
+	{
+	    string test="ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
+	    if(!allAinB(rootseqtxt,test)) { controlerrorprint2("[PARTITIONS]", name, "", "AMINOACID root sequence in file can only contain following letters:\nARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv",""); {if(breakonerror) return -1;} }
+
+	    int size=20;
+
+	    /*
+	    //always equal now
+	    if(rootlength!=myrootlength)
+	    {
+	    stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
+	    stringstream rr2; rr2<<myrootlength; string r2=rr2.str();
+	    controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" amino acids.\nThe two numbers should match.  Have you made a mistake?","");
+	    {if(breakonerror) return -1;}
+	    }
+	    */
+
+	    for(int fd0=0; fd0<myrootlength; fd0++)
+	    {
+		char c=rootseqtxt[fd0];
+		bool error=true;
+
+		for(int fd1=0; fd1<size; fd1++) if(c==test[fd1] || c==test[fd1+size]) {error=false; rootseqint.push_back(fd1); break;}
+
+		if(error) { controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making NUCLEOTIDE root sequence.",""); {if(breakonerror) return -1;} }
+	    }
+	}
+	else
+	{
+	    string test="TCAGtcag", bit;
+	    if(type==1) bit="NUCLEOTIDE"; else bit="CODON";
+
+	    if(!allAinB(rootseqtxt,test)) { controlerrorprint2("[PARTITIONS]", name, "", bit+" root sequence in file can only contain following letters:\nTCAGtcag",""); {if(breakonerror) return -1;} }
+
+
+
+	    int size=4;
+	    if(type==1)
+	    {
+		/*
+		//always equal now
+		if(rootlength!=myrootlength)
+		{
+		stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
+		stringstream rr2; rr2<<myrootlength; string r2=rr2.str();
+		controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" nucleotide bases.\nThe two numbers should match.  Have you made a mistake?","");
+		{if(breakonerror) return -1;}
+		}
+		*/
+		size=4;
+		for(int fd0=0; fd0<myrootlength; fd0++)
+		{
+		    //	char cc=s[fd0];
+		    //	stringstream ccc; ccc<<cc; string c=ccc.str();
+
+		    bool error=true;
+		    char c=rootseqtxt[fd0];
+
+		    for(int fd1=0; fd1<size; fd1++) if(c==test[fd1] || c==test[fd1+size]) {error=false; rootseqint.push_back(fd1); break;}
+
+		    if(error) { controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making "+bit+" root sequence.",""); {if(breakonerror) return -1;} }
+		}
+	    }
+	    else
+	    {
+		if(myrootlength%3!=0)
+		{
+		    stringstream rd; rd<<myrootlength; string rdd=rd.str();
+		    controlerrorprint2("[PARTITIONS]", name, "", "CODON root sequence length is "+rdd+" nucleotides in the file\nbut must be a multiple of 3.","");
+		    {if(breakonerror) return -1;}
+		}
+
+		/*
+		  if(rootlength!=myrootlength/3)
+		  {
+		  stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
+		  stringstream rr2; rr2<<myrootlength/3; string r2=rr2.str();
+		  controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" codons.\nThe two numbers should match.  Have you made a mistake?","");
+		  {if(breakonerror) return -1;}
+		  }
+		*/
+
+		///////////////////////////////////////////////////////////////////////
+
+		vector<int> notallowed=getstops(geneticcode);
+
+		/*  //OLD WAY
+		    vector<int> notallowed;
+
+		    if(geneticcode!=6 && geneticcode!=12) notallowed.push_back(10);
+		    if(geneticcode!=6 && geneticcode!=13) notallowed.push_back(11);
+		    if(geneticcode==0 || geneticcode==6 || geneticcode==9 || geneticcode==10 || geneticcode==13) notallowed.push_back(14);
+		    if(geneticcode==1) {notallowed.push_back(46); notallowed.push_back(47);}
+		*/
+
+		int notsize=notallowed.size();
+
+		stringstream we; we<<geneticcode; string wer=we.str();
+
+		for(int fd0=2; fd0<myrootlength; fd0=fd0+3)
+		{
+		    char c1=rootseqtxt[fd0-2], c2=rootseqtxt[fd0-1], c3=rootseqtxt[fd0];
+		    bool error1=true, error2=true, error3=true;
+		    int i1,i2,i3,tot;
+
+		    for(int fd1=0; fd1<size; fd1++)
+		    {
+			if(c1==test[fd1])      {i1=fd1; error1=false;}
+			if(c1==test[fd1+size]) {i1=fd1; error1=false;}
+			if(c2==test[fd1])      {i2=fd1; error2=false;}
+			if(c2==test[fd1+size]) {i2=fd1; error2=false;}
+			if(c3==test[fd1])      {i3=fd1; error3=false;}
+			if(c3==test[fd1+size]) {i3=fd1; error3=false;}
+
+		    }
+
+		    if(error1 || error2 || error3) { controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making "+bit+" root sequence.",""); {if(breakonerror) return -1;} }
+
+		    tot=(i1<<4)+(i2<<2)+i3; //cout<<tot<<endl;
+
+		    for(int fd2=0; fd2<notsize; fd2++) if(tot==notallowed.at(fd2))
+						       {
+							   stringstream m; m<<fd0/3+1; string mm=m.str();
+							   controlerrorprint2("[PARTITIONS]", name, "", "Root sequence file: "+rootfilename+"\nThis root sequence contains the codon "+c1+c2+c3+" at position "+mm+"\nBut "+mbstype+" class "+mbname+" uses genetic code "+wer+".\nUnder this genetic code "+c1+c2+c3+" is a stop codon and is not allowed.","");
+							   {if(breakonerror) return -1;}
+						       }
+
+		    rootseqint.push_back(tot);
+
+		}
+
+		myrootlength/=3;
+
+	    } // end of type=3 else in type1/type3 else
+
+	} // end of type1/type3 else
+
+
+    }
+
+    return 0;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -3656,25 +3513,6 @@ int dealwithpartitions(vector<string> &block)
 	return 0;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class evolve
-{
-	// real simple class!
-	// this is the one that links it all together.
-	// Each instance of the class evolve is a standalone simulation of a partition that contains a branch class, or a model or so on....
-
-	public:
-	int reps;
-	int partitionpos;
-	string filenamestub;
-
-	evolve(int myreps, int mypartitionpos, string myfilenamestub)
-	{
-		reps=myreps;						// number of replicates
-		partitionpos=mypartitionpos;		// position in totalpartitions of the partition in question
-		filenamestub=myfilenamestub;		// filenamestub which is used to create output filenames
-	}
-};
 
 vector<evolve> totalevolve;		// storage for the evolve class instances.
 
@@ -4158,10 +3996,4 @@ int docontrol()
   return isthereanerror;
 }
 
-
-// include code below if you want to run standalone tests of the code in here without linking to main skeleton program
-//double main(int argc, char* argv[])
-//{
-//	return 0;
-//}
 

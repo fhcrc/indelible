@@ -131,7 +131,11 @@ int inspinvcount, corepinvcount;
 	#include "limits.h"
 #endif
 
-#include "control.cpp"
+// #include "control.cpp"
+#include "models.h"
+#include "control.h"
+#include "randoms.h"
+#include "paml.h"
 
 using namespace std;
 
