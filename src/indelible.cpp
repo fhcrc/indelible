@@ -675,6 +675,8 @@ int returnNewSiteClass(/*vector<int> &siteclasscount, */ vector<double> siteprop
 	//if(po<50) cout<<po<<"  "<<siteclass<<endl;
 	return siteclass;
 }
+
+
 ///////////////
 double returnNewSiteRate(int pos)
 {
@@ -683,7 +685,7 @@ double returnNewSiteRate(int pos)
 	// this function sets the site rates for evolution of the core sequence.
 	// inserted bases will inherit the rate of the base  where the insertion occurred.
 
-	if(type==3)
+	if (model_type == codon)
 	{
 		//if(!sites) rate=1; else for(int gv1=0; gv1<Csitefreqs.size(); gv1++) if(mtrand1()<Csitefreqs.at(gv1)) rate=gv1;
 		//for(int i1a=0; i1a<((*m).codoncatfreqs).size(); i1a++) cout<<((*m).codoncatfreqs).at(i1a)<<" "; cout<<endl;
@@ -700,8 +702,7 @@ double returnNewSiteRate(int pos)
 	}
 
 	double multiplier=1;
-	if(type==1)
-	{
+	if (model_type == nucleotide) {
 		//cout<<"Q"<<endl;
 		int codonpos=pos%3;
 		//cout<<"Q"<<endl;
@@ -710,38 +711,34 @@ double returnNewSiteRate(int pos)
 		//cout<<"Q"<<endl;
 		//if(pos<50)	cout<<"multiplier "<<"  "<<pos<<"  "<<codonpos<<"  "<<multiplier<<endl;
 	}
-	if(codonrates)
-	{
+	
+	if(codonrates) {
 
 	}
-	else if((*m).alpha==0 && (*m).pinv==0)   // no gamma, no codon rates, no proportion invariant
-	{
+	else if((*m).alpha==0 && (*m).pinv==0) {  // no gamma, no codon rates, no proportion invariant
 		// constant rates across whole sequence
 		rate=multiplier;
 	}
-	///////////////////////////
-	else  // proportion invariant with either no gamma, discrete gamma, or continuous gamma
-	{
-		if((*m).alpha==0)
-		{
-			//this is proportion invariant
-			if(mtrand1()<(*m).pinv) rate=0; else rate=multiplier/(1- ((*m).pinv) );
-		}
-		else if((*m).alpha>0 && (*m).ngamcat==0)
-		{
-			//Continuous Gamma + Proportion invariant
-			if(mtrand1()<(*m).pinv) rate=0; else rate=rndgamma(  ((*m).alpha)/(  ((*m).alpha)* (1- ((*m).pinv) )  )  );
-		}
-		else if((*m).alpha>0 && (*m).ngamcat>0)
-		{
-			//Discrete Gamma + Proportion invariant
-
-			if(mtrand1()>(*m).pinv)  rate=GDrates.at( (int)( mtrand1() * ((*m).ngamcat) ) )/(1-((*m).pinv));  else rate=0;
-
-		}
-		else (*LOG)<<"SetSite Rates error 1 - alpha or ngamcat is less than zero"<<endl;
+	else { // proportion invariant with either no gamma, discrete gamma, or continuous gamma
+	    if((*m).alpha==0) {
+		//this is proportion invariant
+		if(mtrand1()<(*m).pinv) rate=0; else rate=multiplier/(1- ((*m).pinv) );
+	    }
+	    else if((*m).alpha>0 && (*m).ngamcat==0)
+	    {
+		//Continuous Gamma + Proportion invariant
+		if(mtrand1()<(*m).pinv) rate=0; else rate=rndgamma(  ((*m).alpha)/(  ((*m).alpha)* (1- ((*m).pinv) )  )  );
+	    }
+	    else if((*m).alpha>0 && (*m).ngamcat>0)
+	    {
+		//Discrete Gamma + Proportion invariant
+		
+		if(mtrand1()>(*m).pinv)  rate=GDrates.at( (int)( mtrand1() * ((*m).ngamcat) ) )/(1-((*m).pinv));  else rate=0;
+		
+	    }
+	    else (*LOG)<<"SetSite Rates error 1 - alpha or ngamcat is less than zero"<<endl;
 	}
-
+	
 	return rate;
 }
 
@@ -750,50 +747,56 @@ double returnNewSiteRate(int pos)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double returnsitesubrate(double rate, int siteclass, int currentbase)
 {
-
-
-	if(type==3)	return ( ( (*m).myratesvec).at(siteclass) ).at( currentbase );
-
-	else		return rate * (((*m).myrates).at(currentbase));
-
-//	cout<<"X"<<endl;
-//	if(type==3)	{cout<<"Y"<<endl; return ( ( (*m).myratesvec).at(siteclass) ).at( currentbase ); }
-//
-//	else		{cout<<"Z "<<((*m).myrates).size()<<"  "<<currentbase<<endl; return rate * (((*m).myrates).at(currentbase)); }
-
+    if (model_type == codon)
+	return ( ( (*m).myratesvec).at(siteclass) ).at( currentbase );
+    else
+	return rate * (((*m).myrates).at(currentbase));
 }
 
 int returnsiteclass()
 {
-	int i1;
-
-	double rate=mtrand1();
-
-	for(i1=0; i1<((*m).cumfreqs).size(); i1++)
-	{
-		if(rate<=((*m).cumfreqs).at(i1)) break; //{ ratevec.push_back(i1);   break;}
-	}
-
-	return i1;
-
+    int i1;
+    double rate=mtrand1();
+    
+    for(i1 = 0; i1 < ((*m).cumfreqs).size(); i1++) {
+	if (rate <= ((*m).cumfreqs).at(i1))
+	    break; //{ ratevec.push_back(i1);   break;}
+    }
+    
+    return i1;
 }
+
 double returnsiterate(int &rateclass, bool core)
 {
-	if((*m).continuousgamma)
-	{
-		double rand=mtrand1();
+    if((*m).continuousgamma)
+    {
+	double rand=mtrand1();
 
-		rateclass=0;
+	rateclass=0;
 
-		if(rand<(*m).pinv) {if(core) corepinvcount++; else inspinvcount++; return 0;}
-
-		else return rndgamma(  ((*m).alpha)  )/(  ((*m).alpha)* (1- ((*m).pinv) )  ) ;
+	if (rand < (*m).pinv) {
+	    if(core)
+		corepinvcount++;
+	    else
+		inspinvcount++;
+	    return 0;
 	}
-	else {rateclass=returnsiteclass(); 	double myrate=((*m).Rrates).at(rateclass);
-
-
-	if(myrate==0) {if(core) corepinvcount++; else inspinvcount++;} return myrate; }
-
+	else {
+	    return rndgamma(  ((*m).alpha)  )/(  ((*m).alpha)* (1- ((*m).pinv) )  ) ;
+	}
+    }
+    else {
+	rateclass = returnsiteclass();
+	double myrate=((*m).Rrates).at(rateclass);
+	
+	if(myrate==0) {
+	    if(core)
+		corepinvcount++;
+	    else
+		inspinvcount++;
+	}
+	return myrate;
+    }
 }
 
 
@@ -810,7 +813,7 @@ void SetSiteRates2(RATES &rates, string name, int repnumber, int mysize)
 //	}
 //	else
 //	{
-		if(type==3)
+		if (model_type == codon)
 		{
 			if(fixtrueproportions)
 			{
@@ -878,29 +881,34 @@ void makeseq2(int length,  vector<site> &myseq, double &sdiff, double timeleft)
 
 			double rate=-1; int siteclass=-1;
 
-			if(type==3) siteclass=returnsiteclass(); else rate=returnsiterate(siteclass, false);
+			if (model_type == codon)
+			    siteclass=returnsiteclass();
+			else
+			    rate=returnsiterate(siteclass, false);
 
 			double sitesubrate; if(oldmethod) {sitesubrate=returnsitesubrate(rate, siteclass,yh3); sdiff+=sitesubrate;}
 
-			#ifndef myevolvedebugger
+#ifndef myevolvedebugger
 
 			myseq.push_back(    site( yh3, rate, siteclass, sitesubrate, timeleft )    );
 
-			#else
+#else
 
 			myseq.push_back(    site( 81, rate, siteclass, sitesubrate, timeleft )    );
 
-			#endif
+#endif
 
 			break;
 
 		}
-		if(wearenotdone) cout<<"NO BASE PICKED in makeseq2, last boundaries was "<<boundaries2.back()<<" myrand was "<<myrand<<" sdiff is "<<sdiff<<endl;
+		if(wearenotdone)
+		    cout << "NO BASE PICKED in makeseq2, last boundaries was "
+			 << boundaries2.back()
+			 <<" myrand was "<< myrand
+			 <<" sdiff is "<< sdiff << endl;
 	}
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void makeseq(int length2,  vector<int> &myseq)
 {
@@ -945,8 +953,8 @@ vector<double> getbasefreqs(vector<int> &seq)
 	// calculates the base frequencies of a given sequence in integer form
 	vector<double> basefreqs;
 	int mymax=4;
-	if(type==2) mymax=20;
-	if(type==3) mymax=64;
+	if (model_type == aminoacid) mymax=20;
+	else if (model_type == codon) mymax=64;
 
 	basefreqs.assign(mymax,0);
 	for(int y2=1; y2<seq.size(); y2++) basefreqs.at(seq.at(y2))++;
@@ -965,13 +973,13 @@ void fromprintseq(vector<string> &seq, vector<int> &myseq)
 	vector<string> myletters, myletters2;
 	int mysize;
 
-	if(type==1)
+	if (model_type == nucleotide)
 	{
 		mysize=4;
 		myletters=myDUletters;
 		myletters2=myDLletters;
 	}
-	else if(type==2)
+	else if (model_type == aminoacid)
 	{
 		mysize=20;
 		myletters=myAUletters;
@@ -1295,13 +1303,13 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 	string now, blank="-", insblank="-"; if( markdeletedinsertions) insblank="*";
 	vector<string> myletters, myletters2;
 
-	if(type==1) {myletters=myDUletters; if(insertaslowercase) myletters2=myDLletters; else myletters2=myletters;}
+	if(model_type == nucleotide) {myletters=myDUletters; if(insertaslowercase) myletters2=myDLletters; else myletters2=myletters;}
 	else
 	{
-		if(type==2) {myletters=myAUletters; if(insertaslowercase) myletters2=myALletters;  else myletters2=myletters;}
+		if (model_type == aminoacid) {myletters=myAUletters; if(insertaslowercase) myletters2=myALletters;  else myletters2=myletters;}
 		else
 		{
-			if(type==3)
+			if (model_type == codon)
 			{
 				if(printcodonsasDNA) {myletters=myCDUletters; if(insertaslowercase) myletters2=myCDLletters;  else myletters2=myletters; }
 				else {myletters=MAKEmyCAUletters(partition,whichseq);if(insertaslowercase) myletters2=MAKEmyCALletters(partition,whichseq); else myletters2=myletters;}
@@ -1326,7 +1334,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 		for(int j=0; j<(*s).size(); j++)
 		{
 			#ifdef checkpinv
-				if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
+				if(mode_type == codon) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
 				if(((*s).at(j)).rate==0) continue;
 			#endif
 
@@ -1346,7 +1354,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 	{
 
 		#ifdef checkpinv
-			if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
+			if (model_type == codon) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
 			if(ratevec.at(i)!=0) {
 		#endif
 
@@ -1375,7 +1383,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 			for(int j=0; j<(*s).size(); j++)
 			{
 				#ifdef checkpinv
-					if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
+					if (model_type == codon) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
 					if(((*s).at(j)).rate==0) continue;
 				#endif
 
@@ -1393,7 +1401,8 @@ void makeprintseqINT(int partition, int expectedcount, vector<int> &inspos, vect
 //if(currentcount!=expectedcount) cout<<endl<<"ERROR in length of sequence in this file"<<endl<<"currentcount was "<<currentcount<<" and expectedcount is "<<expectedcount<<endl;
 }
 
-void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vector<int> &tempintseq, vector<insert>  &insertstuff, int whichseq, ofstream &results, ofstream &results2,  int whichresults)
+void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vector<int> &tempintseq,
+		      vector<insert>  &insertstuff, int whichseq, ofstream &results, ofstream &results2,  int whichresults)
 {
 
 	int currentcount=0, seqnow;
@@ -1403,13 +1412,13 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 		string now, blank="-", insblank="-"; if( markdeletedinsertions) insblank="*";
 	vector<string> myletters, myletters2;
 
-	if(type==1) {myletters=myDUletters; if(insertaslowercase) myletters2=myDLletters; else myletters2=myletters;}
+	if(model_type == nucleotide) {myletters=myDUletters; if(insertaslowercase) myletters2=myDLletters; else myletters2=myletters;}
 	else
 	{
-		if(type==2) {myletters=myAUletters; if(insertaslowercase) myletters2=myALletters; else myletters2=myletters;}
+	    if (model_type == aminoacid) {myletters=myAUletters; if(insertaslowercase) myletters2=myALletters; else myletters2=myletters;}
 		else
 		{
-			if(type==3)
+			if (model_type == codon)
 			{
 				if(printcodonsasDNA) {myletters=myCDUletters; if(insertaslowercase) myletters2=myCDLletters; else myletters2=myletters; }
 				else {myletters=MAKEmyCAUletters(partition,whichseq);if(insertaslowercase) myletters2=MAKEmyCALletters(partition,whichseq); else myletters2=myletters;}
@@ -1432,7 +1441,8 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 		for(int j=0; j<(*s).size(); j++)
 		{
 			#ifdef checkpinv
-				if(type==3) controlerrorprint2("[SIMULATION]","","","Type should not be 3 when using checkpinv compiler option.","");
+				if (model_type == codon)
+				    controlerrorprint2("[SIMULATION]","","","Type should not be 3 when using checkpinv compiler option.","");
 				if(((*s).at(j)).rate==0) continue;
 			#endif
 
@@ -1457,7 +1467,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 	for(int i=1; i<tempintseq.size(); i++)
 	{
 		#ifdef checkpinv
-			if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
+			if (model_type == codon) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
 			if(ratevec.at(i)!=0) {
 		#endif
 
@@ -1491,7 +1501,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int> &inspos, vec
 			for(int j=0; j<(*s).size(); j++)
 			{
 				#ifdef checkpinv
-					if(type==3) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
+					if(model_type == codon) controlerrorprint2("[SIMULATION]", "","","Type should not be 3 when using checkpinv compiler option.","");
 					if(((*s).at(j)).rate==0) continue;
 				#endif
 
@@ -3022,7 +3032,7 @@ int goodcount=0, badcount=0;
 if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is "<<goodcount<<" and the badcount is "<<badcount<<endl;  //else cout<<"IT IS OK on branch with label "<<label<<endl;
 
 
-	if(type==1 && (*m).modelnumber==16) Pt=&matexp; else Pt=&PMatQRev;
+	if(model_type == nucleotide && (*m).modelnumber==16) Pt=&matexp; else Pt=&PMatQRev;
 
 //cout<<" GOT TO HERE on BRANCH "<<label<<endl;
 
@@ -3032,7 +3042,7 @@ if (badcount!=0) cout<<"ERROR on branch with label "<<label<<" the goodcount is 
 		// new method substitutions
 		//////////////////////////////////////////////////////////////////////////////////////////////////
 
-		if(type!=3)
+		if (model_type != codon)
 		{
 			if((*m).continuousgamma)
 			{
@@ -3383,7 +3393,7 @@ void evolvebranch(vector<vector<int> > &insPOS, /*vector<int> &oldinsPOSin,*/ RA
 					}
 
 				}
-				else if( type!=3 && oldalpha!=(*m).alpha )
+				else if ( model_type != codon && oldalpha!=(*m).alpha )
 				{
 					mymods.push_back(mypos);
 
@@ -3701,7 +3711,7 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 
 	*/
 
-	if(printcodonsasDNA && type==3) Mlength*=3;
+	if(printcodonsasDNA && model_type == codon) Mlength*=3;
 
 	//L<<Mlength; length=L.str();
 
@@ -3750,7 +3760,7 @@ void printresultsout(int currentrep,  string filenamestub, int ntaxa, int myleng
 		{
 			// header for nexus file format
 			(*results)<<"#NEXUS"<<endl<<endl<<"BEGIN DATA;"<<endl<<"   DIMENSIONS NTAX = "<<ntaxa<<"  NCHAR = "<<fixed<<setprecision(0)<<Mlength<<";"<<"   FORMAT DATATYPE = ";
-			if(type==2) (*results)<<"PROTEIN"; else (*results)<<"DNA"; (*results)<<"  MISSING = ?  GAP = - ;"<<endl<<"   MATRIX"<<endl;
+			if(model_type == aminoacid) (*results)<<"PROTEIN"; else (*results)<<"DNA"; (*results)<<"  MISSING = ?  GAP = - ;"<<endl<<"   MATRIX"<<endl;
 		}
 
 		// header for phylip format
@@ -4062,7 +4072,7 @@ void printoutrates(int &sitecount,int partition, ofstream &ratesout, vector<int>
 
 //	ratesout<<"Site\tRate\tInserted?\tPartition"<<endl;
 
-	if(type!=3)
+	if (model_type != codon)
 	{
 		int i;
 		//eternal link
@@ -4722,7 +4732,7 @@ int main(int argc, char* argv[])
 
 		if(printrates)
 		{
-		    if(type!=3)
+		    if(model_type != codon)
 		    {
 
 			if((*m).continuousgamma && isitbranches)
@@ -4866,7 +4876,7 @@ int main(int argc, char* argv[])
 
 	    vector<string> myletters;
 
-	    if(type==1) myletters=myDUletters; else if(type==2) myletters=myAUletters; else if(type==3) myletters=myCDUletters;
+	    if(model_type == nucleotide) myletters=myDUletters; else if(model_type == aminoacid) myletters=myAUletters; else if(model_type == codon) myletters=myCDUletters;
 
 
 	    for(int a=1; a<4; a++)
@@ -4921,7 +4931,7 @@ int main(int argc, char* argv[])
 
 	    vector<string> myletters;
 
-	    if(type==1) myletters=myDUletters; else if(type==2) myletters=myAUletters; else if(type==3) myletters=myCDUletters;
+	    if(model_type == nucleotide) myletters=myDUletters; else if(model_type == aminoacid) myletters=myAUletters; else if(model_type == codon) myletters=myCDUletters;
 
 
 
@@ -4932,7 +4942,7 @@ int main(int argc, char* argv[])
 
 		ofstream iff; iff.open( (filename+"_part"+bb+endbit).c_str() );
 
-		int L=partitionlengths.at(px),R=partitionlengths.at(px+1), partlength=R-L; if(type==3) partlength*=3;
+		int L=partitionlengths.at(px),R=partitionlengths.at(px+1), partlength=R-L; if(model_type == codon) partlength*=3;
 
 		iff<<ntaxa<<"   "<<partlength<<endl;
 

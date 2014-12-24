@@ -71,8 +71,8 @@ int chooseoldzipf(int M, double a, vector<double> &z) {int u; do {u=oldZipf(a);}
 
 
 
-int type;	// 1 for NUCLEOTIDE, 2 for AMINOACID, 4 for CODON
-
+// int type;	// 1 for NUCLEOTIDE, 2 for AMINOACID, 4 for CODON
+ModelType model_type;
 
 extern bool controldebug;
 
@@ -183,11 +183,13 @@ int querystops(int geneticcode, vector<double> &basefreqs)
 
 
 
-model::model(int mymodelpos, int &mytype, string &myname, int &mymodelnumber, int &mygeneticcode,
-	     bool &mycopiedmodel, double &myinsertrate, double &mydeleterate, double &myalpha, double &mypinv,
-	     int &myngamcat, double mycodonrates[], vector<double> &mybasefreqs, vector<double> &myrootbasefreqs,
-	     vector<double> &myinsertfreqs, vector<double> &myparams, vector<double> &aamodel, indelmodel &insertmodel,
-	     indelmodel &deletemodel)
+model::model(int mymodelpos, ModelType mytype, const string &myname, int mymodelnumber, int mygeneticcode,
+	     bool mycopiedmodel, double myinsertrate, double mydeleterate, double myalpha, double mypinv,
+	     int myngamcat, double mycodonrates[], const vector<double> &mybasefreqs, const vector<double> &myrootbasefreqs,
+	     const vector<double> &myinsertfreqs, vector<double> &myparams, const vector<double> &aamodel, const indelmodel &insertmodel,
+	     const indelmodel &deletemodel)
+    : type(mytype), name(myname)
+      
 {
 
 
@@ -268,28 +270,28 @@ model::model(int mymodelpos, int &mytype, string &myname, int &mymodelnumber, in
     {
 	// Negative Binomial or Geometric
 
-	insI=insertmodel.r;
-	insD=insertmodel.q;
+	insI = insertmodel.r;
+	insD = insertmodel.q;
 
-	if(insertmodel.type==1) insrandomsize=&choosenewNB;
-	else					insrandomsize=&chooseoldNB;
+	if (insertmodel.type == 1)
+	    insrandomsize=&choosenewNB;
+	else
+	    insrandomsize=&chooseoldNB;
     }
 
 
     continuousgamma=false;
     numberofsiteclasses=1;
 
-    insertrate	=myinsertrate;
-    deleterate	=mydeleterate;
-    subrate=1;
+    insertrate = myinsertrate;
+    deleterate = mydeleterate;
+    subrate = 1;
     //indelrate=insertrate+deleterate;
     //subrate		=1-insertrate-deleterate;
 
+    error=1;
     modelpos=mymodelpos;
 
-    error=1;
-    type=mytype;
-    name=myname;
     modelnumber=mymodelnumber;
     geneticcode=mygeneticcode;
     copiedmodel=mycopiedmodel;
@@ -341,7 +343,7 @@ model::model(int mymodelpos, int &mytype, string &myname, int &mymodelnumber, in
 		controlerrorprint2("[MODEL]",name,"basefreqs","A model with unequal base frequencies was chosen: model "+modelnumberX+"\nbut you have not specified base frequencies.  They will be equal.","");
 	    }
 	    // make equal frequencies either way
-	    makeequalfreqs(type,basefreqs);
+	    makeequalfreqs(type, basefreqs);
 	}
 	else
 	{
@@ -765,7 +767,7 @@ void model::d(vector<vector<double> > &Q, double S)
 /////////////////////////////////////
 
 
-vector<double> model::fx(vector<double> &basefreqs, int which)
+vector<double> model::fx(const vector<double> &basefreqs, int which)
 {
 	vector<double> newbasefreqs;
 
@@ -793,25 +795,29 @@ return newbasefreqs;
 
 
 
-	void model::makeequalfreqs(int &type, vector<double> &tbasefreqs)
+	void model::makeequalfreqs(const ModelType type, vector<double> &tbasefreqs)
 	{
-		// makes equal stationary frequencies.
-		tbasefreqs.clear();
-
-			if(type==1)		for(int it=0; it<4; it++) tbasefreqs.push_back(0.25);
-		else if(type==2)	for(int it=0; it<20; it++) tbasefreqs.push_back(0.05);
-		else if(type==3)
-		{
-			// for CODON the genetic code and the relevant stop codons must be considered.
-			vector<int> stops=getstops(geneticcode);
-
-			double y=stops.size();
-			double x=1/(64-y);
-
-			for(int it=0; it<64; it++) {tbasefreqs.push_back(x);} //tbasefreqs.assign(64,0); ??
-
-			enforcestops(geneticcode,tbasefreqs);
-		}
+	    // makes equal stationary frequencies.
+	    tbasefreqs.clear();
+	    
+	    if (type == nucleotide)
+		for(int it=0; it<4; it++)
+		    tbasefreqs.push_back(0.25);
+	    else if (type == aminoacid)
+		for(int it=0; it<20; it++)
+		    tbasefreqs.push_back(0.05);
+	    else if (type == codon)
+	    {
+		// for CODON the genetic code and the relevant stop codons must be considered.
+		vector<int> stops=getstops(geneticcode);
+		
+		double y=stops.size();
+		double x=1/(64-y);
+		
+		for(int it=0; it<64; it++) {tbasefreqs.push_back(x);} //tbasefreqs.assign(64,0); ??
+		
+		enforcestops(geneticcode,tbasefreqs);
+	    }
 	}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 

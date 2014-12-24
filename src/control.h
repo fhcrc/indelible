@@ -276,6 +276,8 @@ extern std::string phylipextension;		// used for output file filename extension
 extern std::string fastaextension;		// used for output file filename extension
 extern std::string nexusextension;		// used for output file filename extension
 
+enum OutputType { OUTPUT_FASTA=1, OUTPUT_PHYLIP=2, OUTPUT_NEXUS=3 };
+
 extern int outputtype;		// 1 for FASTA, 2 for PHYLIP, 3 for NEXUS
 extern int guidetreetype;		// used for logfile
 

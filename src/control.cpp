@@ -410,7 +410,7 @@ int branchclass::getbranchmodels(vector<string> &modelnames,vector<string> &tota
 
 	    int x=((*k).cumfreqs).size();
 
-	    if( numcats!=1 && x==1 && type!=3)
+	    if( numcats!=1 && x==1 && model_type != codon)
 	    {
 		if(numcats!=0)
 		{
@@ -944,858 +944,837 @@ int dealwithsettings(vector<string> &block)
 
 int dealwithmodel(vector<string> &block)
 {
-	// this is a big function that deals with setting up of substitution and indel models.  What is not tested or pre-processed here is passed to the model class constructor.
+    // this is a big function that deals with setting up of substitution and indel models.
+    // What is not tested or pre-processed here is passed to the model class constructor.
 
-	vector<double> insertrates, deleterates;
-	if(!oldmethod) {insertrates.push_back(0); deleterates.push_back(0);}
-	else
-	{
-		int tempsize;
-		if(type==1) tempsize=4; else if(type==2) tempsize=20; else if(type==3) tempsize=64; else cout<<"tempsize and type error in dealwithmodel"<<endl;
-		for(int jp=0; jp<tempsize; jp++) {insertrates.push_back(0); deleterates.push_back(0);}
+    vector<double> insertrates, deleterates;
+    if(!oldmethod) {insertrates.push_back(0); deleterates.push_back(0);}
+    else
+    {
+	int tempsize;
+	switch (model_type) {
+	case nucleotide:
+	    tempsize=4;
+	    break;
+	case aminoacid:
+	    tempsize=20;
+	    break;
+	case codon:
+	    tempsize=64;
+	default: 
+	    cout<<"tempsize and type error in dealwithmodel"<<endl;
 	}
+	for (int jp=0; jp<tempsize; jp++) {
+	    insertrates.push_back(0);
+	    deleterates.push_back(0);
+	}
+    }
 
-	vector<double> aamodel;
-	string name="DEFAULT";
-	int modelnumber=0;
-	int geneticcode=1;
-	bool copiedmodel=false;
-	double insertrate=0;
-	double deleterate=0;
-	indelmodel insertmodel=indelmodel();
-	indelmodel deletemodel=indelmodel();
-	double alpha=0;
-	double pinv=0;
-	int ngamcat=5;
-	double codonrates[3]; codonrates[0]=codonrates[1]=codonrates[2]=1;
-	vector<double> basefreqs, rootbasefreqs, insertfreqs, params;
+    vector<double> aamodel;
+    string name="DEFAULT";
+    int modelnumber=0;
+    int geneticcode=1;
+    bool copiedmodel=false;
+    double insertrate=0;
+    double deleterate=0;
+    indelmodel insertmodel=indelmodel();
+    indelmodel deletemodel=indelmodel();
+    double alpha=0;
+    double pinv=0;
+    int ngamcat=5;
+    double codonrates[3]; codonrates[0]=codonrates[1]=codonrates[2]=1;
+    vector<double> basefreqs, rootbasefreqs, insertfreqs, params;
 
-	string commandsarray[143]={"[insertmodel]","[deletemodel]","[indelmodel]","[insertrate]","[deleterate]","[indelrate]",
-		"[geneticcode]", "[submodel]","[rates]","[Crates]","[statefreq]","[istatefreq]","[rootstatefreq]","[XXXrootseq]",
-		"[testindeldistributions]"};  // acceptable list of commands
+    string commandsarray[143]={"[insertmodel]","[deletemodel]","[indelmodel]","[insertrate]","[deleterate]","[indelrate]",
+			       "[geneticcode]", "[submodel]","[rates]","[Crates]","[statefreq]","[istatefreq]","[rootstatefreq]","[XXXrootseq]",
+			       "[testindeldistributions]"};  // acceptable list of commands
 
-	// what about tree creation etc?
+    // what about tree creation etc?
 
-	vector<string> commands(commandsarray,commandsarray+13);
-	string mymodelname;
+    vector<string> commands(commandsarray,commandsarray+13);
+    string mymodelname;
 
 //	for(int i=0; i<block.size(); i++) cout<<"model "<<block.at(i)<<endl;
 
 
-	string hg=block.at(0), hg1;
+    string hg=block.at(0), hg1;
 //	if(hg[0]!='#' || hg[hg.size()-1]!='#') { controlerrorprint2("[MODEL]", "?", "", "First statement in a [MODEL] block must be a model name statement in the form #modelname#",""); {if(breakonerror) return -1;} }
-	if(!allAinB(hg,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,.;()-_")) { controlerrorprint2("[MODEL]", hg, "", "First statement in a [MODEL] block must be a model name statement.\nThe name should only contain  ,.;()-_ and alpha-numeric characters.",hg); {if(breakonerror) return -1;} }
-	else
-	{
-		for(int i0=0; i0<hg.size(); i0++) if(hg[i0]!=' ') mymodelname+=hg[i0];
+    if(!allAinB(hg,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,.;()-_")) { controlerrorprint2("[MODEL]", hg, "", "First statement in a [MODEL] block must be a model name statement.\nThe name should only contain  ,.;()-_ and alpha-numeric characters.",hg); {if(breakonerror) return -1;} }
+    else
+    {
+	for(int i0=0; i0<hg.size(); i0++) if(hg[i0]!=' ') mymodelname+=hg[i0];
 	//	cout<<"MODEL NAME "<<mymodelname<<endl;
 
-		if(checkthere(mymodelname,totalmodelnames)!=-1)
-		{ controlerrorprint2("[MODEL]", mymodelname, "", "A model with this name has been specified twice.",""); {if(breakonerror) return -1;} }
-		else {
-				totalmodelnames.push_back(mymodelname);
-				name=mymodelname;
-			}
+	if(checkthere(mymodelname,totalmodelnames)!=-1)
+	{ controlerrorprint2("[MODEL]", mymodelname, "", "A model with this name has been specified twice.",""); {if(breakonerror) return -1;} }
+	else {
+	    totalmodelnames.push_back(mymodelname);
+	    name=mymodelname;
+	}
 
-		vector<string> tempvec;
-		int blocksize=block.size()-1;
+	vector<string> tempvec;
+	int blocksize=block.size()-1;
 
-		//bool waitforcommand=false;
+	//bool waitforcommand=false;
 
-		hg="";
-		int lasttest=-999;
-		int mytest=-999;
-		int astart=1;
-		if(blocksize+1>astart) hg=block.at(astart);
-		if(hg[0]=='#')
-		{
-			// this if bracket is concerned with automatically copying from model to model.
-			// feature will be disabled in final program - so has not been checked after Dec 2008
+	hg="";
+	int lasttest=-999;
+	int mytest=-999;
+	int astart=1;
+	if(blocksize+1>astart) hg=block.at(astart);
+	if(hg[0]=='#')
+	{
+	    // this if bracket is concerned with automatically copying from model to model.
+	    // feature will be disabled in final program - so has not been checked after Dec 2008
 
-			mymodelname="";
-			for(int i0=1; i0<hg.size(); i0++) if(hg[i0]!=' ') mymodelname+=hg[i0];
-		//	cout<<"MODEL NAME 2"<<mymodelname<<endl;
+	    mymodelname="";
+	    for(int i0=1; i0<hg.size(); i0++) if(hg[i0]!=' ') mymodelname+=hg[i0];
+	    //	cout<<"MODEL NAME 2"<<mymodelname<<endl;
 
-			if(mymodelname==name) {controlerrorprint2("[MODEL]", mymodelname, "", "You cannot copy a model within it's own definition statement!\nThe second model name should be different from "+mymodelname,""); {if(breakonerror) return -1;} }
+	    if(mymodelname==name) {controlerrorprint2("[MODEL]", mymodelname, "", "You cannot copy a model within it's own definition statement!\nThe second model name should be different from "+mymodelname,""); {if(breakonerror) return -1;} }
 
-			int ans=checkthere(mymodelname,totalmodelnames);
-			if(ans==-1) {controlerrorprint2("[MODEL]", name, "", "Cannot copy model "+mymodelname+".\nNo model with this name has been defined yet.",""); {if(breakonerror) return -1;} }
+	    int ans=checkthere(mymodelname,totalmodelnames);
+	    if(ans==-1) {controlerrorprint2("[MODEL]", name, "", "Cannot copy model "+mymodelname+".\nNo model with this name has been defined yet.",""); {if(breakonerror) return -1;} }
+	    else
+	    {
+		model* m=&(totalmodels.at(ans));
+
+		modelnumber=(*m).modelnumber;
+		geneticcode=(*m).geneticcode;
+		copiedmodel=true;
+		insertrate=(*m).insertrate;
+		deleterate=(*m).deleterate;
+
+		//insertrates=(*m).insertrates;
+		//deleterates=(*m).deleterates;
+
+		//inlength=(*m).inlength;
+		//dellength=(*m).dellength;
+		//rootlength=(*m).rootlength;
+		alpha=(*m).alpha;
+		pinv=(*m).pinv;
+		ngamcat=(*m).ngamcat;
+		codonrates[0]=(*m).codonrates[0];
+		codonrates[1]=(*m).codonrates[1];
+		codonrates[2]=(*m).codonrates[2];
+
+		//	vector<double> params;  // ??
+
+		rootbasefreqs=(*m).rootbasefreqs;
+		basefreqs=(*m).basefreqs;
+		insertfreqs=(*m).insertfreqs;
+		astart++;
+		//	vector<double> ratevec; // ??
+	    }
+
+	}
+
+	string oldhg="Z";
+	for(int i1=astart; i1<blocksize+1; i1++)
+	{
+	    hg=block.at(i1);
+	    lasttest=mytest;
+	    string myallowed="0123456789.";
+
+	    if(oldhg=="[insertmodel]" || oldhg=="[deletemodel]" || oldhg=="[indelmodel]"  ) myallowed="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890."; //"NBUSEROLDPOWCUMDAWGLAV";
+
+	    mytest=teststring(lasttest, hg, commands, "[MODEL]",myallowed,mymodelname);
+
+	    oldhg=hg;
+
+	    if(mytest==-2) {if(breakonerror) return -1;}
+	    else
+	    {//a1
+		//			cout<<"H2 "<<hg<<" "<<mytest<<" "<<lasttest<<"  "<<blocksize<<"  "<<astart<<endl;
+
+		if(i1==blocksize )  {tempvec.push_back(hg); }//cout<<"H1 "<<hg<<endl;}
+
+		if(mytest==lasttest && i1!=blocksize )  {tempvec.push_back(hg); }// cout<<"H1 "<<hg<<endl;}
+		else if(i1!=astart)
+		{//a2
+
+		    if(tempvec.size()==0)
+		    {
+			controlerrorprint2("[MODEL]", name, commands.at(lasttest), "No values were found after this command in the control file.","");
+			{if(breakonerror) return -1;}
+		    }
+		    else if(lasttest>-1 && lasttest<3)
+		    {
+			// indel models
+
+			// lasttest = 0  for insertion length model
+			//            1  for deletion  length model
+			//            2 for same length model for both insertions and deletions
+
+			bool noindelerror=true;
+			string myin=tempvec.at(0);
+			int tempsize=tempvec.size();
+
+			int myindelmodelint;
+			double mr, mM;
+			double mq, ma, mb;
+
+			double entryd=0, totald=0, meand=0;
+			int thecount=0;
+
+			vector<double> usermodel;
+
+			// 0 USER
+			// 1 NB
+			// 2 POW
+			// 3 LAV
+
+			// 11 NBOLD - NB calculated using p GEO
+			// 12 POWCUM - power law calculated using cumulative method used for USER and LAV
+			// 13 POWDAWG - power law calculated using zipf function from DAWG
+
+			// User Model
+			if(myin=="USER")
+			{
+			    myindelmodelint=0;
+
+			    if(tempsize!=2) noindelerror=false;
+
+			    if(noindelerror)
+			    {
+				myin=tempvec.at(1);
+
+				ifstream if1; if1.open(myin.c_str());
+
+				double countcount=0;
+				if(!(if1.good()))
+				{
+				    controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Could not find a file named:\n"+myin,"");
+				    mytest=-2; {if(breakonerror) return -1;}
+				}
+				char c=if1.get();
+				string s;
+
+				bool writeon=false;
+				while(if1.good())
+				{
+				    if(!AinB(c,"0123456789. \n\t\r"))
+				    {
+					string y; y+=c;
+					controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Illegal character "+y+" found in file named:\n"+myin+"\nAllowed characters are 0.123456789\nSpaces, horizontal tabs, and new lines are also allowed","");
+					mytest=-2; {if(breakonerror) return -1;}
+				    }
+				    if(AinB(c,"0123456789.")) writeon=true;
+
+				    if(writeon && !AinB(c,"0123456789."))
+				    {
+					countcount++;
+					writeon=false;
+					entryd=atof(s.c_str());
+					meand+=(countcount*entryd);
+					totald+=entryd;
+					usermodel.push_back(totald);
+					s="";
+				    }
+
+				    if(writeon) s+=c;
+
+				    c=if1.get();
+				}
+
+
+
+				if(s!="")
+				{
+				    countcount++;
+				    entryd=atof(s.c_str());
+				    meand+=(countcount*entryd);
+				    totald+=entryd;
+				    usermodel.push_back(totald);
+				}
+
+				if(usermodel.empty())
+				{
+				    controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The user-defined indel length model must contain at least one value.!","");
+				    mytest=-2; {if(breakonerror) return -1;}
+				}
+
+				double diff=totald-1;
+				if(diff<0) diff=-diff;
+				if(diff>0.00001)
+				{
+				    stringstream df; df<<totald; string ff=df.str();
+				    controlerrorprint2("[MODEL]", name, commands.at(lasttest), "User-defined indel model does not sum to 1 and so has been rescaled.\n(It summed to "+ff+") ","");
+
+				    for(int i=0; i<usermodel.size(); i++) {(usermodel.at(i))/=totald; }
+				}
+
+				meand/=totald;
+			    }
+
+			} // end of User Model
+
+			// Negative Binomial Distribution
+			else if(myin=="NB" || myin=="NBOLD")
+			{
+			    if(myin=="NB")	myindelmodelint=1;	// used in program
+			    else			myindelmodelint=11;	// alternative parameterisation for testing
+
+			    if(tempsize!=3) noindelerror=false;
+
+			    if(noindelerror)
+			    {
+				myin=tempvec.at(1);
+				if(!allAinB(myin,"0123456789.")) noindelerror=false;
+				else mq=atof(myin.c_str());
+				if(mq<0 || mq>1) noindelerror=false;
+			    }
+
+			    if(noindelerror)
+			    {
+				myin=tempvec.at(2);
+				if(!allAinB(myin,"0123456789")) noindelerror=false;
+				else mr=atoi(myin.c_str());
+				if(mr==0) noindelerror=false;
+			    }
+
+			    if(!noindelerror)
+			    {
+				controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 2 values after \"NB\" when using Negative Binomial Model.\nThe first should be a proportion 0 <= q <= 1.\nThe second should be an integer r > 0.","");
+				mytest=-2; {if(breakonerror) return -1;}
+			    }
+
+			    meand =  1.0+mr*mq/(1.0-mq);
+
+			} // end of Negative Binomial Distribution
+
+
+			// Zipfian Distribution (Power Law)
+			else if(myin=="POW" || myin=="POWDAWG" || myin=="POWCUM")
+			{
+			    if(myin=="POW")     myindelmodelint=2;  // Fast Zipf
+
+			    if(myin=="POWDAWG") myindelmodelint=13; // Slower Zipf from DAWG - here for checking fast zipf!
+
+			    if(myin=="POWCUM")  myindelmodelint=12; // cumulative method as for USER and LAV used to check both above!
+
+			    if(tempsize!=2 && tempsize!=3) noindelerror=false;
+
+			    if(noindelerror)
+			    {
+				myin=tempvec.at(1);
+				if(!allAinB(myin,"0123456789.")) noindelerror=false;
+				else ma=atof(myin.c_str());
+				if(ma<=1) noindelerror=false;
+			    }
+
+			    if(tempsize==3 && noindelerror)
+			    {
+				myin=tempvec.at(2);
+				if(!allAinB(myin,"0123456789")) noindelerror=false;
+				else mM=atoi(myin.c_str());
+				if(mM<=1) noindelerror=false;
+			    }
+			    else mM=2147483647; // largest integer value possible. //mM=pow(10,12); //mM=~0-1; // largest known genome is 132 pg  (1pg is ~ 978 MB, so 132pg is ~ 129 GB, i.e. 10^12 is bigger than any genome!)
+
+			    if(!noindelerror)
+			    {
+				controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 1 or 2 values after \"POW\" when using Zipfian Power Model.\nThis obligatory first value should be a decimal number a > 1.\nThe second optional value should be an integer M > 1.","");
+				mytest=-2; {if(breakonerror) return -1;}
+			    }
+
+			    double blah;
+			    if(myindelmodelint==12)
+			    {
+				for(double u=1; u<mM+1; u++) {entryd=pow(u,-1*ma); totald+=entryd; meand+=( entryd * u );usermodel.push_back(totald); }
+
+				for(int i=0; i<usermodel.size(); i++) {(usermodel.at(i))/=totald;  }
+			    }
+			    else
+			    {
+				//cout<<"mM is "<<mM<<endl;
+				double last=2, diff, bit=pow(10,-15);
+				for(double u=1; u<mM+1; u++) {entryd=pow(u,-1*ma); meand+=(entryd*u); totald+=entryd; diff=last-entryd; last=entryd;  if(diff<bit) {blah=u; break;}}
+			    }
+			    //cout<<"BLAH  "<<blah<<endl;
+			    meand/=totald;
+			    //cout<<meand<<"  "<<totald<<endl;
+
+			} // end of Zipfian Distribution (Power Law)
+
+			// Lavalette Distribution
+			else  if(myin=="LAV")
+			{
+			    /*
+			      Lavalette Distribution References
+
+			      Lavalette distribution (Lavalette, 1996; Popescu et al., 1997; Popescu, 2003).
+			      Lavalette D. (1996) Facteur d’impact: impartialité ou impuissance?, Internal Report, INSERM U350, Institut Curie - Recherche, Bât. 112, Centre Universitaire, 91405 Orsay, France (November 1996)
+			      Popescu, I.I. (1997) On the Lavalette Ranking Law (with M. Ganciu, M. C. Penache, and D. Penache), Romanian Reports in Physics, 49, 3-27
+			      Popescu, I.I. (2003) On a Zipf’s law extension to impact factors. Glottometrics, 6. 83-93.
+			    */
+
+			    myindelmodelint=3;
+
+			    if(tempsize!=3) noindelerror=false;
+
+			    if(noindelerror)
+			    {
+				myin=tempvec.at(1);
+				if(!allAinB(myin,"0123456789.")) noindelerror=false;
+				else mb=atof(myin.c_str());
+				if(mb<=1) noindelerror=false;
+			    }
+
+			    if(noindelerror)
+			    {
+				myin=tempvec.at(2);
+				if(!allAinB(myin,"0123456789")) noindelerror=false;
+				else mM=atoi(myin.c_str());
+				if(mM<=1) noindelerror=false;
+			    }
+
+			    if(!noindelerror)
+			    {
+				controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 2 values after \"LAV\" when using Lavalette Model.\nThe first should be a decimal b > 1.\nThe second (maximum length) should be an integer M>1.","");
+				mytest=-2; {if(breakonerror) return -1;}
+			    }
+
+
+			    for(double u=1; u<mM+1; u++) {entryd=pow(mM*u/(mM-u+1),-1*mb); meand+=(u*entryd); totald+=entryd; usermodel.push_back(totald); }
+
+			    for(int i=0; i<usermodel.size(); i++) {(usermodel.at(i))/=totald; }
+			    meand/=totald;
+
+
+			} // end of Lavalette Distribution
+
 			else
 			{
-				model* m=&(totalmodels.at(ans));
-
-				modelnumber=(*m).modelnumber;
-				geneticcode=(*m).geneticcode;
-				copiedmodel=true;
-				insertrate=(*m).insertrate;
-				deleterate=(*m).deleterate;
-
-				//insertrates=(*m).insertrates;
-				//deleterates=(*m).deleterates;
-
-				//inlength=(*m).inlength;
-				//dellength=(*m).dellength;
-				//rootlength=(*m).rootlength;
-				alpha=(*m).alpha;
-				pinv=(*m).pinv;
-				ngamcat=(*m).ngamcat;
-				codonrates[0]=(*m).codonrates[0];
-				codonrates[1]=(*m).codonrates[1];
-				codonrates[2]=(*m).codonrates[2];
-
-				//	vector<double> params;  // ??
-
-				rootbasefreqs=(*m).rootbasefreqs;
-				basefreqs=(*m).basefreqs;
-				insertfreqs=(*m).insertfreqs;
-				astart++;
-				//	vector<double> ratevec; // ??
+			    controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The first value in this command specifies the insertion or deletion model.\nPossible values are:\n\n     NB = Negative Binomial Distribution\n    POW = Zipfian Distribution (Power Law)\n    LAV = Lavalette Distribution\n   USER = explicit, user-defined indel length distribution\n",myin);
+			    mytest=-2; {if(breakonerror) return -1;}
 			}
 
-		}
+			if(lasttest==0 || lasttest==2)
+			{
+			    insertmodel.type=myindelmodelint;
+			    insertmodel.r=int(mr);
+			    insertmodel.q=mq;
+			    insertmodel.a=ma;
+			    insertmodel.b=mb;
+			    insertmodel.M=int(mM);			//cout<<"mM before "<<mM<<"  and after "<<int(mM)<<endl;
+			    insertmodel.meansize=meand;
+			    insertmodel.usermodel=usermodel;
+			}
+			if(lasttest==1 || lasttest==2)
+			{
+			    deletemodel.type=myindelmodelint;
+			    deletemodel.r=int(mr);
+			    deletemodel.q=mq;
+			    deletemodel.a=ma;
+			    deletemodel.b=mb;
+			    deletemodel.M=int(mM);			//cout<<"mM before "<<mM<<"  and after "<<int(mM)<<endl;
+			    deletemodel.meansize=meand;
+			    deletemodel.usermodel=usermodel;
+			}
 
-		string oldhg="Z";
-		for(int i1=astart; i1<blocksize+1; i1++)
-		{
-			hg=block.at(i1);
-			lasttest=mytest;
-			string myallowed="0123456789.";
+		    } // end of indel model stuff
 
-			if(oldhg=="[insertmodel]" || oldhg=="[deletemodel]" || oldhg=="[indelmodel]"  ) myallowed="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890."; //"NBUSEROLDPOWCUMDAWGLAV";
+		    else if(lasttest>2 && lasttest<7)
+		    {
+			// last test = 3  for insertion rate
+			// last test = 4  for deletion rate
+			// last test = 5  for insertion AND deletion rate
+			// last test = 6  for genetic code
 
-			mytest=teststring(lasttest, hg, commands, "[MODEL]",myallowed,mymodelname);
+			if(tempvec.size()>1)
+			{
+			    controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 1 value after this command but found "+tempvec.at(0)+" then "+tempvec.at(1)+".","");
+			    mytest=-2; {if(breakonerror) return -1;}
+			}
 
-			oldhg=hg;
+			string myin=tempvec.at(0);
 
-			if(mytest==-2) {if(breakonerror) return -1;}
+			if(lasttest==6)
+			{
+			    // genetic code
+
+			    if (model_type != codon) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "This command only has effect in CODON simulations.","");   {if(breakonerror) return -1;} }
+
+			    if(AinB('.',myin)) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should not be decimal, was expecting integer.",myin);   {if(breakonerror) return -1;} }
+
+			    else
+			    {
+				int myout=atoi(myin.c_str());
+
+				if(  (myout>0 && myout<7) || (myout>8 && myout<17) || (myout>20 && myout<24)  ) geneticcode=myout;
+
+				else {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should be an integer 1-6, 9-16, or 21-23\nThese correspond to the entries on GenBank (October 2008).",myin);   {if(breakonerror) return -1;} }
+			    }
+			}
 			else
-			{//a1
-			 //			cout<<"H2 "<<hg<<" "<<mytest<<" "<<lasttest<<"  "<<blocksize<<"  "<<astart<<endl;
+			{
+			    double myout=atof(myin.c_str());
 
-			if(i1==blocksize )  {tempvec.push_back(hg); }//cout<<"H1 "<<hg<<endl;}
+			    if(myout<0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should be greater than or equal to zero.",myin);   {if(breakonerror) return -1;} }
 
-			if(mytest==lasttest && i1!=blocksize )  {tempvec.push_back(hg); }// cout<<"H1 "<<hg<<endl;}
-				else if(i1!=astart)
-				{//a2
+			    if(lasttest==3) insertrate=myout;
 
-					if(tempvec.size()==0)
+			    else if(lasttest==4) deleterate=myout;
+
+			    else insertrate=deleterate=myout;
+			}
+
+		    }
+		    else if(lasttest==7)
+		    {
+			// lasttest == 7 is the substitution model  -----> big if bracket
+
+			string myin=tempvec.at(0);
+
+			if(!allAinB(myin,"0123456789.") )
+			{
+			    ifstream ig1; ig1.open(myin.c_str());
+
+			    if (model_type == aminoacid)
+			    {
+				if(!(ig1.good())) {controlerrorprint2("[MODEL]", name, "[submodel]", myin+"\nis not a model name or number and no file of this name exists.\nFor protein models, the entry after a [submodel] command must be\nan integer or a filename.",""); {if(breakonerror) return -1;} }
+
+				modelnumber=-1;
+				char c2; string sss;
+
+				c2=ig1.get(); aamodel.clear();
+				bool writeon=false;
+				while(ig1.good())
+				{
+				    if(AinB(c2,"1234567890. \t\n\r"))
+				    {
+					if(AinB(c2," \t\n\r")) writeon=false; else writeon=true;
+
+					if(writeon) sss+=c2;
+					else if(sss!="") {aamodel.push_back(  atof(sss.c_str())  ); sss="";}
+				    }
+				    else {controlerrorprint2("[MODEL]", name, "[submodel]", "Reading user defined protein substitution model from file:\n"+myin+"\n...but have found illegal character \""+c2+"\"\nEntries in this file can only be decimal numbers separated by\nspaces, horizontal tabs and new lines.",""); {if(breakonerror) return -1;} }
+
+				    c2=ig1.get();
+				}
+				int wrongsize2=aamodel.size(); stringstream dd; dd<<wrongsize2; string wrongsize=dd.str();
+
+				if(wrongsize2!=210) {controlerrorprint2("[MODEL]", name, "[submodel]", "Reading user defined protein substitution model from file:\n"+myin+"\n...but have found "+wrongsize+" entries. Was expecting 210 entries.\nThe first 190 entries are from the substitution matrix.\nThe final 20 values are for the stationary amino-acid frequencies.\nThe substititution model must be symmetric and the file must only contain\nthe lower triangular half of the substitution matrix.",""); {if(breakonerror) return -1;} }
+			    }
+			    else if (model_type==nucleotide) {controlerrorprint2("[MODEL]", name, "[submodel]", myin+" is not an integer model number.\nThe entry after a [submodel] command must be an integer.",""); {if(breakonerror) return -1;} }
+
+			}
+			else
+			{
+
+			    int mymodel=atoi(myin.c_str());
+
+			    int b=17; string typestring="NUCLEOTIDE"; string bnum="16";  //for type 1
+			    if (model_type == aminoacid) {typestring="AMINOACID";}
+			    else if (model_type == codon) {b=16; bnum="15"; typestring="CODON";}
+
+			    if (model_type != codon) {
+				if (mymodel>-1 && mymodel<b && !AinB('.',myin)) {modelnumber=mymodel;}
+				else {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "First value for this command represents the model number.\nThis should be a integer between 0 and "+bnum+" inclusive\nwhen type is set to "+typestring+".",myin);   {if(breakonerror) return -1;} }
+			    }
+			    else
+			    {
+				if(mymodel!=14 && mymodel!=15) modelnumber=mymodel=3;
+			    }
+			    int nstsize=tempvec.size();
+
+			    if(model_type == codon) for(int hy=0; hy<nstsize; hy++) {params.push_back(atof((tempvec.at(hy)).c_str())); }    //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
+			    else        for(int hy=1; hy<nstsize; hy++) {params.push_back(atof((tempvec.at(hy)).c_str())); }    //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
+
+			    if(model_type == aminoacid)
+			    {
+				if(nstsize>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should be a single integer between 0 and "+bnum+"\nor a model/file name when type is set to AMINOACID.\nBut found "+tempvec.at(0)+" then "+tempvec.at(1)+".","");   {if(breakonerror) return -1;} }
+
+
+			    }
+
+			    else if (model_type == nucleotide) {
+				stringstream fr; fr<<nstsize-1; string fh=fr.str();
+
+				if(mymodel==0  && nstsize!=1)                 {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as JC69. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==1  && nstsize!=1)                 {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as F81. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==2  && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K80. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==3  && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as HKY85. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==4  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TN93ef. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==5  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TN93. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==6  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K81. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==7  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K81uf. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==8  && nstsize!=4 && nstsize!=5)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TIMef. \nExpecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==9  && nstsize!=4 && nstsize!=5)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TIM. \nExpecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==10 && nstsize!=5 && nstsize!=6)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TVMef. \nExpecting 4 or 5 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==11 && nstsize!=5 && nstsize!=6)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TVM. \nExpecting 4 or 5 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==12 && nstsize!=6 && nstsize!=7)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as SYM. \nExpecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==13 && nstsize!=6 && nstsize!=7)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as GTR. \nExpecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+
+				else if(mymodel==14 && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as F84ef. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==15 && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as F84. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				//	else if(mymodel==16 && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as T92. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				//	else if(mymodel==17 && nstsize!=12 && nstsize!=13) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as UNREST. \nExpecting 11 or 12 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==16 && nstsize!=12 && nstsize!=13) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as UNREST. \nExpecting 11 or 12 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+			    }
+
+			    else if (model_type == codon)
+			    {
+				ngamcat=1;
+				//nstsize--;
+				stringstream fr; fr<<nstsize; string fh=fr.str();
+
+				if(mymodel==0  && nstsize!=2) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M0. \nWas expecting 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==1  && nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M1. \nWas expecting 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==2  && nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M2. \nWas expecting 5 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+
+
+#warning "large chunk of old commented-out code deleted from here."
+
+				else if(mymodel==5 ) {if(nstsize==4){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5.\nWhen specifying 4 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==6 ) {if(nstsize==6){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M6.\nWhen specifying 6 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==7 ) {if(nstsize==4){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M7.\nWhen specifying 4 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==8 ) {if(nstsize==6){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M8.\nWhen specifying 6 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==9 ) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M9.\nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==10) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M10. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==11) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M11. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==12) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M12. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+				else if(mymodel==13) {if(nstsize==8){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M13. \nWhen specifying 8 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=7) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 7 or 8 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
+
+
+
+				else if(mymodel==3  && (nstsize%2)!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M3. \nWas expecting 2K substitution parameters for K categories.\nOrder should be: kappa p_0  p_1  ... p_(k-2)  w_0  w_1  ... w_(k-1)\nFor M0 this would be: kappa w_0\nFor M1a this would be: kappa p_0 w_0 w_1.\nFor M2a this would be: kappa p_0 p_1 w_0 w_1 w_2 etc.\nInstead found an odd number of parameters ("+fh+") after model number",""); {if(breakonerror) return -1;} }
+
+
+				//else if(mymodel==3  && (nstsize%2)!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M3. \nWas expecting 2K-1 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==4  && nstsize<3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M4. \nWas expecting at least 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+
+				else if(mymodel==14 && nstsize!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as ECMrest. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+				else if(mymodel==15 && nstsize!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as ECMunrest. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+
+
+				// why is this here?  it says NUCLEOTIDE - is this the same as before? - maybe just used for copying?
+				//else if(mymodel==2  && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K80. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
+
+				// cout<<"NGAMCAT "<<ngamcat<<endl;
+
+				if(mymodel==12 || mymodel==13 || mymodel==2)
+				{
+				    if(params.at(1)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p0 must be between 0 and 1.  You entered "+tempvec.at(2),""); {if(breakonerror) return -1;} }
+				    if(params.at(2)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p1 must be between 0 and 1.  You entered "+tempvec.at(3),""); {if(breakonerror) return -1;} }
+				    if(mymodel!=12 && params.at(1)+params.at(2)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "sum of proportions p0 and p1 must be between 0 and 1.  \nYou entered "+tempvec.at(2)+" and "+tempvec.at(3),""); {if(breakonerror) return -1;} }
+
+				}
+				else if( (mymodel<12 && mymodel>7) || mymodel==6 || mymodel==1)
+				{
+				    if(params.at(1)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p0 must be between 0 and 1.  You entered "+tempvec.at(2),""); {if(breakonerror) return -1;} }
+				}
+				else if(mymodel==3 || mymodel==4)
+				{
+				    int thesize=params.size();
+				    if(mymodel==3) thesize=(thesize-1)/2 +1;
+				    double sum=0;
+				    for(int gh8=1; gh8<thesize; gh8++)
+				    {
+					sum+=params.at(gh8);
+					if(params.at(gh8)>1)
 					{
-						controlerrorprint2("[MODEL]", name, commands.at(lasttest), "No values were found after this command in the control file.","");
-						{if(breakonerror) return -1;}
+					    stringstream cd; cd<<gh8-1; string hf=cd.str();
+					    controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p"+hf+" must be between 0 and 1.  You entered "+tempvec.at(gh8+1),"");
+					    {if(breakonerror) return -1;}
 					}
-					else if(lasttest>-1 && lasttest<3)
-					{
-						// indel models
-
-						// lasttest = 0  for insertion length model
-						//            1  for deletion  length model
-						//            2 for same length model for both insertions and deletions
-
-						bool noindelerror=true;
-						string myin=tempvec.at(0);
-						int tempsize=tempvec.size();
-
-						int myindelmodelint;
-						double mr, mM;
-						double mq, ma, mb;
-
-						double entryd=0, totald=0, meand=0;
-						int thecount=0;
-
-						vector<double> usermodel;
-
-						// 0 USER
-						// 1 NB
-						// 2 POW
-						// 3 LAV
-
-						// 11 NBOLD - NB calculated using p GEO
-						// 12 POWCUM - power law calculated using cumulative method used for USER and LAV
-						// 13 POWDAWG - power law calculated using zipf function from DAWG
-
-						// User Model
-						if(myin=="USER")
-						{
-							myindelmodelint=0;
-
-							if(tempsize!=2) noindelerror=false;
-
-							if(noindelerror)
-							{
-								myin=tempvec.at(1);
-
-								ifstream if1; if1.open(myin.c_str());
-
-								double countcount=0;
-								if(!(if1.good()))
-								{
-									controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Could not find a file named:\n"+myin,"");
-									mytest=-2; {if(breakonerror) return -1;}
-								}
-								char c=if1.get();
-								string s;
-
-								bool writeon=false;
-								while(if1.good())
-								{
-									if(!AinB(c,"0123456789. \n\t\r"))
-									{
-										string y; y+=c;
-										controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Illegal character "+y+" found in file named:\n"+myin+"\nAllowed characters are 0.123456789\nSpaces, horizontal tabs, and new lines are also allowed","");
-										mytest=-2; {if(breakonerror) return -1;}
-									}
-									if(AinB(c,"0123456789.")) writeon=true;
-
-									if(writeon && !AinB(c,"0123456789."))
-									{
-										countcount++;
-										writeon=false;
-										entryd=atof(s.c_str());
-										meand+=(countcount*entryd);
-										totald+=entryd;
-										usermodel.push_back(totald);
-										s="";
-									}
-
-									if(writeon) s+=c;
-
-									c=if1.get();
-								}
-
-
-
-								if(s!="")
-								{
-									countcount++;
-									entryd=atof(s.c_str());
-									meand+=(countcount*entryd);
-									totald+=entryd;
-									usermodel.push_back(totald);
-								}
-
-								if(usermodel.empty())
-								{
-									controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The user-defined indel length model must contain at least one value.!","");
-									mytest=-2; {if(breakonerror) return -1;}
-								}
-
-								double diff=totald-1;
-								if(diff<0) diff=-diff;
-								if(diff>0.00001)
-								{
-									stringstream df; df<<totald; string ff=df.str();
-									controlerrorprint2("[MODEL]", name, commands.at(lasttest), "User-defined indel model does not sum to 1 and so has been rescaled.\n(It summed to "+ff+") ","");
-
-									for(int i=0; i<usermodel.size(); i++) {(usermodel.at(i))/=totald; }
-								}
-
-								meand/=totald;
-							}
-
-						} // end of User Model
-
-						// Negative Binomial Distribution
-						else if(myin=="NB" || myin=="NBOLD")
-						{
-							if(myin=="NB")	myindelmodelint=1;	// used in program
-							else			myindelmodelint=11;	// alternative parameterisation for testing
-
-							if(tempsize!=3) noindelerror=false;
-
-							if(noindelerror)
-							{
-								myin=tempvec.at(1);
-								if(!allAinB(myin,"0123456789.")) noindelerror=false;
-								else mq=atof(myin.c_str());
-								if(mq<0 || mq>1) noindelerror=false;
-							}
-
-							if(noindelerror)
-							{
-								myin=tempvec.at(2);
-								if(!allAinB(myin,"0123456789")) noindelerror=false;
-								else mr=atoi(myin.c_str());
-								if(mr==0) noindelerror=false;
-							}
-
-							if(!noindelerror)
-							{
-								controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 2 values after \"NB\" when using Negative Binomial Model.\nThe first should be a proportion 0 <= q <= 1.\nThe second should be an integer r > 0.","");
-								mytest=-2; {if(breakonerror) return -1;}
-							}
-
-							meand =  1.0+mr*mq/(1.0-mq);
-
-						} // end of Negative Binomial Distribution
-
-
-						// Zipfian Distribution (Power Law)
-						else if(myin=="POW" || myin=="POWDAWG" || myin=="POWCUM")
-						{
-							if(myin=="POW")     myindelmodelint=2;  // Fast Zipf
-
-							if(myin=="POWDAWG") myindelmodelint=13; // Slower Zipf from DAWG - here for checking fast zipf!
-
-							if(myin=="POWCUM")  myindelmodelint=12; // cumulative method as for USER and LAV used to check both above!
-
-							if(tempsize!=2 && tempsize!=3) noindelerror=false;
-
-							if(noindelerror)
-							{
-								myin=tempvec.at(1);
-								if(!allAinB(myin,"0123456789.")) noindelerror=false;
-								else ma=atof(myin.c_str());
-								if(ma<=1) noindelerror=false;
-							}
-
-							if(tempsize==3 && noindelerror)
-							{
-								myin=tempvec.at(2);
-								if(!allAinB(myin,"0123456789")) noindelerror=false;
-								else mM=atoi(myin.c_str());
-								if(mM<=1) noindelerror=false;
-							}
-							else mM=2147483647; // largest integer value possible. //mM=pow(10,12); //mM=~0-1; // largest known genome is 132 pg  (1pg is ~ 978 MB, so 132pg is ~ 129 GB, i.e. 10^12 is bigger than any genome!)
-
-							if(!noindelerror)
-							{
-								controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 1 or 2 values after \"POW\" when using Zipfian Power Model.\nThis obligatory first value should be a decimal number a > 1.\nThe second optional value should be an integer M > 1.","");
-								mytest=-2; {if(breakonerror) return -1;}
-							}
-
-							double blah;
-							if(myindelmodelint==12)
-							{
-								for(double u=1; u<mM+1; u++) {entryd=pow(u,-1*ma); totald+=entryd; meand+=( entryd * u );usermodel.push_back(totald); }
-
-								for(int i=0; i<usermodel.size(); i++) {(usermodel.at(i))/=totald;  }
-							}
-							else
-							{
-								//cout<<"mM is "<<mM<<endl;
-								double last=2, diff, bit=pow(10,-15);
-								for(double u=1; u<mM+1; u++) {entryd=pow(u,-1*ma); meand+=(entryd*u); totald+=entryd; diff=last-entryd; last=entryd;  if(diff<bit) {blah=u; break;}}
-							}
-							//cout<<"BLAH  "<<blah<<endl;
-							meand/=totald;
-							//cout<<meand<<"  "<<totald<<endl;
-
-						} // end of Zipfian Distribution (Power Law)
-
-						// Lavalette Distribution
-						else  if(myin=="LAV")
-						{
-							/*
-							Lavalette Distribution References
-
-							Lavalette distribution (Lavalette, 1996; Popescu et al., 1997; Popescu, 2003).
-							Lavalette D. (1996) Facteur d’impact: impartialité ou impuissance?, Internal Report, INSERM U350, Institut Curie - Recherche, Bât. 112, Centre Universitaire, 91405 Orsay, France (November 1996)
-							Popescu, I.I. (1997) On the Lavalette Ranking Law (with M. Ganciu, M. C. Penache, and D. Penache), Romanian Reports in Physics, 49, 3-27
-							Popescu, I.I. (2003) On a Zipf’s law extension to impact factors. Glottometrics, 6. 83-93.
-							*/
-
-							myindelmodelint=3;
-
-							if(tempsize!=3) noindelerror=false;
-
-							if(noindelerror)
-							{
-								myin=tempvec.at(1);
-								if(!allAinB(myin,"0123456789.")) noindelerror=false;
-								else mb=atof(myin.c_str());
-								if(mb<=1) noindelerror=false;
-							}
-
-							if(noindelerror)
-							{
-								myin=tempvec.at(2);
-								if(!allAinB(myin,"0123456789")) noindelerror=false;
-								else mM=atoi(myin.c_str());
-								if(mM<=1) noindelerror=false;
-							}
-
-							if(!noindelerror)
-							{
-								controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 2 values after \"LAV\" when using Lavalette Model.\nThe first should be a decimal b > 1.\nThe second (maximum length) should be an integer M>1.","");
-								mytest=-2; {if(breakonerror) return -1;}
-							}
-
-
-							for(double u=1; u<mM+1; u++) {entryd=pow(mM*u/(mM-u+1),-1*mb); meand+=(u*entryd); totald+=entryd; usermodel.push_back(totald); }
-
-							for(int i=0; i<usermodel.size(); i++) {(usermodel.at(i))/=totald; }
-							meand/=totald;
-
-
-						} // end of Lavalette Distribution
-
-						else
-						{
-							controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The first value in this command specifies the insertion or deletion model.\nPossible values are:\n\n     NB = Negative Binomial Distribution\n    POW = Zipfian Distribution (Power Law)\n    LAV = Lavalette Distribution\n   USER = explicit, user-defined indel length distribution\n",myin);
-							mytest=-2; {if(breakonerror) return -1;}
-						}
-
-						if(lasttest==0 || lasttest==2)
-						{
-							insertmodel.type=myindelmodelint;
-							insertmodel.r=int(mr);
-							insertmodel.q=mq;
-							insertmodel.a=ma;
-							insertmodel.b=mb;
-							insertmodel.M=int(mM);			//cout<<"mM before "<<mM<<"  and after "<<int(mM)<<endl;
-							insertmodel.meansize=meand;
-							insertmodel.usermodel=usermodel;
-						}
-						if(lasttest==1 || lasttest==2)
-						{
-							deletemodel.type=myindelmodelint;
-							deletemodel.r=int(mr);
-							deletemodel.q=mq;
-							deletemodel.a=ma;
-							deletemodel.b=mb;
-							deletemodel.M=int(mM);			//cout<<"mM before "<<mM<<"  and after "<<int(mM)<<endl;
-							deletemodel.meansize=meand;
-							deletemodel.usermodel=usermodel;
-						}
-
-					} // end of indel model stuff
-
-					else if(lasttest>2 && lasttest<7)
-					{
-						// last test = 3  for insertion rate
-						// last test = 4  for deletion rate
-						// last test = 5  for insertion AND deletion rate
-						// last test = 6  for genetic code
-
-						if(tempvec.size()>1)
-						{
-							controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 1 value after this command but found "+tempvec.at(0)+" then "+tempvec.at(1)+".","");
-							mytest=-2; {if(breakonerror) return -1;}
-						}
-
-						string myin=tempvec.at(0);
-
-						if(lasttest==6)
-						{
-							// genetic code
-
-							if(type!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "This command only has effect in CODON simulations.","");   {if(breakonerror) return -1;} }
-
-							if(AinB('.',myin)) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should not be decimal, was expecting integer.",myin);   {if(breakonerror) return -1;} }
-
-							else
-							{
-								int myout=atoi(myin.c_str());
-
-								if(  (myout>0 && myout<7) || (myout>8 && myout<17) || (myout>20 && myout<24)  ) geneticcode=myout;
-
-								else {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should be an integer 1-6, 9-16, or 21-23\nThese correspond to the entries on GenBank (October 2008).",myin);   {if(breakonerror) return -1;} }
-							}
-						}
-						else
-						{
-							double myout=atof(myin.c_str());
-
-							if(myout<0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should be greater than or equal to zero.",myin);   {if(breakonerror) return -1;} }
-
-							if(lasttest==3) insertrate=myout;
-
-							else if(lasttest==4) deleterate=myout;
-
-							else insertrate=deleterate=myout;
-						}
-
-					}
-					else if(lasttest==7)
-					{
-						// lasttest == 7 is the substitution model  -----> big if bracket
-
-						string myin=tempvec.at(0);
-
-						if(!allAinB(myin,"0123456789.") )
-						{
-							ifstream ig1; ig1.open(myin.c_str());
-
-							if(type==2)
-							{
-								if(!(ig1.good())) {controlerrorprint2("[MODEL]", name, "[submodel]", myin+"\nis not a model name or number and no file of this name exists.\nFor protein models, the entry after a [submodel] command must be\nan integer or a filename.",""); {if(breakonerror) return -1;} }
-
-								modelnumber=-1;
-								char c2; string sss;
-
-								c2=ig1.get(); aamodel.clear();
-								bool writeon=false;
-								while(ig1.good())
-								{
-									if(AinB(c2,"1234567890. \t\n\r"))
-									{
-										if(AinB(c2," \t\n\r")) writeon=false; else writeon=true;
-
-										if(writeon) sss+=c2;
-										else if(sss!="") {aamodel.push_back(  atof(sss.c_str())  ); sss="";}
-									}
-									else {controlerrorprint2("[MODEL]", name, "[submodel]", "Reading user defined protein substitution model from file:\n"+myin+"\n...but have found illegal character \""+c2+"\"\nEntries in this file can only be decimal numbers separated by\nspaces, horizontal tabs and new lines.",""); {if(breakonerror) return -1;} }
-
-									c2=ig1.get();
-								}
-								int wrongsize2=aamodel.size(); stringstream dd; dd<<wrongsize2; string wrongsize=dd.str();
-
-								if(wrongsize2!=210) {controlerrorprint2("[MODEL]", name, "[submodel]", "Reading user defined protein substitution model from file:\n"+myin+"\n...but have found "+wrongsize+" entries. Was expecting 210 entries.\nThe first 190 entries are from the substitution matrix.\nThe final 20 values are for the stationary amino-acid frequencies.\nThe substititution model must be symmetric and the file must only contain\nthe lower triangular half of the substitution matrix.",""); {if(breakonerror) return -1;} }
-							}
-							else if(type==1) {controlerrorprint2("[MODEL]", name, "[submodel]", myin+" is not an integer model number.\nThe entry after a [submodel] command must be an integer.",""); {if(breakonerror) return -1;} }
-
-						}
-						else
-						{
-
-							int mymodel=atoi(myin.c_str());
-
-							int b=17; string typestring="NUCLEOTIDE"; string bnum="16";  //for type 1
-							if(type==2) {typestring="AMINOACID";}
-							else if(type==3) {b=16; bnum="15"; typestring="CODON";}
-
-							if(type!=3)
-							{
-								if(mymodel>-1 && mymodel<b && !AinB('.',myin)) {modelnumber=mymodel;}
-								else {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "First value for this command represents the model number.\nThis should be a integer between 0 and "+bnum+" inclusive\nwhen type is set to "+typestring+".",myin);   {if(breakonerror) return -1;} }
-							}
-							else
-							{
-								if(mymodel!=14 && mymodel!=15) modelnumber=mymodel=3;
-							}
-							int nstsize=tempvec.size();
-
-							// old way
-							//for(int hy=1; hy<nstsize; hy++) {params.push_back(atof((tempvec.at(hy)).c_str())); }    //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
-
-							if(type==3) for(int hy=0; hy<nstsize; hy++) {params.push_back(atof((tempvec.at(hy)).c_str())); }    //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
-							else        for(int hy=1; hy<nstsize; hy++) {params.push_back(atof((tempvec.at(hy)).c_str())); }    //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
-
-							if(type==2)
-							{
-								if(nstsize>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should be a single integer between 0 and "+bnum+"\nor a model/file name when type is set to AMINOACID.\nBut found "+tempvec.at(0)+" then "+tempvec.at(1)+".","");   {if(breakonerror) return -1;} }
-
-
-							}
-
-							else if(type==1)
-							{
-								stringstream fr; fr<<nstsize-1; string fh=fr.str();
-
-	 								 if(mymodel==0  && nstsize!=1)                 {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as JC69. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==1  && nstsize!=1)                 {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as F81. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==2  && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K80. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==3  && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as HKY85. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==4  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TN93ef. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==5  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TN93. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==6  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K81. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==7  && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K81uf. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==8  && nstsize!=4 && nstsize!=5)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TIMef. \nExpecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==9  && nstsize!=4 && nstsize!=5)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TIM. \nExpecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==10 && nstsize!=5 && nstsize!=6)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TVMef. \nExpecting 4 or 5 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==11 && nstsize!=5 && nstsize!=6)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as TVM. \nExpecting 4 or 5 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==12 && nstsize!=6 && nstsize!=7)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as SYM. \nExpecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==13 && nstsize!=6 && nstsize!=7)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as GTR. \nExpecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-
-								else if(mymodel==14 && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as F84ef. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==15 && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as F84. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-							//	else if(mymodel==16 && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as T92. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-							//	else if(mymodel==17 && nstsize!=12 && nstsize!=13) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as UNREST. \nExpecting 11 or 12 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==16 && nstsize!=12 && nstsize!=13) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as UNREST. \nExpecting 11 or 12 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-							}
-
-							else if(type==3)
-							{
-								ngamcat=1;
-								//nstsize--;
-								stringstream fr; fr<<nstsize; string fh=fr.str();
-
-	 								 if(mymodel==0  && nstsize!=2) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M0. \nWas expecting 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==1  && nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M1. \nWas expecting 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==2  && nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M2. \nWas expecting 5 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-
-
-								/*
-								else if(mymodel==5 )
-								{
-									if(nstsize==4)
-									{
-										if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 4 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} }
-										else ngamcat=atoi((tempvec.back()).c_str());
-									}
-									else
-									{
-										if(nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-										else ngamcat=0;
-									}
-								}
-
-
-								else if(mymodel==5 ) {if(nstsize==4){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 4 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==6 ) {if(nstsize==6){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 6 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==7 ) {if(nstsize==4){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 4 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==8 ) {if(nstsize==6){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 6 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==9 ) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==10) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==11) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==12) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								else if(mymodel==13) {if(nstsize==8){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWhen specifying 8 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=7) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 7 or 8 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=0;}}
-								/*
-								else if(mymodel==5  && nstsize!=3 && nstsize!=4) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==6  && nstsize!=5 && nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M6. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==7  && nstsize!=3 && nstsize!=4) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M7. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==8  && nstsize!=5 && nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M8. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==9  && nstsize!=6 && nstsize!=7) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M9. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==10 && nstsize!=6 && nstsize!=7) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M10.\nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==11 && nstsize!=6 && nstsize!=7) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M11.\nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==12 && nstsize!=6 && nstsize!=7) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M12.\nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==13 && nstsize!=7 && nstsize!=8) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M13.\nWas expecting 7 or 8 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								*/
-
-								else if(mymodel==5 ) {if(nstsize==4){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5.\nWhen specifying 4 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==6 ) {if(nstsize==6){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M6.\nWhen specifying 6 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==7 ) {if(nstsize==4){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M7.\nWhen specifying 4 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 3 or 4 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==8 ) {if(nstsize==6){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M8.\nWhen specifying 6 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=5) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 5 or 6 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==9 ) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M9.\nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==10) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M10. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==11) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M11. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==12) {if(nstsize==7){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M12. \nWhen specifying 7 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=6) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 6 or 7 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-								else if(mymodel==13) {if(nstsize==8){ if(AinB('.',tempvec.back())) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M13. \nWhen specifying 8 substitution parameters after the model number the\nlast value represents the number of categories to use in the discrete \napproximation for any continuous distributions.  This must be an integer. ",tempvec.back()); {if(breakonerror) return -1;} } else {ngamcat=atoi((tempvec.back()).c_str());params.pop_back();}}  else {if(nstsize!=7) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M5. \nWas expecting 7 or 8 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} } else ngamcat=10;}}
-
-
-
-								else if(mymodel==3  && (nstsize%2)!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M3. \nWas expecting 2K substitution parameters for K categories.\nOrder should be: kappa p_0  p_1  ... p_(k-2)  w_0  w_1  ... w_(k-1)\nFor M0 this would be: kappa w_0\nFor M1a this would be: kappa p_0 w_0 w_1.\nFor M2a this would be: kappa p_0 p_1 w_0 w_1 w_2 etc.\nInstead found an odd number of parameters ("+fh+") after model number",""); {if(breakonerror) return -1;} }
-
-
-								//else if(mymodel==3  && (nstsize%2)!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M3. \nWas expecting 2K-1 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==4  && nstsize<3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as M4. \nWas expecting at least 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-
-								else if(mymodel==14 && nstsize!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as ECMrest. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-								else if(mymodel==15 && nstsize!=0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "CODON substitution model set as ECMunrest. \nNot expecting any substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-
-
-								// why is this here?  it says NUCLEOTIDE - is this the same as before? - maybe just used for copying?
-								//else if(mymodel==2  && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K80. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-
-								// cout<<"NGAMCAT "<<ngamcat<<endl;
-
-								if(mymodel==12 || mymodel==13 || mymodel==2)
-								{
-									if(params.at(1)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p0 must be between 0 and 1.  You entered "+tempvec.at(2),""); {if(breakonerror) return -1;} }
-									if(params.at(2)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p1 must be between 0 and 1.  You entered "+tempvec.at(3),""); {if(breakonerror) return -1;} }
-									if(mymodel!=12 && params.at(1)+params.at(2)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "sum of proportions p0 and p1 must be between 0 and 1.  \nYou entered "+tempvec.at(2)+" and "+tempvec.at(3),""); {if(breakonerror) return -1;} }
-
-								}
-								else if( (mymodel<12 && mymodel>7) || mymodel==6 || mymodel==1)
-								{
-									if(params.at(1)>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p0 must be between 0 and 1.  You entered "+tempvec.at(2),""); {if(breakonerror) return -1;} }
-								}
-								else if(mymodel==3 || mymodel==4)
-								{
-									int thesize=params.size();
-									if(mymodel==3) thesize=(thesize-1)/2 +1;
-									double sum=0;
-									for(int gh8=1; gh8<thesize; gh8++)
-									{
-										sum+=params.at(gh8);
-										if(params.at(gh8)>1)
-										{
-											stringstream cd; cd<<gh8-1; string hf=cd.str();
-											controlerrorprint2("[MODEL]", name, commands.at(lasttest), "proportion p"+hf+" must be between 0 and 1.  You entered "+tempvec.at(gh8+1),"");
-											{if(breakonerror) return -1;}
-										}
-									}
-									if(sum>1)
-									{
-										stringstream cd; cd<<sum; string hf=cd.str();
-
-										controlerrorprint2("[MODEL]", name, commands.at(lasttest), "sum of proportions must be between 0 and 1.  It was "+hf+".",""); {if(breakonerror) return -1;}
-									}
-
-								}
-
-							} // end of else if type =3 bracket
-
-						}
-					}// end of lasttest == 7 bracket
-					else if(lasttest==99)
-					{//y1
-						// params
+				    }
+				    if(sum>1)
+				    {
+					stringstream cd; cd<<sum; string hf=cd.str();
+
+					controlerrorprint2("[MODEL]", name, commands.at(lasttest), "sum of proportions must be between 0 and 1.  It was "+hf+".",""); {if(breakonerror) return -1;}
+				    }
+
+				}
+
+			    } // end of else if type =3 bracket
+
+			}
+		    }// end of lasttest == 7 bracket
+		    else if(lasttest==99)
+		    {//y1
+			// params
 
 ///////////////////////////////////////////////
 
-						//  disabled bracket now
+			//  disabled bracket now
 
 
-					}//y1
-					else if(lasttest==8)
-					{
-						// lasttest == 8 sets site specific rates for.   order of commands is --------> rates  pinv alpha ngamcat
+		    }//y1
+		    else if(lasttest==8)
+		    {
+			// lasttest == 8 sets site specific rates for.   order of commands is --------> rates  pinv alpha ngamcat
 
-						if(type==3)	{controlerrorprint2("[MODEL]", name, commands.at(lasttest), "This command has no effect in a CODON simulation.","");   {if(breakonerror) return -1;} }
-						else if(tempvec.size()!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "There should be 3 values following a [rates] command: pinv alpha ngamcat.","");  {if(breakonerror) return -1;} }
-						else
-						{
-							if(AinB('.',tempvec.at(2))) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The 3rd value representing ngamcat should be an integer",tempvec.at(2));  {if(breakonerror) return -1;} }
+			if(model_type == codon)	{controlerrorprint2("[MODEL]", name, commands.at(lasttest), "This command has no effect in a CODON simulation.","");   {if(breakonerror) return -1;} }
+			else if(tempvec.size()!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "There should be 3 values following a [rates] command: pinv alpha ngamcat.","");  {if(breakonerror) return -1;} }
+			else
+			{
+			    if(AinB('.',tempvec.at(2))) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The 3rd value representing ngamcat should be an integer",tempvec.at(2));  {if(breakonerror) return -1;} }
 
-							pinv=atof((tempvec.at(0)).c_str());
-							alpha=atof((tempvec.at(1)).c_str());
-							ngamcat=atoi((tempvec.at(2)).c_str());
+			    pinv=atof((tempvec.at(0)).c_str());
+			    alpha=atof((tempvec.at(1)).c_str());
+			    ngamcat=atoi((tempvec.at(2)).c_str());
 
-							if(pinv>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The 1st value representing pinv should be between 0 and 1.",tempvec.at(0));  {if(breakonerror) return -1;} }
+			    if(pinv>1) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "The 1st value representing pinv should be between 0 and 1.",tempvec.at(0));  {if(breakonerror) return -1;} }
 
-						}
-					}
-					else if(lasttest==9)
-					{
-						// Crates  ---->    now disabled, was for fixed relative rates for each codon position.
+			}
+		    }
+		    else if(lasttest==9)
+		    {
+			// Crates  ---->    now disabled, was for fixed relative rates for each codon position.
 
-						if(tempvec.size()!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "There should be 3 decimal values following a [Crates] command.","");  {if(breakonerror) return -1;} }
-						else
-						{
-							codonrates[0]=atof((tempvec.at(0)).c_str());
-							codonrates[1]=atof((tempvec.at(1)).c_str());
-							codonrates[2]=atoi((tempvec.at(2)).c_str());
-						}
-					}
-					else if(lasttest>9)
-					{//x1
-						// lasttest == 10 is base frequencies being defined
-						// lasttest == 11 is insertion base frequenciess being defined (i.e. diff. base freqs being used for creating inserted sequences and for substitution model)
-						// lasttest == 12 is root base frequencies being defined  (i.e.  using diff base freqs for creating root sequence than those used by substitution model)
+			if(tempvec.size()!=3) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "There should be 3 decimal values following a [Crates] command.","");  {if(breakonerror) return -1;} }
+			else
+			{
+			    codonrates[0]=atof((tempvec.at(0)).c_str());
+			    codonrates[1]=atof((tempvec.at(1)).c_str());
+			    codonrates[2]=atoi((tempvec.at(2)).c_str());
+			}
+		    }
+		    else if(lasttest>9)
+		    {//x1
+			// lasttest == 10 is base frequencies being defined
+			// lasttest == 11 is insertion base frequenciess being defined (i.e. diff. base freqs being used for creating inserted sequences and for substitution model)
+			// lasttest == 12 is root base frequencies being defined  (i.e.  using diff base freqs for creating root sequence than those used by substitution model)
 
-						// base frequency stuff
+			// base frequency stuff
 
-						int mysize=tempvec.size();
+			int mysize=tempvec.size();
 
-						stringstream fd; fd<<mysize; string mysizeS=fd.str();
-						bool errorprint=false;
-						string mytype, mysizes;
+			stringstream fd; fd<<mysize; string mysizeS=fd.str();
+			bool errorprint=false;
+			string mytype, mysizes;
 
-						if(type==3) {if(mysize!=4 && mysize!=12 && mysize!=64) {mytype="CODON"; mysizes="4, 12, or 64"; errorprint=true; }}
-						else if(type==2) {if(mysize!=20){mytype="AMINOACID"; mysizes="20"; errorprint=true; }}
-						else if(type==1) {if(mysize!=4) {mytype="NUCLEOTIDE";     mysizes="4"; errorprint=true; }}
+			if (model_type == codon) {if(mysize!=4 && mysize!=12 && mysize!=64) {mytype="CODON"; mysizes="4, 12, or 64"; errorprint=true; }}
+			else if (model_type == aminoacid) {if(mysize!=20){mytype="AMINOACID"; mysizes="20"; errorprint=true; }}
+			else if (model_type == nucleotide) {if(mysize!=4) {mytype="NUCLEOTIDE";     mysizes="4"; errorprint=true; }}
 
-						if(errorprint) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "There should be "+mysizes+" values for a base frequency command\nwhen simulating "+mytype+" data. You entered "+mysizeS+" values.","");  {if(breakonerror) return -1;} }
-						else
-						{ //x2
-							vector<double> tempbases, tempbases2;
-							for(int kh=0; kh<mysize; kh++)
-							{
-								double mytemp=atof( ( tempvec.at(kh) ).c_str() );
-								if(mytemp<0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Values for base frequency commands must be positive.","");  {if(breakonerror) return -1;} }
-								else tempbases.push_back(mytemp);
-							}
+			if(errorprint) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "There should be "+mysizes+" values for a base frequency command\nwhen simulating "+mytype+" data. You entered "+mysizeS+" values.","");  {if(breakonerror) return -1;} }
+			else
+			{ //x2
+			    vector<double> tempbases, tempbases2;
+			    for(int kh=0; kh<mysize; kh++)
+			    {
+				double mytemp=atof( ( tempvec.at(kh) ).c_str() );
+				if(mytemp<0) {controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Values for base frequency commands must be positive.","");  {if(breakonerror) return -1;} }
+				else tempbases.push_back(mytemp);
+			    }
 
-							double scaler=0,lastscaler,diff;
+			    double scaler=0,lastscaler,diff;
 
-							if(type==3 && mysize==4)
-							{
-								// F1X4 frequencies
-								scaler=0;
-								for(int gh1q=0; gh1q<mysize; gh1q++) scaler+=tempbases.at(gh1q);
-								for(int gh2q=0; gh2q<mysize; gh2q++) tempbases.at(gh2q)/=scaler;
+			    if (model_type == codon && mysize==4)
+			    {
+				// F1X4 frequencies
+				scaler=0;
+				for(int gh1q=0; gh1q<mysize; gh1q++) scaler+=tempbases.at(gh1q);
+				for(int gh2q=0; gh2q<mysize; gh2q++) tempbases.at(gh2q)/=scaler;
 
-								diff=scaler-1; if(diff<0) diff=-diff;
-								if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F1X4 base frequencies did not add up to 1 so they have been rescaled.","");
+				diff=scaler-1; if(diff<0) diff=-diff;
+				if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F1X4 base frequencies did not add up to 1 so they have been rescaled.","");
 
-								//for(int i1=0; i1<4; i1++) for(int j1=0; j1<4; j1++) for(int k1=0; k1<4; k1++)
-								//tempbases2.push_back(tempbases.at(i1)*tempbases.at(j1)*tempbases.at(k1));
+				//for(int i1=0; i1<4; i1++) for(int j1=0; j1<4; j1++) for(int k1=0; k1<4; k1++)
+				//tempbases2.push_back(tempbases.at(i1)*tempbases.at(j1)*tempbases.at(k1));
 
-								//enforcestops(geneticcode,tempbases2);
-								//mysize=64;
+				//enforcestops(geneticcode,tempbases2);
+				//mysize=64;
 
-								tempbases2=tempbases;
+				tempbases2=tempbases;
 
-							}
-							else if(type==3 && mysize==12)
-							{
-								// F3X4 frequencies
-								scaler=0;
-								for(int gh1a=0; gh1a<4; gh1a++) scaler+=tempbases.at(gh1a);
-								for(int gh2a=0; gh2a<4; gh2a++) tempbases.at(gh2a)/=scaler;
+			    }
+			    else if(model_type == codon && mysize==12)
+			    {
+				// F3X4 frequencies
+				scaler=0;
+				for(int gh1a=0; gh1a<4; gh1a++) scaler+=tempbases.at(gh1a);
+				for(int gh2a=0; gh2a<4; gh2a++) tempbases.at(gh2a)/=scaler;
 
-								diff=scaler-1; if(diff<0) diff=-diff;
-								if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F3X4 base frequencies for the 1st codon position\ndid not add up to 1 so they have been rescaled.","");
+				diff=scaler-1; if(diff<0) diff=-diff;
+				if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F3X4 base frequencies for the 1st codon position\ndid not add up to 1 so they have been rescaled.","");
 
-								scaler=0;
-								for(int gh1b=4; gh1b<8; gh1b++) scaler+=tempbases.at(gh1b);
-								for(int gh2b=4; gh2b<8; gh2b++) tempbases.at(gh2b)/=scaler;
+				scaler=0;
+				for(int gh1b=4; gh1b<8; gh1b++) scaler+=tempbases.at(gh1b);
+				for(int gh2b=4; gh2b<8; gh2b++) tempbases.at(gh2b)/=scaler;
 
-								diff=scaler-1; if(diff<0) diff=-diff;
-								if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F3X4 base frequencies for the 2nd codon position\ndid not add up to 1 so they have been rescaled.","");
+				diff=scaler-1; if(diff<0) diff=-diff;
+				if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F3X4 base frequencies for the 2nd codon position\ndid not add up to 1 so they have been rescaled.","");
 
-								scaler=0;
-								for(int gh1c=8; gh1c<12; gh1c++) scaler+=tempbases.at(gh1c);
-								for(int gh2c=8; gh2c<12; gh2c++) tempbases.at(gh2c)/=scaler;
+				scaler=0;
+				for(int gh1c=8; gh1c<12; gh1c++) scaler+=tempbases.at(gh1c);
+				for(int gh2c=8; gh2c<12; gh2c++) tempbases.at(gh2c)/=scaler;
 
-								diff=scaler-1; if(diff<0) diff=-diff;
-								if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F3X4 base frequencies for the 3rd codon position\ndid not add up to 1 so they have been rescaled.","");
-
-
-								//for(int i1=0; i1<4; i1++) for(int j1=4; j1<8; j1++) for(int k1=8; k1<12; k1++)
-								//tempbases2.push_back(tempbases.at(i1)*tempbases.at(j1)*tempbases.at(k1));
-
-								//enforcestops(geneticcode,tempbases2);
-								//mysize=64;
-
-								tempbases2=tempbases;
-
-							}
-							else if(type==3 && mysize==64)
-							{
-								//Fcodon frequencies
-								scaler=0;
-								for(int gh1s=0; gh1s<mysize; gh1s++) scaler+=tempbases.at(gh1s);
-								for(int gh2s=0; gh2s<mysize; gh2s++) tempbases.at(gh2s)/=scaler;
-
-								lastscaler=scaler;
-								diff=scaler-1; if(diff<0) diff=-diff;
-								if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Base frequencies did not add up to 1 so they have been rescaled.","");
-
-								tempbases2=tempbases;
-
-							}
-							else tempbases2=tempbases;
-
-							if(type==1 || type==2)
-							{
-								scaler=0;
-								for(int gh1=0; gh1<mysize; gh1++) scaler+=tempbases2.at(gh1);
-								for(int gh2=0; gh2<mysize; gh2++) tempbases2.at(gh2)/=scaler;
-
-								diff=scaler-1; if(diff<0) diff=-diff;
-								if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Base frequencies did not add up to 1 so they have been rescaled.","");
-							}
-
-							if(lasttest==10)
-							{
-								basefreqs=tempbases2;
-							}
-							else if(lasttest==11) insertfreqs=tempbases2;
-							else if(lasttest==12) rootbasefreqs=tempbases2;
-
-						}//x2
-					}//x1
-
-					tempvec.clear();
-
-				} //end of a2  bracket (long way above!)
-
-			} //end of a1  bracket ( long long way above!)
-
-		}	// end of for bracket
-
-	} // end of model name else bracket
+				diff=scaler-1; if(diff<0) diff=-diff;
+				if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "F3X4 base frequencies for the 3rd codon position\ndid not add up to 1 so they have been rescaled.","");
 
 
-		totalmodels.push_back(model(totalmodels.size(), type, name, modelnumber, geneticcode, copiedmodel, insertrate, deleterate,  alpha, pinv, ngamcat, codonrates, basefreqs, rootbasefreqs, insertfreqs, params, aamodel, insertmodel, deletemodel ));
+				//for(int i1=0; i1<4; i1++) for(int j1=4; j1<8; j1++) for(int k1=8; k1<12; k1++)
+				//tempbases2.push_back(tempbases.at(i1)*tempbases.at(j1)*tempbases.at(k1));
 
-		if((totalmodels.back()).error==-1) return -1;   // returns error if there was an error resulting from the model constructor in the model class
+				//enforcestops(geneticcode,tempbases2);
+				//mysize=64;
 
-	return 0;
+				tempbases2=tempbases;
 
-}
+			    }
+			    else if(model_type == codon && mysize==64)
+			    {
+				//Fcodon frequencies
+				scaler=0;
+				for(int gh1s=0; gh1s<mysize; gh1s++) scaler+=tempbases.at(gh1s);
+				for(int gh2s=0; gh2s<mysize; gh2s++) tempbases.at(gh2s)/=scaler;
+
+				lastscaler=scaler;
+				diff=scaler-1; if(diff<0) diff=-diff;
+				if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Base frequencies did not add up to 1 so they have been rescaled.","");
+
+				tempbases2=tempbases;
+
+			    }
+			    else tempbases2=tempbases;
+
+			    if(model_type == nucleotide || model_type == aminoacid)
+			    {
+				scaler=0;
+				for(int gh1=0; gh1<mysize; gh1++) scaler+=tempbases2.at(gh1);
+				for(int gh2=0; gh2<mysize; gh2++) tempbases2.at(gh2)/=scaler;
+
+				diff=scaler-1; if(diff<0) diff=-diff;
+				if(diff>0.0001) controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Base frequencies did not add up to 1 so they have been rescaled.","");
+			    }
+
+			    if(lasttest==10)
+			    {
+				basefreqs=tempbases2;
+			    }
+			    else if(lasttest==11) insertfreqs=tempbases2;
+			    else if(lasttest==12) rootbasefreqs=tempbases2;
+
+			}//x2
+		    }//x1
+
+		    tempvec.clear();
+
+		} //end of a2  bracket (long way above!)
+
+	    } //end of a1  bracket ( long long way above!)
+
+	}	// end of for bracket
+
+    } // end of model name else bracket
+
+    model m(totalmodels.size(), model_type, name, modelnumber, geneticcode,
+	    copiedmodel, insertrate, deleterate,  alpha, pinv, ngamcat,
+	    codonrates, basefreqs, rootbasefreqs, insertfreqs, params,
+	    aamodel, insertmodel, deletemodel);
+    totalmodels.push_back(m);
+
+    if ( (totalmodels.back()).error==-1)
+	return -1;   // returns error if there was an error resulting from the model constructor in the model class
+
+    return 0;
+
+} // end-dealwithmodel
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1838,9 +1817,9 @@ int dealwithsites(vector<string> &block)
 			if(a[y]==',' && lastcomma==false) {commacount++; lastcomma=true;}
 		}
 
-		if(type!=1)
+		if (model_type != nucleotide)
 		{
-			string protcod; if(type==2) protcod="AMINOACID"; else protcod="CODON";
+			string protcod; if(model_type == aminoacid) protcod="AMINOACID"; else protcod="CODON";
 			controlerrorprint2("[SITES]", name, a, "The command C[x,y,z] is used to specify different models or branch\nclasses for each codon position in a NUCLEOTIDE analysis.\nIt cannot be used for a "+protcod+" type analysis.","");
 			{if(breakonerror) return -1;}
 		}
@@ -3006,7 +2985,7 @@ int partitionclass::makerootseqints(vector<int> &rootseqint, vector<int> rootlen
     }
     else
     {
-	if(type==2)
+	if(model_type == aminoacid)
 	{
 	    string test="ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
 	    if(!allAinB(rootseqtxt,test)) { controlerrorprint2("[PARTITIONS]", name, "", "AMINOACID root sequence in file can only contain following letters:\nARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv",""); {if(breakonerror) return -1;} }
@@ -3037,14 +3016,14 @@ int partitionclass::makerootseqints(vector<int> &rootseqint, vector<int> rootlen
 	else
 	{
 	    string test="TCAGtcag", bit;
-	    if(type==1) bit="NUCLEOTIDE"; else bit="CODON";
+	    if(model_type == nucleotide) bit="NUCLEOTIDE"; else bit="CODON";
 
 	    if(!allAinB(rootseqtxt,test)) { controlerrorprint2("[PARTITIONS]", name, "", bit+" root sequence in file can only contain following letters:\nTCAGtcag",""); {if(breakonerror) return -1;} }
 
 
 
 	    int size=4;
-	    if(type==1)
+	    if(model_type == nucleotide)
 	    {
 		/*
 		//always equal now
@@ -3369,7 +3348,7 @@ int dealwithpartitions(vector<string> &block)
 				else rootfilenamevec.push_back(s);
 
 				string test="TCAGtcag";
-				if(type==2) test="ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
+				if(model_type == aminoacid) test="ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
 				char c='\n';
 
 				while(if1.good())
@@ -3380,8 +3359,8 @@ int dealwithpartitions(vector<string> &block)
 						if(!AinB(c,"\n\r\t "))
 						{
 							string bit="NUCLEOTIDE";
-							if(type==2) bit="AMINOACID";
-							if(type==3) bit="CODON";
+							if(model_type == aminoacid) bit="AMINOACID";
+							if(model_type == codon) bit="CODON";
 							string s; s+=c;
 							controlerrorprint2("[PARTITIONS]", name, "", bit+" root sequence in file can only contain following letters:\n"+test,s); {if(breakonerror) return -1;}
 						}
@@ -3571,369 +3550,396 @@ string paupstart, paupmiddle, paupend;
 
 int docontrol()
 {
-	// this is the main function that processes the control file and calls the other relevant processing functions
+    // this is the main function that processes the control file and calls the other relevant processing functions
 
-	int isthereanerror=0;
-	ifstream if1;
-	if1.open(masterfilename.c_str());
+    int isthereanerror=0;
+    ifstream if1;
+    if1.open(masterfilename.c_str());
 
-	char c1='q', c2='q'; //,c2,c3,c4,c5,c6;
-	bool notwhitespace=true;
-	string s, newfilename=masterfilename;
-	vector<string> sv;
+    char c1='q', c2='q'; //,c2,c3,c4,c5,c6;
+    bool notwhitespace=true;
+    string s, newfilename=masterfilename;
+    vector<string> sv;
 
 
-	// get command blocks if they exist
-	ifstream paups, paupm, paupf;
+    // get command blocks if they exist
+    ifstream paups, paupm, paupf;
 
-	paups.open("paupstart.txt");
-	paupm.open("paupmiddle.txt");
-	paupf.open("paupend.txt");
+    paups.open("paupstart.txt");
+    paupm.open("paupmiddle.txt");
+    paupf.open("paupend.txt");
 
-	while(paups.good()) {char c=paups.get(); if(c!='ÿ') paupstart+=c; }//cout<<c<<endl;}
-	while(paupm.good()) {char c=paupm.get(); if(c!='ÿ') paupmiddle+=c; }//cout<<c<<endl;}
-	while(paupf.good()) {char c=paupf.get(); if(c!='ÿ') paupend+=c; }//cout<<c<<endl;}
+    while(paups.good()) {char c=paups.get(); if(c!='ÿ') paupstart+=c; }//cout<<c<<endl;}
+    while(paupm.good()) {char c=paupm.get(); if(c!='ÿ') paupmiddle+=c; }//cout<<c<<endl;}
+    while(paupf.good()) {char c=paupf.get(); if(c!='ÿ') paupend+=c; }//cout<<c<<endl;}
 
-	if(paupstart!="") paupstart+="\n\n";
-	if(paupmiddle!="") paupmiddle+="\n"; paupmiddle+="\n";
-	if(paupend!="") paupend+="\n\n";
+    if(paupstart!="") paupstart+="\n\n";
+    if(paupmiddle!="") paupmiddle+="\n"; paupmiddle+="\n";
+    if(paupend!="") paupend+="\n\n";
 
-	bool writeon=true;
-	string s1,s2,s3;
-	if(!if1.good())
+    bool writeon=true;
+    string s1,s2,s3;
+    if(!if1.good())
+    {
+	bool waste=true;
+	for(int qa=0; qa<10; qa++)
 	{
-		bool waste=true;
-		for(int qa=0; qa<10; qa++)
-		{
-			// this prompts for a different control file name if there is no file sharing name of masterfilename that is hardwired in code.
+	    // this prompts for a different control file name if there is no file sharing name of masterfilename that is hardwired in code.
 
-			controlerrorprint2("CONTROL FILE","","","There is no control file. INDELible was looking for file named:\n" +newfilename+"\nPlease enter the correct filename.","");
+	    controlerrorprint2("CONTROL FILE","","","There is no control file. INDELible was looking for file named:\n" +newfilename+"\nPlease enter the correct filename.","");
 
-			cin>>newfilename;
+	    cin>>newfilename;
 
-			if1.open(newfilename.c_str());
+	    if1.open(newfilename.c_str());
 
-			if(if1.good()) {waste=false; break;}
-		}
-
-		if(waste)
-		{
-			controlerrorprint2("CONTROL FILE","","","There is no control file. INDELible was looking for file named:\n" +newfilename+"\n10 failed attempts - please check your filenames and re-run INDELible.","");
-			isthereanerror=-1;
-			return -1;
-		}
+	    if(if1.good()) {waste=false; break;}
 	}
 
-
-	/*
-		// old way of reading in control file
-
-		while(if1.good())
-		{
-			// ignore comment lines in command file
-			getline(if1,s1); s3="";
-			if(s1[0]!='/' && s1[1]!='/')
-			{
-				for(int rd=0; rd<s1.size(); rd++)
-				{
-					if(s1[rd]=='/' ) break; //&& (s1[rd+1]=='/' || s1[rd+1]=='\n' || s1[rd+1]=='\r')) break;
-					else s3+=s1[rd];
-				}
-				s2+=s3; s2+='\n';
-			}
-		}
-
-		for(int hb=0; hb<s2.size(); hb++)
-		{
-			c2=c1; c1=s2[hb];
-			//if(c2=='/' && c1=='*') writeon=false;
-
-			if(writeon)
-			{
-				if(AinB(c1," \n\r\t")) {if(s!="") sv.push_back(s); s="";}
-				else{s+=c1;}
-			}
-
-		}
-		sv.push_back(s);
-	*/
-
-
-	vector<char> temp1, temp2, temp3;
-
-	temp1.push_back(' ');   // to prevent crashes at *1 below
-	while(if1.good()) {char c=if1.get(); temp1.push_back(c); originalcontrol.push_back(c);}          // parse control file character by character into temp1
-	temp1.push_back('\n');  // to prevent crashes at *2 below, and also if control file does not end in new line..
-
-	bool WR=true;
-
-	int mymycount=0;
-
-	for(int th1=1; th1<temp1.size()-1; th1++)
+	if(waste)
 	{
-		// this for loop will weed out any commented text between /* .... */ in the control file (from temp1 to temp2)
+	    controlerrorprint2("CONTROL FILE","","","There is no control file. INDELible was looking for file named:\n" +newfilename+"\n10 failed attempts - please check your filenames and re-run INDELible.","");
+	    isthereanerror=-1;
+	    return -1;
+	}
+    }
 
-		if(temp1.at(th1) == '/' && temp1.at(th1+1)=='*') {WR=false; mymycount++;}  ///// *1
 
-		if(WR) temp2.push_back(temp1.at(th1));
+    /*
+    // old way of reading in control file
 
-		if(temp1.at(th1-1)=='*' && temp1.at(th1) == '/') {WR=true; mymycount--;}   ///// *2
+    while(if1.good())
+    {
+    // ignore comment lines in command file
+    getline(if1,s1); s3="";
+    if(s1[0]!='/' && s1[1]!='/')
+    {
+    for(int rd=0; rd<s1.size(); rd++)
+    {
+    if(s1[rd]=='/' ) break; //&& (s1[rd+1]=='/' || s1[rd+1]=='\n' || s1[rd+1]=='\r')) break;
+    else s3+=s1[rd];
+    }
+    s2+=s3; s2+='\n';
+    }
+    }
 
-		if(mymycount<0)  {controlerrorprint2("CONTROL FILE","","","There is a '*/' statement without a preceding\nand matching '/*' statement! ",""); return -1;}
+    for(int hb=0; hb<s2.size(); hb++)
+    {
+    c2=c1; c1=s2[hb];
+    //if(c2=='/' && c1=='*') writeon=false;
 
+    if(writeon)
+    {
+    if(AinB(c1," \n\r\t")) {if(s!="") sv.push_back(s); s="";}
+    else{s+=c1;}
+    }
+
+    }
+    sv.push_back(s);
+    */
+
+
+    vector<char> temp1, temp2, temp3;
+
+    temp1.push_back(' ');   // to prevent crashes at *1 below
+    while(if1.good()) {char c=if1.get(); temp1.push_back(c); originalcontrol.push_back(c);}          // parse control file character by character into temp1
+    temp1.push_back('\n');  // to prevent crashes at *2 below, and also if control file does not end in new line..
+
+    bool WR=true;
+
+    int mymycount=0;
+
+    for(int th1=1; th1<temp1.size()-1; th1++)
+    {
+	// this for loop will weed out any commented text between /* .... */ in the control file (from temp1 to temp2)
+
+	if(temp1.at(th1) == '/' && temp1.at(th1+1)=='*') {WR=false; mymycount++;}  ///// *1
+
+	if(WR) temp2.push_back(temp1.at(th1));
+
+	if(temp1.at(th1-1)=='*' && temp1.at(th1) == '/') {WR=true; mymycount--;}   ///// *2
+
+	if(mymycount<0)  {controlerrorprint2("CONTROL FILE","","","There is a '*/' statement without a preceding\nand matching '/*' statement! ",""); return -1;}
+
+    }
+
+    temp2.push_back(' ');   WR=true;
+
+    for(int th2=0; th2<temp2.size()-1; th2++)
+    {
+	// this for loop should get rid of any remaining lines that begin with double slash //
+	// or get rid of the end of any lines that have // ends to them
+
+	char q1=temp2.at(th2);
+
+	if(q1=='/' && temp2.at(th2+1)=='/') WR=false;
+
+	if(WR) temp3.push_back(q1);
+
+	if(q1=='\n' || q1=='\r') WR=true;
+    }
+
+
+    // re-sorts information into "word size" string blocks
+    for(int th3=0; th3<temp3.size(); th3++)
+    {
+	c1=temp3.at(th3);
+	//  again this is to keep backward compatibility with all my old control files
+	if(AinB(c1," \n\r\t")) {if(s!="") {if(s=="[basefreq]") sv.push_back("[statefreq]"); else sv.push_back(s);} s="";}
+	else{s+=c1;}
+    }
+    sv.push_back(s);
+
+
+
+    // archaic little function to put "[user]" back in user-defined tree code -----> easier than re-writing the whole of the dealwithtrees function.
+    // BUT it doesn't put it back in if it is already there! ---> that means I can use my mountaind of old "validation" control files without having to amend them.
+
+    bool weareonbaby=false;
+
+    for(int sd=0; sd<sv.size()-1; sd++)
+    {
+	string sq1=sv.at(sd), sq2=sv.at(sd+1);
+	if(sq1=="[TYPE]" || sq1=="[SETTINGS]" || sq1=="[MODEL]" || sq1=="[SITES]" || sq1=="[BRANCHES]" || sq1=="[PARTITIONS]" || sq1=="[EVOLVE]" || sq1== "[BRANCHES*]") weareonbaby=false;
+	if(sq1=="[TREE]") weareonbaby=true;
+
+	if(weareonbaby && sq2[0]=='(')
+	{
+	    if(sq1 != "[user]" )  {sv.insert(sv.begin()+sd+1,"[user]"); sd++;}
+	    weareonbaby=false;
 	}
 
-	temp2.push_back(' ');   WR=true;
-
-	for(int th2=0; th2<temp2.size()-1; th2++)
-	{
-		// this for loop should get rid of any remaining lines that begin with double slash //
-		// or get rid of the end of any lines that have // ends to them
-
-		char q1=temp2.at(th2);
-
-		if(q1=='/' && temp2.at(th2+1)=='/') WR=false;
-
-		if(WR) temp3.push_back(q1);
-
-		if(q1=='\n' || q1=='\r') WR=true;
-	}
-
-
-	// re-sorts information into "word size" string blocks
-	for(int th3=0; th3<temp3.size(); th3++)
-	{
-		c1=temp3.at(th3);
-		                                     //  again this is to keep backward compatibility with all my old control files
-		if(AinB(c1," \n\r\t")) {if(s!="") {if(s=="[basefreq]") sv.push_back("[statefreq]"); else sv.push_back(s);} s="";}
-		else{s+=c1;}
-	}
-	sv.push_back(s);
+    }
 
 
 
-	// archaic little function to put "[user]" back in user-defined tree code -----> easier than re-writing the whole of the dealwithtrees function.
-	// BUT it doesn't put it back in if it is already there! ---> that means I can use my mountaind of old "validation" control files without having to amend them.
+    // archaic little function to put "M3" back in codon model code -----> easier than re-writing the whole of the type 3 [submodel] command in the dealwithmodel function.
+    // BUT it doesn't put it back in if it is already there! ---> that means I can use my mountaind of old "validation" control files without having to amend them.
 
+    // CSW - model_type is used before set
+    if (model_type==3)
+    {
 	bool weareonbaby=false;
 
 	for(int sd=0; sd<sv.size()-1; sd++)
 	{
-		string sq1=sv.at(sd), sq2=sv.at(sd+1);
-		if(sq1=="[TYPE]" || sq1=="[SETTINGS]" || sq1=="[MODEL]" || sq1=="[SITES]" || sq1=="[BRANCHES]" || sq1=="[PARTITIONS]" || sq1=="[EVOLVE]" || sq1== "[BRANCHES*]") weareonbaby=false;
-		if(sq1=="[TREE]") weareonbaby=true;
+	    string sq1=sv.at(sd), sq2=sv.at(sd+1);
+	    if(sq1=="[submodel]") weareonbaby=true;
+	    else if(sq1[0]=='[') weareonbaby=false;
 
-		if(weareonbaby && sq2[0]=='(')
-		{
-			if(sq1 != "[user]" )  {sv.insert(sv.begin()+sd+1,"[user]"); sd++;}
-			weareonbaby=false;
-		}
+	    if(weareonbaby && sq2[0]=='(')
+	    {
+		if(sq1 != "M3" && sq1 != "M2" && sq1 != "M1" && sq1 != "M0" && sq1 != "ECMrest" && sq1 != "ECMunrest")  {sv.insert(sv.begin()+sd+1,"M3"); sd++;}
+		weareonbaby=false;
+	    }
 
 	}
 
+    }
 
 
-	// archaic little function to put "M3" back in codon model code -----> easier than re-writing the whole of the type 3 [submodel] command in the dealwithmodel function.
-	// BUT it doesn't put it back in if it is already there! ---> that means I can use my mountaind of old "validation" control files without having to amend them.
+    bool settingsblock = false,
+	modelblock = false,
+	sitesblock = false,
+	branchesblock = false,
+	partitionsblock = false,
+	evolveblock = false,
+	doneanymodelsyet = false;
+    
+    string lastbit;
+    vector<string> block;
+    int well=0;
 
-	if(type==3)
+    if (sv.at(0)!="[TYPE]") {
+	controlerrorprint2("CONTROL FILE","","","First entry in control file must be a [TYPE] command.","");
+	return -1;
+    }
+    else if(sv.at(1)=="NUCLEOTIDE")		model_type = nucleotide;
+    else if(sv.at(1)=="AMINOACID")		model_type = aminoacid;
+    else if(sv.at(1)=="CODON")			model_type = codon;
+    else {
+	isthereanerror=-1;
+ 	controlerrorprint2("[TYPE]","","","First value for [TYPE] command must be NUCLEOTIDE, AMINOACID, or CODON","");
+	return -1;
+    }
+
+    //this loop will go through and change model names (new system. e.g "HKY") to numbers (old system, e.g. "3") but will ignore old system if used.
+
+    string codonmodelnames[16]={"M0","M1","M2","M3","M4xxx","M5xxx","M6xxx","M7xxx","M8xxx","M9xxx","M10xxx","M11xxx","M12xxx","M13xxx","ECMrest","ECMunrest"};
+
+    string nucleotidemodelnames[17]={"JC","F81","K80","HKY","TrNef","TrN","K81","K81uf","TIMef","TIM","TVMef","TVM","SYM","GTR","F84ef","F84","UNREST"};
+
+    string aminoacidmodelnames[17]={"Poisson","JTT","JTT-dcmut","Dayhoff","Dayhoff-dcmut","WAG","mtMAM","mtART","mtREV","rtREV","cpREV","Vt","Blosum","LG","HIVb","HIVw","USER"};
+
+    string option3="M0, M1, M2, M3, ECMrest, ECMunrest.";
+
+    string option1="JC, F81, K80, HKY, TrNef, TrN, K81, K81uf, TIMef,\nTIM, TVMef, TVM, SYM, GTR, F84ef, F84, UNREST.";
+
+    string option2="Poisson, JTT, JTT-dcmut, Dayhoff, Dayhoff-dcmut, WAG, mtMAM,\nmtART, mtREV, rtREV, cpREV, Vt, Blosum, LG, HIVb, HIVw, USER.";
+
+
+    vector<string> replacenames;   string myname, mybit=sv.at(1), optionstring;
+
+    switch (model_type) {
+    case codon: 
+	for (int pg=0; pg<16; pg++)
+	    replacenames.push_back(codonmodelnames[pg]);
+	optionstring = option3;
+	break;
+    case aminoacid:
+	for (int pg=0; pg<17; pg++)
+	    replacenames.push_back(aminoacidmodelnames[pg]);
+	optionstring=option2;
+	break;
+    case nucleotide:
+	for (int pg=0; pg<17; pg++)
+	    replacenames.push_back(nucleotidemodelnames[pg]);
+	optionstring=option1;
+    }
+
+    for(int qw=1; qw<sv.size(); qw++)
+    {
+	string test=sv.at(qw), oldtest=sv.at(qw-1);
+
+	if(oldtest=="[MODEL]") myname=test;
+
+	if(oldtest=="[submodel]")
 	{
-		bool weareonbaby=false;
+	    if(allAinB(test,"0123456789.")) continue;
 
-		for(int sd=0; sd<sv.size()-1; sd++)
-		{
-			string sq1=sv.at(sd), sq2=sv.at(sd+1);
-			if(sq1=="[submodel]") weareonbaby=true;
-			else if(sq1[0]=='[') weareonbaby=false;
+	    bool error=true;
+	    stringstream sss; string ss;
+	    for(int pg=0; pg<replacenames.size(); pg++) if(replacenames.at(pg)==test) {sss<<pg; ss=sss.str(); sv.at(qw)=ss; error=false; break;}
 
-			if(weareonbaby && sq2[0]=='(')
-			{
-				if(sq1 != "M3" && sq1 != "M2" && sq1 != "M1" && sq1 != "M0" && sq1 != "ECMrest" && sq1 != "ECMunrest")  {sv.insert(sv.begin()+sd+1,"M3"); sd++;}
-				weareonbaby=false;
-			}
+	    if (model_type == aminoacid && error) {
+		ifstream ig1; ig1.open(test.c_str());
 
+		if (!(ig1.good())) {
+		    controlerrorprint2("[MODEL]", myname, "[submodel]",
+				       test+"\nis not a model name or number and no file of this name exists.\nFor protein models, the entry after a [submodel] command must be\nan integer, model name or a filename.","");
+		    if(breakonerror)
+			return -1;
 		}
+		else {
+		    error=false;
+		}
+	    }
+
+	    if(error)
+	    {
+		string mystring="\nThere is no "+mybit+" substitution model named: "+test+".\n\nYour options are:\n\n"+optionstring+"\n\nor the numerical counterparts. Please consult manual.";
+		if(model_type == aminoacid) mystring+="\nThere is also no file named "+mybit+" in the INDELible directory.";
+		controlerrorprint2("[MODEL]",myname,"[submodel]",mystring,"");
+		return -1;
+	    }
 
 	}
-
-
-		bool settingsblock,modelblock,sitesblock,branchesblock,partitionsblock,evolveblock,doneanymodelsyet;
-		settingsblock=modelblock=sitesblock=branchesblock=partitionsblock=evolveblock=doneanymodelsyet=false;
-
-		string lastbit;
-		vector<string> block;
-		int well=0;
-
-		if(sv.at(0)!="[TYPE]") { controlerrorprint2("CONTROL FILE","","","First entry in control file must be a [TYPE] command.",""); return -1;}
-		else if(sv.at(1)=="NUCLEOTIDE")		type=1;
-		else if(sv.at(1)=="AMINOACID")		type=2;
-		else if(sv.at(1)=="CODON")			type=3;
-		else {isthereanerror=-1; 	controlerrorprint2("[TYPE]","","","First value for [TYPE] command must be NUCLEOTIDE, AMINOACID, or CODON",""); return -1;}
-
-
-
-
-	//this loop will go through and change model names (new system. e.g "HKY") to numbers (old system, e.g. "3") but will ignore old system if used.
-
-	string codonmodelnames[16]={"M0","M1","M2","M3","M4xxx","M5xxx","M6xxx","M7xxx","M8xxx","M9xxx","M10xxx","M11xxx","M12xxx","M13xxx","ECMrest","ECMunrest"};
-
-	string nucleotidemodelnames[17]={"JC","F81","K80","HKY","TrNef","TrN","K81","K81uf","TIMef","TIM","TVMef","TVM","SYM","GTR","F84ef","F84","UNREST"};
-
-	string aminoacidmodelnames[17]={"Poisson","JTT","JTT-dcmut","Dayhoff","Dayhoff-dcmut","WAG","mtMAM","mtART","mtREV","rtREV","cpREV","Vt","Blosum","LG","HIVb","HIVw","USER"};
-
-	string option3="M0, M1, M2, M3, ECMrest, ECMunrest.";
-
-	string option1="JC, F81, K80, HKY, TrNef, TrN, K81, K81uf, TIMef,\nTIM, TVMef, TVM, SYM, GTR, F84ef, F84, UNREST.";
-
-	string option2="Poisson, JTT, JTT-dcmut, Dayhoff, Dayhoff-dcmut, WAG, mtMAM,\nmtART, mtREV, rtREV, cpREV, Vt, Blosum, LG, HIVb, HIVw, USER.";
-
-
-	vector<string> replacenames;   string myname, mybit=sv.at(1), optionstring;
-
-	if(type==3)			{for(int pg=0; pg<16; pg++) replacenames.push_back(codonmodelnames[pg]);       optionstring=option3;}
-	else if(type==2)	{for(int pg=0; pg<17; pg++) replacenames.push_back(aminoacidmodelnames[pg]);   optionstring=option2;}
-	else if(type==1)	{for(int pg=0; pg<17; pg++) replacenames.push_back(nucleotidemodelnames[pg]);  optionstring=option1;}
-
-	for(int qw=1; qw<sv.size(); qw++)
-	{
-		string test=sv.at(qw), oldtest=sv.at(qw-1);
-
-		if(oldtest=="[MODEL]") myname=test;
-
-		if(oldtest=="[submodel]")
-		{
-			if(allAinB(test,"0123456789.")) continue;
-
-			bool error=true;
-			stringstream sss; string ss;
-			for(int pg=0; pg<replacenames.size(); pg++) if(replacenames.at(pg)==test) {sss<<pg; ss=sss.str(); sv.at(qw)=ss; error=false; break;}
-
-			if(type==2 && error)
-			{
-				ifstream ig1; ig1.open(test.c_str());
-
-				if(!(ig1.good())) {controlerrorprint2("[MODEL]", myname, "[submodel]", test+"\nis not a model name or number and no file of this name exists.\nFor protein models, the entry after a [submodel] command must be\nan integer, model name or a filename.",""); {if(breakonerror) return -1;} }
-				else error=false;
-
-
-			}
-
-			if(error)
-			{
-				string mystring="\nThere is no "+mybit+" substitution model named: "+test+".\n\nYour options are:\n\n"+optionstring+"\n\nor the numerical counterparts. Please consult manual.";
-				if(type==2) mystring+="\nThere is also no file named "+mybit+" in the INDELible directory.";
-				controlerrorprint2("[MODEL]",myname,"[submodel]",mystring,"");
-				return -1;
-			}
-
-		}
-	}
+    }
 /*
-		string blah=sv.back(),blah2;
-		if(blah.size()!=1)
-		{
-			//to prevent parsing error if there is no space, horizontal tab or new line after last entry in control file.
-			for(int ghg=0; ghg<blah.size()-1; ghg++) blah2+=blah[ghg];
+  string blah=sv.back(),blah2;
+  if(blah.size()!=1)
+  {
+  //to prevent parsing error if there is no space, horizontal tab or new line after last entry in control file.
+  for(int ghg=0; ghg<blah.size()-1; ghg++) blah2+=blah[ghg];
 
-			sv.back()=blah2; sv.push_back("\n");
-		}
+  sv.back()=blah2; sv.push_back("\n");
+  }
 */
 
-		// checks which algorithm people want to use
-		if(sv.at(2)=="1") oldmethod=false;		//old model
-		else if(sv.at(2)=="2") oldmethod=true; //new model
+    // checks which algorithm people want to use
+    if(sv.at(2)=="1") oldmethod=false;		//old model
+    else if(sv.at(2)=="2") oldmethod=true; //new model
 
-		else {isthereanerror=-1; 	controlerrorprint2("[TYPE]","","","Second value for [TYPE] command must 1 or 2 for choice of algorithm",""); return -1;}
-
-
-		int mytype=-1;
-
-		vector<string> rough, settingsV, evolveV;
-		vector<vector<string> > modelsV, sitesV, branchesV, treesV, partitionsV;
-		vector<bool> branchesCV;
+    else {isthereanerror=-1; 	controlerrorprint2("[TYPE]","","","Second value for [TYPE] command must 1 or 2 for choice of algorithm",""); return -1;}
 
 
-	//	string thisbit=sv.at(2);
-		string thisbit;
-		string MAIN[8]={"[SETTINGS]","[MODEL]","[SITES]","[BRANCHES]","[TREE]","[PARTITIONS]","[BRANCHES*]","[EVOLVE]"};
+    int mytype=-1;
 
-		bool doit=true;
-		int numberofsettingsblocks=0;
-		int numberofmodelsblocks=0;
-
-	/*
-		if(well!=-1)
-		{
-			if(thisbit=="[SETTINGS]") mytype=0;
-			else if (thisbit=="[MODEL]") mytype=1;
-			else cout<<"ERROR: After the [TYPE] setting should come a [SETTINGS] or [MODEL] block."<<endl;
-		}
-
-		if(mytype==0 || mytype==1)
-	*/
-		if(sv.at(3)!="[MODEL]" && sv.at(3)!="[SETTINGS]") {isthereanerror=-1;	controlerrorprint2("[TYPE]","","","There is some text after the [TYPE] command before the first block.\n Is this a mistake? Was expecting a [MODEL] or [SETTINGS] block",sv.at(3)); return -1;}
+    vector<string> rough, settingsV, evolveV;
+    vector<vector<string> > modelsV, sitesV, branchesV, treesV, partitionsV;
+    vector<bool> branchesCV;
 
 
-		if(isthereanerror!=-1) for(int i=3; i<sv.size(); i++)
-		{
-			// if there is no error then this function collects together blocks of same type etc.
+    //	string thisbit=sv.at(2);
+    string thisbit;
+    string MAIN[8]={"[SETTINGS]","[MODEL]","[SITES]","[BRANCHES]","[TREE]","[PARTITIONS]","[BRANCHES*]","[EVOLVE]"};
 
-			thisbit=sv.at(i);
+    bool doit=true;
+    int numberofsettingsblocks=0;
+    int numberofmodelsblocks=0;
 
-			doit=true;
+    /*
+      if(well!=-1)
+      {
+      if(thisbit=="[SETTINGS]") mytype=0;
+      else if (thisbit=="[MODEL]") mytype=1;
+      else cout<<"ERROR: After the [TYPE] setting should come a [SETTINGS] or [MODEL] block."<<endl;
+      }
 
-			for(int j=0; j<8; j++)
-			{
-				if(thisbit==MAIN[j])
-				{
-
-					if(mytype==0)		{settingsV=rough; numberofsettingsblocks++;}
-	  				else if(mytype==1)	{modelsV.push_back(rough); numberofmodelsblocks++;}
-					else if(mytype==2)	sitesV.push_back(rough);
-					else if(mytype==3)	{branchesV.push_back(rough); branchesCV.push_back(true);}
-					else if(mytype==4)	treesV.push_back(rough);
-					else if(mytype==5)	partitionsV.push_back(rough);
-					else if(mytype==6)	{branchesV.push_back(rough); branchesCV.push_back(false);}
-
-					mytype=j;
-					rough.clear();
-					doit=false;
-					break;
-				}
+      if(mytype==0 || mytype==1)
+    */
+    if(sv.at(3)!="[MODEL]" && sv.at(3)!="[SETTINGS]") {isthereanerror=-1;	controlerrorprint2("[TYPE]","","","There is some text after the [TYPE] command before the first block.\n Is this a mistake? Was expecting a [MODEL] or [SETTINGS] block",sv.at(3)); return -1;}
 
 
-			}
+    if(isthereanerror!=-1) for(int i=3; i<sv.size(); i++)
+			   {
+			       // if there is no error then this function collects together blocks of same type etc.
 
-			if(doit) rough.push_back(thisbit);
-		}
+			       thisbit=sv.at(i);
 
-		if(well!=-1)
-		{
-			// final error checking
+			       doit=true;
 
-			if(numberofsettingsblocks>1) {controlerrorprint2("[SETTINGS]","","","ERROR: There was more than one [SETTINGS] block.","");   return -1;}
-			if(numberofmodelsblocks==0) {controlerrorprint2("[MODEL]","","","ERROR: No [MODEL] blocks were specified.","");   return -1;}
+			       for(int j=0; j<8; j++)
+			       {
+				   if(thisbit==MAIN[j])
+				   {
+
+				       if(mytype==0)		{settingsV=rough; numberofsettingsblocks++;}
+				       else if(mytype==1)	{modelsV.push_back(rough); numberofmodelsblocks++;}
+				       else if(mytype==2)	sitesV.push_back(rough);
+				       else if(mytype==3)	{branchesV.push_back(rough); branchesCV.push_back(true);}
+				       else if(mytype==4)	treesV.push_back(rough);
+				       else if(mytype==5)	partitionsV.push_back(rough);
+				       else if(mytype==6)	{branchesV.push_back(rough); branchesCV.push_back(false);}
+
+				       mytype=j;
+				       rough.clear();
+				       doit=false;
+				       break;
+				   }
 
 
-			if(mytype!=7) {controlerrorprint2("[EVOLVE]","","","ERROR: Control file should end with an [EVOLVE] block","");    return -1;}
-			else evolveV=rough;
-			rough.clear();
-			sv.clear();
-		}
+			       }
+
+			       if(doit) rough.push_back(thisbit);
+			   }
+
+    if(well!=-1)
+    {
+	// final error checking
+
+	if(numberofsettingsblocks>1) {controlerrorprint2("[SETTINGS]","","","ERROR: There was more than one [SETTINGS] block.","");   return -1;}
+	if(numberofmodelsblocks==0) {controlerrorprint2("[MODEL]","","","ERROR: No [MODEL] blocks were specified.","");   return -1;}
 
 
-	int p; //,q;
+	if(mytype!=7) {controlerrorprint2("[EVOLVE]","","","ERROR: Control file should end with an [EVOLVE] block","");    return -1;}
+	else evolveV=rough;
+	rough.clear();
+	sv.clear();
+    }
 
-	// settings blocks first!
-	if(isthereanerror!=-1 && numberofsettingsblocks>0) dealwithsettings(settingsV);
 
-	// runs through commands in correct order, and skips if an error occurs anywhere
-	for(p=0; p<modelsV.size();     p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithmodel(modelsV.at(p)); }
-	for(p=0; p<branchesV.size();   p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithbranches(branchesV.at(p), branchesCV.at(p)); }
-	for(p=0; p<sitesV.size();      p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithsites(sitesV.at(p)); }
-	for(p=0; p<treesV.size();      p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithtrees(treesV.at(p)); }
-	for(p=0; p<partitionsV.size(); p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithpartitions(partitionsV.at(p)); }
-	if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithevolve(evolveV);
+    int p; //,q;
+
+    // settings blocks first!
+    if(isthereanerror!=-1 && numberofsettingsblocks>0) dealwithsettings(settingsV);
+
+    // runs through commands in correct order, and skips if an error occurs anywhere
+    for(p=0; p<modelsV.size();     p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithmodel(modelsV.at(p)); }
+    for(p=0; p<branchesV.size();   p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithbranches(branchesV.at(p), branchesCV.at(p)); }
+    for(p=0; p<sitesV.size();      p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithsites(sitesV.at(p)); }
+    for(p=0; p<treesV.size();      p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithtrees(treesV.at(p)); }
+    for(p=0; p<partitionsV.size(); p++) { if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithpartitions(partitionsV.at(p)); }
+    if(isthereanerror==-1 ) return -1; else isthereanerror=dealwithevolve(evolveV);
 
 
 
@@ -3942,58 +3948,58 @@ int docontrol()
 
 //	cout<<"HERE"<<endl;
 /*
-	// for testing model copying and assigning etc
+// for testing model copying and assigning etc
 
-	for(p=0; p<totalmodels.size(); p++)
-	{
-		model m=totalmodels.at(p);
-		cout<<endl<<"MODEL "<<m.name<<endl<<endl;
+for(p=0; p<totalmodels.size(); p++)
+{
+model m=totalmodels.at(p);
+cout<<endl<<"MODEL "<<m.name<<endl<<endl;
 
-		cout<<m.modelnumber<<" modelnumber"<<endl;
-		cout<<m.geneticcode<<" geneticcode"<<endl;
-		cout<<m.indeltosub<<" indeltosub"<<endl;
-		cout<<m.instodel<<" instodel"<<endl;
-		cout<<m.inlength<<" inlength"<<endl;
-		cout<<m.dellength<<" dellength"<<endl;
+cout<<m.modelnumber<<" modelnumber"<<endl;
+cout<<m.geneticcode<<" geneticcode"<<endl;
+cout<<m.indeltosub<<" indeltosub"<<endl;
+cout<<m.instodel<<" instodel"<<endl;
+cout<<m.inlength<<" inlength"<<endl;
+cout<<m.dellength<<" dellength"<<endl;
 
-		cout<<m.alpha<<" alpha"<<endl;
-		cout<<m.pinv<<" pinv"<<endl;
-		cout<<m.ngamcat<<" ngamcat"<<endl;
+cout<<m.alpha<<" alpha"<<endl;
+cout<<m.pinv<<" pinv"<<endl;
+cout<<m.ngamcat<<" ngamcat"<<endl;
 
-		vector<double> bits; int gg;
-		double sum=0;
+vector<double> bits; int gg;
+double sum=0;
 
-		sum=0; bits=m.rootbasefreqs; cout<<"rootbasefreqs ";
-		for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//<<endl;}
-		cout<<sum<<endl;
-		sum=0; bits=m.insertfreqs; cout<<"insertfreqs ";
-		for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//endl;}
-		cout<<sum<<endl;
-		sum=0; bits=m.basefreqs; cout<<"basefreqs ";
-		for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//endl;}
-		cout<<sum<<endl;
+sum=0; bits=m.rootbasefreqs; cout<<"rootbasefreqs ";
+for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//<<endl;}
+cout<<sum<<endl;
+sum=0; bits=m.insertfreqs; cout<<"insertfreqs ";
+for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//endl;}
+cout<<sum<<endl;
+sum=0; bits=m.basefreqs; cout<<"basefreqs ";
+for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//endl;}
+cout<<sum<<endl;
 
-	}
+}
 */
 
-	/*
-	// for printing of information
+    /*
+    // for printing of information
 
-	for(q=0; q<settingsV.size(); q++)	cout<<"settings "<<q<<" "<<settingsV.at(q)<<endl;
+    for(q=0; q<settingsV.size(); q++)	cout<<"settings "<<q<<" "<<settingsV.at(q)<<endl;
 
-	for(p=0; p<modelsV.size(); p++)		for(q=0; q<(modelsV.at(p)).size(); q++) cout<<"models "<<p<<" "<<q<<" "<<(modelsV.at(p)).at(q)<<endl;
+    for(p=0; p<modelsV.size(); p++)		for(q=0; q<(modelsV.at(p)).size(); q++) cout<<"models "<<p<<" "<<q<<" "<<(modelsV.at(p)).at(q)<<endl;
 
-	for(p=0; p<sitesV.size(); p++)		for(q=0; q<(sitesV.at(p)).size(); q++) cout<<"sites "<<p<<" "<<q<<" "<<(sitesV.at(p)).at(q)<<endl;
+    for(p=0; p<sitesV.size(); p++)		for(q=0; q<(sitesV.at(p)).size(); q++) cout<<"sites "<<p<<" "<<q<<" "<<(sitesV.at(p)).at(q)<<endl;
 
-	for(p=0; p<branchesV.size(); p++)	for(q=0; q<(branchesV.at(p)).size(); q++) cout<<"branches "<<p<<" "<<q<<" "<<(branchesV.at(p)).at(q)<<endl;
+    for(p=0; p<branchesV.size(); p++)	for(q=0; q<(branchesV.at(p)).size(); q++) cout<<"branches "<<p<<" "<<q<<" "<<(branchesV.at(p)).at(q)<<endl;
 
-	for(p=0; p<partitionsV.size(); p++)	for(q=0; q<(partitionsV.at(p)).size(); q++) cout<<"partitions "<<p<<" "<<q<<" "<<(partitionsV.at(p)).at(q)<<endl;
+    for(p=0; p<partitionsV.size(); p++)	for(q=0; q<(partitionsV.at(p)).size(); q++) cout<<"partitions "<<p<<" "<<q<<" "<<(partitionsV.at(p)).at(q)<<endl;
 
-	for(q=0; q<evolveV.size(); q++)		cout<<"evolve "<<q<<" "<<evolveV.at(q)<<endl;
+    for(q=0; q<evolveV.size(); q++)		cout<<"evolve "<<q<<" "<<evolveV.at(q)<<endl;
     */
 
-	printf("\n");
-  return isthereanerror;
+    printf("\n");
+    return isthereanerror;
 }
 
 
