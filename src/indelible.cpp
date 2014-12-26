@@ -1055,34 +1055,12 @@ void makeseq(int length2, vector<int>& myseq)
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-vector<double> getbasefreqs(vector<int>& seq)
-{
-   // calculates the base frequencies of a given sequence in integer form
-   vector<double> basefreqs;
-   int            mymax = 4;
-   if (model_type == aminoacid) {
-      mymax = 20;
-   }
-   else if (model_type == codon) {
-      mymax = 64;
-   }
-
-   basefreqs.assign(mymax, 0);
-   for (int y2 = 1; y2 < seq.size(); y2++) {
-      basefreqs.at(seq.at(y2))++;
-   }
-   for (int y3 = 0; y3 < mymax; y3++) {
-      basefreqs.at(y3) /= seq.size();
-   }
-
-   return basefreqs;
-}
+/* definition of vector<double> getbasefreqs(vector<int>& seq)
+   removed.  Doesn't seem to be called from anywhere.
+*/
 
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void fromprintseq(vector<string>& seq, vector<int>& myseq)
 {

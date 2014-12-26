@@ -33,7 +33,6 @@
 #include "randoms.h"
 
 MTRand mtrand1;
-MTRand mtrand2;
 
 // needed for time monitoring
 

@@ -7,7 +7,6 @@ extern int oldrandnegbin(int, double);
 
 class MTRand;   // forward declaration
 extern MTRand       mtrand1;
-extern MTRand       mtrand2;
 extern unsigned int imax;
 extern int          idum;
 extern double       Zq1, Zq2, ZHx0, Zs, ZHimax;

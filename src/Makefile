@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS = -g
+CXXFLAGS = -g  -std=c++11
 LDFLAGS=-lstdc++ -lm
 
 indelible: control.cpp  indelible.cpp  models.cpp  paml.cpp  randoms.cpp # M5-13.cpp

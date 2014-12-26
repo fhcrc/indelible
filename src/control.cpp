@@ -223,18 +223,20 @@ void controlerrorprint2(string blocktype, string blockname, string commandname, 
 }
 
 
-int checkthere(string mytest, vector<string> mylist)
+/* 
+ * Return index of matching string in a vector of strings,
+ * -1 otherwise.
+ */
+int checkthere(string item, vector<string> mylist)
 {
-   // returns -1 if mytest is not in mylist otherwise returns position in list
-   int blah = -1;
+    auto index = -1;
+    std::vector<string>::iterator p;
 
-   for (int h1 = 0; h1 < mylist.size(); h1++) {
-      if (mylist.at(h1) == mytest) {
-         blah = h1;
-         break;
-      }
-   }
-   return blah;
+    p = std::find(mylist.begin(), mylist.end(), item);
+    if (p != mylist.end())
+	index = p - mylist.begin();
+
+    return(index);
 }
 
 
@@ -995,8 +997,32 @@ int dealwithsettings(vector<string>& block)
    }
 
    string         s1, s2;
-   string         scommands[15] = { "[printindelstatistics]", "[ancestralprint]", "[phylipextension]", "[nexusextension]", "[fastaextension]", "[output]", "[randomseed]", "[printrates]", "[insertaslowercase]", "[printcodonsasaminoacids]", "[fileperrep]", "[markdeletedinsertions]", "[fixproportions]", "[printallrates]", "[globalseed]" };
+   string         scommands[15] = { "[printindelstatistics]", "[ancestralprint]", "[phylipextension]", "[nexusextension]", "[fastaextension]", "[output]", "[randomseed]", "[printrates]", 
+				    "[insertaslowercase]", "[printcodonsasaminoacids]", "[fileperrep]", "[markdeletedinsertions]", "[fixproportions]", "[printallrates]", "[globalseed]" };
    vector<string> commands(scommands, scommands + 15);
+
+
+   enum class Command { 
+       PRINTINDELSTATS, ANCESTRALPRINT, PHYLIP_EXT, NEXUS_EXT, FASTA_EXT, OUTPUT, 
+	   SEED, PRINT_RATES, INSERT_LC, PRINT_AA, FILEPER, MARK_DEL_INS, FIXPROP, 
+	   PRINT_ALL_RATES, BLOBALSEED};
+
+   std::map<const string, Command> CmdMap = {{"[printindelstatistics]", Command::PRINTINDELSTATS}, 
+					     {"[ancestralprint]", Command::ANCESTRALPRINT},
+					     {"[phylipextension]", Command::PHYLIP_EXT},
+					     {"[nexusextension]", Command::NEXUS_EXT},
+					     {"[fastaextension]", Command::FASTA_EXT},
+					     {"[output]", Command::OUTPUT},
+					     {"[randomseed]", Command::SEED},
+					     {"[printrates]", Command::PRINT_RATES},
+					     {"[insertaslowercase]", Command::INSERT_LC},
+					     {"[printcodonsasaminoacids]", Command::PRINT_AA},
+					     {"[fileperrep]", Command::FILEPER},
+					     {"[markdeletedinsertions]", Command::MARK_DEL_INS},
+					     {"[fixproportions]", Command::FIXPROP},
+					     {"[printallrates]", Command::PRINT_ALL_RATES},
+					     {"[globalseed]", Command::BLOBALSEED}};
+
 
    int idum2;
    int commanderror;
@@ -1024,7 +1050,12 @@ int dealwithsettings(vector<string>& block)
          }
       }
       else{
-         commanderror = checkthere(s1, commands);
+	  std::map<const string, Command>::iterator it;
+	  it = CmdMap.find(s1);
+	  
+	  Command tmp = it->second;
+	  
+	  commanderror = checkthere(s1, commands);
       }
 
       if (commanderror == -1) {
