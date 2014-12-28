@@ -383,7 +383,6 @@ public:
 };
 
 ////////////////////////////////////////
-string               masterfilename = "control.txt";
 vector<model>        mymodels;
 vector<int>          siteclasses;
 vector<vector<int> > siteclassmodels;
@@ -398,7 +397,6 @@ vector<int>    siteclassvec;
 int  mypos;
 bool weareon;
 
-//ofstream hout("h.txt");
 #ifdef checksitesclass
 ofstream gout("g.txt");
 #endif
@@ -1019,6 +1017,9 @@ void makeseq2(int length, vector<site>& myseq, double& sdiff, double timeleft)
 }
 
 
+// Create a random sequence according to the base frequency distribution.
+// Operates on both model base frequencies or branch base frequencies, whatever that means... -csw
+
 void makeseq(int length2, vector<int>& myseq)
 {
    // this assigns to "myseq" a sequence of length "length" subject to the base frequencies in "basefreqs" in integer form
@@ -1026,7 +1027,6 @@ void makeseq(int length2, vector<int>& myseq)
    int length = length2 - 1;
 
    vector<double> boundaries2;
-//	cout<<boundaries2.size()<<endl;
    if (isitbranches) {
       boundaries2 = makecumfreqs((*b).rootbasefreqs);
    }
@@ -1034,24 +1034,17 @@ void makeseq(int length2, vector<int>& myseq)
       boundaries2 = makecumfreqs((*m).rootbasefreqs);
    }
 
-//	cout<<boundaries2.size()<<endl;
    myseq.push_back(-1);
-//	cout<<"LLL "<<length2<<" "<<length<<endl;
    for (int yh2 = 0; yh2 < length; yh2++) {
       myrand = mtrand1();
 
       for (int yh3 = 0; yh3 < boundaries2.size(); yh3++) {
-         //cout<<"X "<<boundaries2.at(yh3)<<endl;
          if (myrand <= boundaries2.at(yh3)) {
-            //cout<<boundaries2.at(yh3)<<endl;
             myseq.push_back(yh3);
             break;
          }
       }
    }
-
-
-//	cout<<"WOW "<<myseq.size()<<endl;
 }
 
 
@@ -6097,8 +6090,7 @@ int check_indeldistributions()
    y << "0.000000000462" << endl << "0.000000000445" << endl << "0.000000000428" << endl << "0.000000000412" << endl << "0.000000000397" << endl << "0.000000000381" << endl << "0.000000000366" << endl << "0.000000000352" << endl << "0.000000000338" << endl << "0.000000000324" << endl << "0.00000000031" << endl << "0.000000000297" << endl << "0.000000000284" << endl << "0.000000000272" << endl << "0.00000000026" << endl << "0.000000000248" << endl << "0.000000000236" << endl << "0.000000000225" << endl << "0.000000000214" << endl << "0.000000000203" << endl << "0.000000000193" << endl << "0.000000000183" << endl << "0.000000000174" << endl << "0.000000000164" << endl << "0.000000000155" << endl << "0.000000000146" << endl << "0.000000000138" << endl << "0.00000000013" << endl << "0.000000000122" << endl << "0.000000000114" << endl << "0.000000000107" << endl << "0.0000000001" << endl << "0.000000000093" << endl << "0.000000000087" << endl << "0.000000000081" << endl << "0.000000000075" << endl << "0.000000000069" << endl << "0.000000000063" << endl << "0.000000000058" << endl << "0.000000000053" << endl << "0.000000000049" << endl << "0.000000000044" << endl << "0.00000000004" << endl << "0.000000000036" << endl << "0.000000000032" << endl << "0.000000000029" << endl;
    y << "0.000000000025" << endl << "0.000000000022" << endl << "0.00000000002" << endl << "0.000000000017" << endl << "0.000000000015" << endl << "0.000000000012" << endl << "0.00000000001" << endl << "0.000000000008" << endl << "0.000000000007" << endl << "0.000000000005" << endl << "0.000000000004" << endl << "0.000000000003" << endl << "0.000000000002" << endl << "0.000000000001" << endl << "0.000000000001" << endl << "0" << endl << "0" << endl << "0" << endl;
 
-   masterfilename = "controldist.txt";
-   int isthereanerror = docontrol();
+   int isthereanerror = parse_control_file("controldist.txt");
 
    if (isthereanerror == -1) {
       return -1;
@@ -6280,6 +6272,7 @@ int main(int argc, char *argv[])
    };
 
    int seed = 0;
+   string masterfilename;
 
    while ((c = getopt_long(argc, argv, "s:vh",
                            long_options, &option_index)) != -1) {
@@ -6355,7 +6348,7 @@ int main(int argc, char *argv[])
    (*LOG) << "********************************************************************************" << endl;
    cout << endl << " INDELible V" << VersionNumber << " by Will Fletcher: Simulation began at " << asctime(timeinfo) << endl << endl;
 
-   int isthereanerror = docontrol();                    // parse and process control file
+   int isthereanerror = parse_control_file(masterfilename);                    // parse and process control file
 
    if (isthereanerror == -1) { // if parsing and processing of control file returns an error then quits.
       delete results;

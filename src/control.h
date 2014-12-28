@@ -171,9 +171,14 @@ private:
 
    int checktaxaintrees(std::vector<int> posvec);
 
-
-   int makerootseqints(std::vector<int>& rootseqint, std::vector<int> rootlengths, std::string& rootseqtxt, int kk, int mbspos,
-                       std::vector<std::string> rootfilenames, std::string mbstype, std::vector<std::string> mbnames, std::vector<int> geneticcodevec);
+   int makerootseqints(std::vector<int>& rootseqint,
+		       int rootlength,
+		       const std::string& rootseqtxt,
+		       int mbspos,
+		       const std::string& rootfilename,
+		       const std::string& mbstype,
+		       const std::string& mbname,
+		       int geneticcode);
 };  // end-class partitionclass
 
 
@@ -292,4 +297,4 @@ extern std::vector<branchclass>    totalbranches;   // storage for branch classe
 
 
 extern void controlerrorprint2(std::string blocktype, std::string blockname, std::string commandname, std::string instring, std::string myline);
-extern int docontrol();
+extern int parse_control_file(const std::string& filename);

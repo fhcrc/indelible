@@ -35,6 +35,7 @@
 #include <sstream>
 #include <algorithm>
 #include <map>
+#include <cassert>
 // #include "models.cpp"
 #include "models.h"
 #include "control.h"
@@ -44,8 +45,6 @@
 using namespace std;
 
 bool controldebug = false;    //"false" will cease everything when a -1 error occurs, "true" will continue on - for debugging (but may lead to crashes)
-
-extern string masterfilename; //="control.txt";
 
 bool oldmethod;               // false for method 1, true for waiting time method
 
@@ -255,82 +254,25 @@ int checkthereN(int mytest, vector<int> mylist)
 }
 
 
-bool AinB(char testchar, string referencestring)
+bool AinB(char testchar, const string& referencestring)
 {
    // returns true if testchar is in referencestring
    // returns false if testchar is not in referencestring
-
-   bool answer1 = false;
-
-   for (int i = 0; i < referencestring.size(); i++) {
-      if (testchar == referencestring[i]) {
-         answer1 = true;
-         break;
-      }
-   }
-
-   return answer1;
+    std::size_t found = referencestring.find(testchar);
+    return(found != std::string::npos);
 }
 
 
-bool AonlyfromB(string teststring, string referencestring)
+bool allAinB(const string& teststring, const string& referencestring)
 {
-   // checks test string to make sure it is only made up of
-   // characters from referencestring. Anything else gives false.
-   // returns false if teststring contains illegal characters
-
-   bool answer;
-
-   for (int i = 0; i < teststring.size(); i++) {
-      answer = AinB(teststring[i], referencestring);
-      if (!answer) {
-         break;
-      }
-   }
-
-   return answer;
+    // checks test string to make sure it is only made up of
+    // characters from referencestring. Anything else gives false.
+    // returns false if teststring contains illegal characters
+    std::size_t found = teststring.find_first_not_of(referencestring);
+    return(found == std::string::npos);
 }
 
 
-bool allAinB(string teststring, string referencestring)
-{
-   // checks test string to make sure it is only made up of
-   // characters from referencestring. Anything else gives false.
-   // returns false if teststring contains illegal characters
-
-   bool answer;
-
-   for (int i = 0; i < teststring.size(); i++) {
-      answer = AinB(teststring[i], referencestring);
-      if (!answer) {
-         break;
-      }
-   }
-
-   return answer;
-}
-
-
-bool noneAinB(string teststring, string referencestring)
-{
-   // checks test string to make sure it is only made up of
-   // characters from referencestring. Anything else gives false.
-   // returns false if teststring contains illegal characters
-
-   bool answer;
-
-   for (int i = 0; i < teststring.size(); i++) {
-      answer = AinB(teststring[i], referencestring);
-      if (answer) {
-         break;
-      }
-   }
-
-   return !answer;
-}
-
-
-////////////////////////////////////////////////
 
 int branchclass::getrootfreqs(string& testtree2)
 {
@@ -933,7 +875,7 @@ int teststring(int lastresult, string com, vector<string>& allowed, string block
       }
    }
    else{
-      if (!AonlyfromB(com, allowedstring)) {
+      if (!allAinB(com, allowedstring)) {
          //	cout<<com<<"  "<<allowedstring<<endl;
          //		if(allowedstring!="0123456789.") myresult=lastresult;
 
@@ -2287,9 +2229,6 @@ int dealwithmodel(vector<string>& block)
                            }
                         }
 
-
-#warning "large chunk of old commented-out code deleted from here."
-
                         else if (mymodel == 5) {
                            if (nstsize == 4) {
                               if (AinB('.', tempvec.back())) {
@@ -2591,11 +2530,6 @@ int dealwithmodel(vector<string>& block)
                            }
                         }
 
-
-                        // why is this here?  it says NUCLEOTIDE - is this the same as before? - maybe just used for copying?
-                        //else if(mymodel==2  && nstsize!=2 && nstsize!=3)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as K80. \nExpecting 1 or 2 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-
-                        // cout<<"NGAMCAT "<<ngamcat<<endl;
 
                         if ((mymodel == 12) || (mymodel == 13) || (mymodel == 2)) {
                            if (params.at(1) > 1) {
@@ -4683,7 +4617,14 @@ partitionclass::partitionclass(string myname, vector<int> rootlengths, vector<st
          isitbranches.push_back(now);
       }
 
-      makerootseqints(rootseqints.at(kk), rootlengths, rootseqtxtvec.at(kk), kk, mbsposvec.at(kk), rootfilenames, mbstype, mbnames, geneticcodevec);
+      makerootseqints(rootseqints.at(kk),
+		      rootlengths.at(kk),
+		      rootseqtxtvec.at(kk),
+		      mbsposvec.at(kk),
+		      rootfilenames.at(kk),
+		      mbstype,
+		      mbnames.at(kk),
+		      geneticcodevec.at(kk));
    }
 }
 
@@ -4713,252 +4654,122 @@ int partitionclass::checktaxaintrees(vector<int> posvec)
 }
 
 
-int partitionclass::makerootseqints(vector<int>& rootseqint, vector<int> rootlengths, string& rootseqtxt, int kk, int mbspos, vector<string> rootfilenames, string mbstype, vector<string> mbnames, vector<int> geneticcodevec)
+int partitionclass::makerootseqints(vector<int>& rootseqint,
+				    int rootlength,
+				    const string& rootseqtxt,
+				    int mbspos,
+				    const string& rootfilename,
+				    const string& mbstype,
+				    const string& mbname,
+				    int geneticcode)
 {
-   int rootlength   = rootlengths.at(kk);
-   int myrootlength = rootseqtxt.size();
-   int geneticcode  = geneticcodevec.at(kk);
+    int myrootlength = rootseqtxt.size();
+    
+    if (rootseqtxt == "CREATE") {
+	// CREATION OF ROOT SEQUENCE NOW DONE IN SETUPROOT FUNCTION IN MAIN SKELETON FILE
+    }
+    else {
+	if (model_type == aminoacid) {
+	    string test = "ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
+	    if (!allAinB(rootseqtxt, test)) {
+		controlerrorprint2("[PARTITIONS]", name, "", "AMINOACID root sequence in file can only contain following letters:\nARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv", "");
+		{
+		    if (breakonerror) {
+			return -1;
+		    }
+		}
+	    }
 
-   string rootfilename = rootfilenames.at(kk);
-   string mbname       = mbnames.at(kk);
+	    int size = 20;
 
-   if (rootseqtxt == "CREATE") {
-      // CREATION OF ROOT SEQUENCE NOW DONE IN SETUPROOT FUNCTION IN MAIN SKELETON FILE
+	    for (int fd0 = 0; fd0 < myrootlength; fd0++) {
+		char c     = rootseqtxt[fd0];
+		bool error = true;
 
-      /*
-       * model* m=&(totalmodels.at(mbspos));
-       *
-       * vector<double> rootbasefreqs=(*m).rootbasefreqs;
-       * vector<double> cumfreqs; cumfreqs.push_back(rootbasefreqs.at(0));
-       * int rsize=rootbasefreqs.size();
-       *
-       * for(int gh1=1; gh1<rsize; gh1++) cumfreqs.push_back(rootbasefreqs.at(gh1)+cumfreqs.at(gh1-1));
-       *
-       * double diff=1-cumfreqs.back(); if(diff<0) diff=-diff;
-       * if(diff>0.0001) {controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR: root base freqs do not sum to 1 in partitions class.",""); {if(breakonerror) return -1;} }
-       *
-       * for(int gf=0; gf<rootlength; gf++)
-       * {
-       * double rand=mtrand1();
-       * for(int ds=0; ds<rsize; ds++) if(rand<cumfreqs.at(ds)) {rootseqint.push_back(ds); break;}
-       * }
-       *
-       * //for(int as=0; as<rootseqint.size(); as++) cout<<as<<" "<<rootseqint.at(as)<<endl; cout<<endl;
-       */
-   }
-   else{
-      if (model_type == aminoacid) {
-         string test = "ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
-         if (!allAinB(rootseqtxt, test)) {
-            controlerrorprint2("[PARTITIONS]", name, "", "AMINOACID root sequence in file can only contain following letters:\nARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv", "");
-            {
-               if (breakonerror) {
-                  return -1;
-               }
-            }
-         }
+		for (int fd1 = 0; fd1 < size; fd1++) {
+		    if ((c == test[fd1]) || (c == test[fd1 + size])) {
+			error = false;
+			rootseqint.push_back(fd1);
+			break;
+		    }
+		}
 
-         int size = 20;
-
-         /*
-          * //always equal now
-          * if(rootlength!=myrootlength)
-          * {
-          * stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
-          * stringstream rr2; rr2<<myrootlength; string r2=rr2.str();
-          * controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" amino acids.\nThe two numbers should match.  Have you made a mistake?","");
-          * {if(breakonerror) return -1;}
-          * }
-          */
-
-         for (int fd0 = 0; fd0 < myrootlength; fd0++) {
-            char c     = rootseqtxt[fd0];
-            bool error = true;
-
-            for (int fd1 = 0; fd1 < size; fd1++) {
-               if ((c == test[fd1]) || (c == test[fd1 + size])) {
-                  error = false;
-                  rootseqint.push_back(fd1);
-                  break;
-               }
-            }
-
-            if (error) {
-               controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making NUCLEOTIDE root sequence.", "");
-               {
-                  if (breakonerror) {
-                     return -1;
-                  }
-               }
-            }
-         }
-      }
-      else{
-         string test = "TCAGtcag", bit;
-         if (model_type == nucleotide) {
-            bit = "NUCLEOTIDE";
-         }
-         else{
-            bit = "CODON";
-         }
-
-         if (!allAinB(rootseqtxt, test)) {
-            controlerrorprint2("[PARTITIONS]", name, "", bit + " root sequence in file can only contain following letters:\nTCAGtcag", "");
-            {
-               if (breakonerror) {
-                  return -1;
-               }
-            }
-         }
+		if (error) {
+		    controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making NUCLEOTIDE root sequence.", "");
+		    {
+			if (breakonerror) {
+			    return -1;
+			}
+		    }
+		}
+	    }
+	}
+	else{
+	    string alphabet = "TCAGtcag";
+	    const string bit = (model_type == nucleotide) ? "NUCLEOTIDE" : "CODON";
+	    
+	    if (!allAinB(rootseqtxt, alphabet)) {
+		controlerrorprint2("[PARTITIONS]", name, "", bit + " root sequence in file can only contain following letters:\nTCAGtcag", "");
+		{
+		    if (breakonerror) {
+			return -1;
+		    }
+		}
+	    }
 
 
 
-         int size = 4;
-         if (model_type == nucleotide) {
-            /*
-             * //always equal now
-             * if(rootlength!=myrootlength)
-             * {
-             * stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
-             * stringstream rr2; rr2<<myrootlength; string r2=rr2.str();
-             * controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" nucleotide bases.\nThe two numbers should match.  Have you made a mistake?","");
-             * {if(breakonerror) return -1;}
-             * }
-             */
-            size = 4;
-            for (int fd0 = 0; fd0 < myrootlength; fd0++) {
-               //	char cc=s[fd0];
-               //	stringstream ccc; ccc<<cc; string c=ccc.str();
+	    int size = 4;
+	    if (model_type == nucleotide) {
+		// // convert string of nucleotide letters to vector of integer indicies.
+		for (string::size_type i = 0; i < rootseqtxt.size(); ++i) {
+		    size_t p = alphabet.find(toupper(rootseqtxt[i]));
+		    assert(p != string::npos);
+		    rootseqint.push_back(p);
+		}
+	    }
+	    else {
+		if (myrootlength % 3 != 0) {
+		    stringstream rd;
+		    rd << myrootlength;
+		    string rdd = rd.str();
+		    controlerrorprint2("[PARTITIONS]", name, "", "CODON root sequence length is " + rdd + " nucleotides in the file\nbut must be a multiple of 3.", "");
+		    return -1;
+		}
 
-               bool error = true;
-               char c     = rootseqtxt[fd0];
 
-               for (int fd1 = 0; fd1 < size; fd1++) {
-                  if ((c == test[fd1]) || (c == test[fd1 + size])) {
-                     error = false;
-                     rootseqint.push_back(fd1);
-                     break;
-                  }
-               }
+		vector<int> notallowed = getstops(geneticcode);
+		int notsize = notallowed.size();
 
-               if (error) {
-                  controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making " + bit + " root sequence.", "");
-                  {
-                     if (breakonerror) {
-                        return -1;
-                     }
-                  }
-               }
-            }
-         }
-         else{
-            if (myrootlength % 3 != 0) {
-               stringstream rd;
-               rd << myrootlength;
-               string rdd = rd.str();
-               controlerrorprint2("[PARTITIONS]", name, "", "CODON root sequence length is " + rdd + " nucleotides in the file\nbut must be a multiple of 3.", "");
-               {
-                  if (breakonerror) {
-                     return -1;
-                  }
-               }
-            }
+		for (string::size_type i = 0; i < rootseqtxt.size(); i += 3) {
+		    int tot = 0;
+		    for (string::size_type j = i; j < i+3; ++j) {
+			size_t p = alphabet.find(toupper(rootseqtxt[j]));
+			tot = (tot << 2) & p;
+		    }
+		    
+		    std::vector<int>::iterator it;
+		    it = find (notallowed.begin(), notallowed.end(), tot);
+		    if (it != notallowed.end()) {
+			stringstream msg;
+			msg << "Root sequence file: " << rootfilename << "\n" <<
+			    "This root sequence contains the codon " << rootseqtxt.substr(i,3) <<
+			    " at position " << i / 3 + 1 << "\nBut " << mbstype <<
+			    " class " << mbname << " uses genetic code " << geneticcode <<
+			    ".\nUnder this genetic code " << rootseqtxt.substr(i,3) <<
+			    " is a stop codon and is not allowed.";
+			controlerrorprint2("[PARTITIONS]", name, "", msg.str(), "");
+			return -1;
+		    }
+      
+		    rootseqint.push_back(tot);
+		}
+		
+	    } // end of type=3 else in type1/type3 else
+	}    // end of type1/type3 else
+    }
 
-            /*
-             * if(rootlength!=myrootlength/3)
-             * {
-             * stringstream rr1; rr1<<rootlength;   string r1=rr1.str();
-             * stringstream rr2; rr2<<myrootlength/3; string r2=rr2.str();
-             * controlerrorprint2("[PARTITIONS]", name, "", "In partitions command you specified a root length of "+r1+"\nbut in file "+rootfilename+"\nthe root sequence has a length of "+r2+" codons.\nThe two numbers should match.  Have you made a mistake?","");
-             * {if(breakonerror) return -1;}
-             * }
-             */
-
-            ///////////////////////////////////////////////////////////////////////
-
-            vector<int> notallowed = getstops(geneticcode);
-
-            /*  //OLD WAY
-             *  vector<int> notallowed;
-             *
-             *  if(geneticcode!=6 && geneticcode!=12) notallowed.push_back(10);
-             *  if(geneticcode!=6 && geneticcode!=13) notallowed.push_back(11);
-             *  if(geneticcode==0 || geneticcode==6 || geneticcode==9 || geneticcode==10 || geneticcode==13) notallowed.push_back(14);
-             *  if(geneticcode==1) {notallowed.push_back(46); notallowed.push_back(47);}
-             */
-
-            int notsize = notallowed.size();
-
-            stringstream we;
-            we << geneticcode;
-            string wer = we.str();
-
-            for (int fd0 = 2; fd0 < myrootlength; fd0 = fd0 + 3) {
-               char c1     = rootseqtxt[fd0 - 2], c2 = rootseqtxt[fd0 - 1], c3 = rootseqtxt[fd0];
-               bool error1 = true, error2 = true, error3 = true;
-               int  i1, i2, i3, tot;
-
-               for (int fd1 = 0; fd1 < size; fd1++) {
-                  if (c1 == test[fd1]) {
-                     i1     = fd1;
-                     error1 = false;
-                  }
-                  if (c1 == test[fd1 + size]) {
-                     i1     = fd1;
-                     error1 = false;
-                  }
-                  if (c2 == test[fd1]) {
-                     i2     = fd1;
-                     error2 = false;
-                  }
-                  if (c2 == test[fd1 + size]) {
-                     i2     = fd1;
-                     error2 = false;
-                  }
-                  if (c3 == test[fd1]) {
-                     i3     = fd1;
-                     error3 = false;
-                  }
-                  if (c3 == test[fd1 + size]) {
-                     i3     = fd1;
-                     error3 = false;
-                  }
-               }
-
-               if (error1 || error2 || error3) {
-                  controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making " + bit + " root sequence.", "");
-                  {
-                     if (breakonerror) {
-                        return -1;
-                     }
-                  }
-               }
-
-               tot = (i1 << 4) + (i2 << 2) + i3; //cout<<tot<<endl;
-
-               for (int fd2 = 0; fd2 < notsize; fd2++) {
-                  if (tot == notallowed.at(fd2)) {
-                     stringstream m;
-                     m << fd0 / 3 + 1;
-                     string mm = m.str();
-                     controlerrorprint2("[PARTITIONS]", name, "", "Root sequence file: " + rootfilename + "\nThis root sequence contains the codon " + c1 + c2 + c3 + " at position " + mm + "\nBut " + mbstype + " class " + mbname + " uses genetic code " + wer + ".\nUnder this genetic code " + c1 + c2 + c3 + " is a stop codon and is not allowed.", "");
-                     {
-                        if (breakonerror) {
-                           return -1;
-                        }
-                     }
-                  }
-               }
-
-               rootseqint.push_back(tot);
-            }
-
-            myrootlength /= 3;
-         } // end of type=3 else in type1/type3 else
-      }    // end of type1/type3 else
-   }
-
-   return 0;
+    return 0;
 }
 
 
@@ -4967,7 +4778,7 @@ int partitionclass::makerootseqints(vector<int>& rootseqint, vector<int> rootlen
 vector<partitionclass> totalpartitions;   // storage for partitions
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-int dealwithpartitions(vector<string>& block)
+int parse_partition_block(vector<string>& block)
 {
    // this function deals with information in the control file about partitions and pre-processes it for the class constructor
 
@@ -5299,7 +5110,7 @@ int dealwithpartitions(vector<string>& block)
          else{
             // get root sequence
             ifstream if1;
-            if1.open(s.c_str());
+            if1.open(s);
             if (!if1.good()) {
                controlerrorprint2("[PARTITIONS]", name, "", "1) This entry is not a positive integer representing a root length.\n2) No root sequence file with this name exists in the program directory.\nPlease format partition sections of the control file as described in the manual", s);
                {
@@ -5312,35 +5123,33 @@ int dealwithpartitions(vector<string>& block)
                rootfilenamevec.push_back(s);
             }
 
-            string test = "TCAGtcag";
+            string alphabet = "TCAGtcag";
             if (model_type == aminoacid) {
-               test = "ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
+               alphabet = "ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
             }
             char c = '\n';
 
             while (if1.good()) {
-               if (AinB(c, test) && !AinB(c, "\n\r\t ")) {
+               if (AinB(c, alphabet)) {
                   rootseqtxt += c;
-               }
-               else{
-                  if (!AinB(c, "\n\r\t ")) {
-                     string bit = "NUCLEOTIDE";
-                     if (model_type == aminoacid) {
-                        bit = "AMINOACID";
-                     }
-                     if (model_type == codon) {
-                        bit = "CODON";
-                     }
-                     string s;
-                     s += c;
-                     controlerrorprint2("[PARTITIONS]", name, "", bit + " root sequence in file can only contain following letters:\n" + test, s);
-                     {
-                        if (breakonerror) {
+               } else if (!AinB(c, "\n\r\t ")) {
+		   string bit = "NUCLEOTIDE";
+		   if (model_type == aminoacid) {
+		       bit = "AMINOACID";
+		   }
+		   if (model_type == codon) {
+		       bit = "CODON";
+		   }
+
+		   string s;
+		   s += c;
+		   controlerrorprint2("[PARTITIONS]", name, "", bit + " root sequence in file can only contain following letters:\n" + alphabet, s);
+		   {
+		       if (breakonerror) {
                            return -1;
-                        }
-                     }
-                  }
-               }
+		       }
+		   }
+	       }
                c = if1.get();
             }
 
@@ -5349,89 +5158,6 @@ int dealwithpartitions(vector<string>& block)
          }        // end of else for if rootseqfilename
       }           // end of else bracket for 3rd element.
 
-      /*
-       *              // old way of doing step 3 in two steps....... changed to make root sequence creation the default
-       *
-       * else if(count==3)
-       * {
-       *      if(allAinB(s,"1234567890")) rootlength=atoi(s.c_str());
-       *      else { controlerrorprint2("[PARTITIONS]", name, "", "The root length must be an integer greater than zero.",s); {if(breakonerror) return -1;} }
-       *      if(rootlength==0) { controlerrorprint2("[PARTITIONS]", name, "", "The root length must be an integer greater than zero.",s); {if(breakonerror) return -1;} }
-       *
-       *      rootlengthvec.push_back(rootlength);
-       * }
-       * else if(count==4)
-       * {
-       *
-       *      //int ans=checkthere(s,totalmodelnames);
-       *
-       *      //if(ans!=-1)
-       *      //{
-       *      //	model* m=&(totalmodels.at(ans));
-       *      //	int geneticcode2=(*m).geneticcode;
-       *
-       *      //	if(geneticcode!=geneticcode2)
-       *      //	{
-       *      //		string type;
-       *      //		if(mbstype=="model") type="Model";
-       *      //		if(mbstype=="branches") type="Branch class";
-       *      //		if(mbstype=="sites") type="Sites class";
-       *
-       *      //		stringstream ss1;ss1<<geneticcode; string sss1=ss1.str();
-       *      //		stringstream ss2;ss2<<geneticcode2;string sss2=ss2.str();
-       *
-       *      //		controlerrorprint2("[PARTITIONS]", name, "", type+" \""+mbname+"\" has genetic code "+sss1+"\nbut root model \""+s+"\" has genetic code "+sss2,""); {if(breakonerror) return -1;}
-       *      //	}
-       *
-       *
-       *      //	rootfilenamevec.push_back("NONE");
-       *      //	rootmodelpos.push_back(ans);
-       *      //	rootseqtxtvec.push_back("CREATE");
-       *      //}
-       *      //else
-       *
-       *      if(s=="CREATE")
-       *      {
-       *              rootfilenamevec.push_back("NONE");
-       *              //rootmodelpos.push_back(ans);
-       *              rootseqtxtvec.push_back("CREATE");
-       *      }
-       *      else
-       *      {
-       *              // get root sequence
-       *              ifstream if1;
-       *              if1.open(s.c_str());
-       *              if(!if1.good()){ controlerrorprint2("[PARTITIONS]", name, "", "No model with this name has been specified.\nNo root sequence file with this name exists in the program directory.",s); {if(breakonerror) return -1;} }
-       *              else rootfilenamevec.push_back(s);
-       *
-       *              string test="TCAGtcag";
-       *              if(type==2) test="ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
-       *              char c='\n';
-       *
-       *              while(if1.good())
-       *              {
-       *                      if(AinB(c,test) && !AinB(c,"\n\r\t ")) rootseqtxt+=c;
-       *                      else
-       *                      {
-       *                              if(!AinB(c,"\n\r\t "))
-       *                              {
-       *                                      string bit="NUCLEOTIDE";
-       *                                      if(type==2) bit="AMINOACID";
-       *                                      if(type==3) bit="CODON";
-       *                                      string s; s+=c;
-       *                                      controlerrorprint2("[PARTITIONS]", name, "", bit+" root sequence in file can only contain following letters:\n"+test,s); {if(breakonerror) return -1;}
-       *                              }
-       *                      }
-       *                      c=if1.get();
-       *              }
-       *
-       *              rootseqtxtvec.push_back(rootseqtxt);
-       *
-       *      } // end of else for if rootseqfilename
-       *
-       * } // end of else bracket for 4th element.
-       *
-       */
    }      //	end of for(int k=1; k<mymy; k++) bracket
 
    int t1 = ntaxavec.at(0), t2;
@@ -5576,23 +5302,32 @@ int dealwithevolve(vector<string>& block)
 
 string paupstart, paupmiddle, paupend;
 
-int docontrol()
+int parse_control_file(const std::string & masterfilename)
 {
    // this is the main function that processes the control file and calls the other relevant processing functions
 
    int      isthereanerror = 0;
    ifstream if1;
 
+   // if1.open(masterfilename.c_str());
    if1.open(masterfilename.c_str());
+   if (!if1.good()) {
+       controlerrorprint2("CONTROL FILE", "", "", 
+			  "There is no control file. "
+			  "INDELible was looking for file named:\n" + masterfilename + "\n"
+			  "Please check your filenames and re-run INDELible.", "");
+       return -1;
+   }
 
-   char           c1            = 'q', c2 = 'q'; //,c2,c3,c4,c5,c6;
+   char           c1            = 'q', c2 = 'q';
    bool           notwhitespace = true;
    string         s, newfilename = masterfilename;
    vector<string> sv;
 
-
    // get command blocks if they exist
    ifstream paups, paupm, paupf;
+
+
 
    paups.open("paupstart.txt");
    paupm.open("paupmiddle.txt");
@@ -5627,67 +5362,6 @@ int docontrol()
    if (paupend != "") {
       paupend += "\n\n";
    }
-
-   bool   writeon = true;
-   string s1, s2, s3;
-   if (!if1.good()) {
-      bool waste = true;
-      for (int qa = 0; qa < 10; qa++) {
-         // this prompts for a different control file name if there is no file sharing name of masterfilename that is hardwired in code.
-
-         controlerrorprint2("CONTROL FILE", "", "", "There is no control file. INDELible was looking for file named:\n" + newfilename + "\nPlease enter the correct filename.", "");
-
-         cin >> newfilename;
-
-         if1.open(newfilename.c_str());
-
-         if (if1.good()) {
-            waste = false;
-            break;
-         }
-      }
-
-      if (waste) {
-         controlerrorprint2("CONTROL FILE", "", "", "There is no control file. INDELible was looking for file named:\n" + newfilename + "\n10 failed attempts - please check your filenames and re-run INDELible.", "");
-         isthereanerror = -1;
-         return -1;
-      }
-   }
-
-
-   /*
-    * // old way of reading in control file
-    *
-    * while(if1.good())
-    * {
-    * // ignore comment lines in command file
-    * getline(if1,s1); s3="";
-    * if(s1[0]!='/' && s1[1]!='/')
-    * {
-    * for(int rd=0; rd<s1.size(); rd++)
-    * {
-    * if(s1[rd]=='/' ) break; //&& (s1[rd+1]=='/' || s1[rd+1]=='\n' || s1[rd+1]=='\r')) break;
-    * else s3+=s1[rd];
-    * }
-    * s2+=s3; s2+='\n';
-    * }
-    * }
-    *
-    * for(int hb=0; hb<s2.size(); hb++)
-    * {
-    * c2=c1; c1=s2[hb];
-    * //if(c2=='/' && c1=='*') writeon=false;
-    *
-    * if(writeon)
-    * {
-    * if(AinB(c1," \n\r\t")) {if(s!="") sv.push_back(s); s="";}
-    * else{s+=c1;}
-    * }
-    *
-    * }
-    * sv.push_back(s);
-    */
-
 
    vector<char> temp1, temp2, temp3;
 
@@ -5834,7 +5508,6 @@ int docontrol()
 
    string         lastbit;
    vector<string> block;
-   int            well = 0;
 
    if (sv.at(0) != "[TYPE]") {
       controlerrorprint2("CONTROL FILE", "", "", "First entry in control file must be a [TYPE] command.", "");
@@ -5947,16 +5620,6 @@ int docontrol()
       }
    }
 
-/*
- * string blah=sv.back(),blah2;
- * if(blah.size()!=1)
- * {
- * //to prevent parsing error if there is no space, horizontal tab or new line after last entry in control file.
- * for(int ghg=0; ghg<blah.size()-1; ghg++) blah2+=blah[ghg];
- *
- * sv.back()=blah2; sv.push_back("\n");
- * }
- */
 
    // checks which algorithm people want to use
    if (sv.at(2) == "1") {
@@ -5981,22 +5644,19 @@ int docontrol()
 
    //	string thisbit=sv.at(2);
    string thisbit;
-   string MAIN[8] = { "[SETTINGS]", "[MODEL]", "[SITES]", "[BRANCHES]", "[TREE]", "[PARTITIONS]", "[BRANCHES*]", "[EVOLVE]" };
+   string MAIN[8] = { "[SETTINGS]", 
+		      "[MODEL]", 
+		      "[SITES]", 
+		      "[BRANCHES]", 
+		      "[TREE]", 
+		      "[PARTITIONS]", 
+		      "[BRANCHES*]", 
+		      "[EVOLVE]" };
 
    bool doit = true;
    int  numberofsettingsblocks = 0;
    int  numberofmodelsblocks   = 0;
 
-   /*
-    * if(well!=-1)
-    * {
-    * if(thisbit=="[SETTINGS]") mytype=0;
-    * else if (thisbit=="[MODEL]") mytype=1;
-    * else cout<<"ERROR: After the [TYPE] setting should come a [SETTINGS] or [MODEL] block."<<endl;
-    * }
-    *
-    * if(mytype==0 || mytype==1)
-    */
    if ((sv.at(3) != "[MODEL]") && (sv.at(3) != "[SETTINGS]")) {
       isthereanerror = -1;
       controlerrorprint2("[TYPE]", "", "", "There is some text after the [TYPE] command before the first block.\n Is this a mistake? Was expecting a [MODEL] or [SETTINGS] block", sv.at(3));
@@ -6053,32 +5713,27 @@ int docontrol()
       }
    }
 
-   if (well != -1) {
-      // final error checking
-
-      if (numberofsettingsblocks > 1) {
-         controlerrorprint2("[SETTINGS]", "", "", "ERROR: There was more than one [SETTINGS] block.", "");
-         return -1;
-      }
-      if (numberofmodelsblocks == 0) {
-         controlerrorprint2("[MODEL]", "", "", "ERROR: No [MODEL] blocks were specified.", "");
-         return -1;
-      }
-
-
-      if (mytype != 7) {
-         controlerrorprint2("[EVOLVE]", "", "", "ERROR: Control file should end with an [EVOLVE] block", "");
-         return -1;
-      }
-      else{
-         evolveV = rough;
-      }
-      rough.clear();
-      sv.clear();
+   if (numberofsettingsblocks > 1) {
+       controlerrorprint2("[SETTINGS]", "", "", "ERROR: There was more than one [SETTINGS] block.", "");
+       return -1;
+   }
+   if (numberofmodelsblocks == 0) {
+       controlerrorprint2("[MODEL]", "", "", "ERROR: No [MODEL] blocks were specified.", "");
+       return -1;
    }
 
+   if (mytype != 7) {
+       controlerrorprint2("[EVOLVE]", "", "", "ERROR: Control file should end with an [EVOLVE] block", "");
+       return -1;
+   }
+   else{
+       evolveV = rough;
+   }
+   rough.clear();
+   sv.clear();
+   
 
-   int p;  //,q;
+   int p; 
 
    // settings blocks first!
    if ((isthereanerror != -1) && (numberofsettingsblocks > 0)) {
@@ -6123,7 +5778,7 @@ int docontrol()
          return -1;
       }
       else{
-         isthereanerror = dealwithpartitions(partitionsV.at(p));
+         isthereanerror = parse_partition_block(partitionsV.at(p));
       }
    }
    if (isthereanerror == -1) {
@@ -6132,64 +5787,6 @@ int docontrol()
    else{
       isthereanerror = dealwithevolve(evolveV);
    }
-
-
-
-//	cout<<"HERE"<<endl;
-
-
-//	cout<<"HERE"<<endl;
-
-/*
- * // for testing model copying and assigning etc
- *
- * for(p=0; p<totalmodels.size(); p++)
- * {
- * model m=totalmodels.at(p);
- * cout<<endl<<"MODEL "<<m.name<<endl<<endl;
- *
- * cout<<m.modelnumber<<" modelnumber"<<endl;
- * cout<<m.geneticcode<<" geneticcode"<<endl;
- * cout<<m.indeltosub<<" indeltosub"<<endl;
- * cout<<m.instodel<<" instodel"<<endl;
- * cout<<m.inlength<<" inlength"<<endl;
- * cout<<m.dellength<<" dellength"<<endl;
- *
- * cout<<m.alpha<<" alpha"<<endl;
- * cout<<m.pinv<<" pinv"<<endl;
- * cout<<m.ngamcat<<" ngamcat"<<endl;
- *
- * vector<double> bits; int gg;
- * double sum=0;
- *
- * sum=0; bits=m.rootbasefreqs; cout<<"rootbasefreqs ";
- * for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//<<endl;}
- * cout<<sum<<endl;
- * sum=0; bits=m.insertfreqs; cout<<"insertfreqs ";
- * for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//endl;}
- * cout<<sum<<endl;
- * sum=0; bits=m.basefreqs; cout<<"basefreqs ";
- * for(gg=0;gg<bits.size();gg++) {sum+=bits.at(gg); cout<<bits.at(gg)<<" ";}//endl;}
- * cout<<sum<<endl;
- *
- * }
- */
-
-   /*
-    * // for printing of information
-    *
-    * for(q=0; q<settingsV.size(); q++)	cout<<"settings "<<q<<" "<<settingsV.at(q)<<endl;
-    *
-    * for(p=0; p<modelsV.size(); p++)		for(q=0; q<(modelsV.at(p)).size(); q++) cout<<"models "<<p<<" "<<q<<" "<<(modelsV.at(p)).at(q)<<endl;
-    *
-    * for(p=0; p<sitesV.size(); p++)		for(q=0; q<(sitesV.at(p)).size(); q++) cout<<"sites "<<p<<" "<<q<<" "<<(sitesV.at(p)).at(q)<<endl;
-    *
-    * for(p=0; p<branchesV.size(); p++)	for(q=0; q<(branchesV.at(p)).size(); q++) cout<<"branches "<<p<<" "<<q<<" "<<(branchesV.at(p)).at(q)<<endl;
-    *
-    * for(p=0; p<partitionsV.size(); p++)	for(q=0; q<(partitionsV.at(p)).size(); q++) cout<<"partitions "<<p<<" "<<q<<" "<<(partitionsV.at(p)).at(q)<<endl;
-    *
-    * for(q=0; q<evolveV.size(); q++)		cout<<"evolve "<<q<<" "<<evolveV.at(q)<<endl;
-    */
 
    printf("\n");
    return isthereanerror;
