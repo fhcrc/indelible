@@ -1,1 +1,6 @@
 indelible
+*.depends
+outputname.fas
+outputname_TRUE.phy
+LOG.txt
+trees.txt
