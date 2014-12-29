@@ -227,9 +227,7 @@ void controlerrorprint2(string blocktype, string blockname, string commandname, 
 int checkthere(string item, vector<string> mylist)
 {
     auto index = -1;
-    std::vector<string>::iterator p;
-
-    p = std::find(mylist.begin(), mylist.end(), item);
+    auto p = std::find(mylist.begin(), mylist.end(), item);
     if (p != mylist.end()) {
 	index = p - mylist.begin();
     }
@@ -974,8 +972,7 @@ int dealwithsettings(vector<string>& block)
 		}
 	    }
 	} else   {
-	    std::map<const string, Command>::iterator it;
-	    it = CmdMap.find(s1);
+	    auto it = CmdMap.find(s1);
 
 	    Command tmp = it->second;
 
@@ -4472,8 +4469,7 @@ int partitionclass::makerootseqints(vector<int>&  rootseqint,
 		    tot = (tot << 2) & p;
 		}
 
-		std::vector<int>::iterator it;
-		it = find(notallowed.begin(), notallowed.end(), tot);
+		auto it = find(notallowed.begin(), notallowed.end(), tot);
 		if (it != notallowed.end()) {
 		    stringstream msg;
 		    msg << "Root sequence file: " << rootfilename << "\n" <<
