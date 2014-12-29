@@ -63,69 +63,67 @@ int    idum;
 // exponential random number generation
 double expmyrand(double myrate)
 {
-   double dum;
+    double dum;
 
-   do {
-      dum = mtrand1();
-   } while (dum == 0.0);
-   return -(log(dum) / myrate);
+    do {
+	dum = mtrand1();
+    } while (dum == 0.0);
+    return -(log(dum) / myrate);
 }
 
 
 // geometric random number generation
 int oldgeomyrand(double p)
 {
-   if (p == 1) {
-      return 1;
-   }
-   else{
-      double dum;
-      do {
-         dum = mtrand1();
-      } while (dum == 0.0);
-      return int(log(dum) / log(1 - p));
-   }
+    if (p == 1) {
+	return 1;
+    } else   {
+	double dum;
+	do {
+	    dum = mtrand1();
+	} while (dum == 0.0);
+	return int(log(dum) / log(1 - p));
+    }
 }
 
 
 // alternative parameterisation - for testing
 int geomyrand(double q)
 {
-   if (q == 0) {
-      return 1;
-   }
-   else{
-      double dum;
-      do {
-         dum = mtrand1();
-      } while (dum == 0.0);
-      return int(log(dum) / log(q));
-   }
+    if (q == 0) {
+	return 1;
+    } else   {
+	double dum;
+	do {
+	    dum = mtrand1();
+	} while (dum == 0.0);
+	return int(log(dum) / log(q));
+    }
 }
 
 
 // negative binomial distribution
 int randnegbin(int r, double q)
 {
-   int u = 0;
+    int u = 0;
 
-   while (r--) {
-      u += geomyrand(q);
-   }
-   return u + 1;
+    while (r--) {
+	u += geomyrand(q);
+    }
+    return u + 1;
 }
 
 
 // alternative parameterisation - for testing
 int oldrandnegbin(int r, double q)
 {
-   double p = 1 - q;
-   int    u = 0;
+    double p = 1 - q;
+    int    u = 0;
 
-   while (r--) {
-      u += oldgeomyrand(p);
-   }
-   return u + 1;
+    while (r--) {
+	u += oldgeomyrand(p);
+    }
+    return u + 1;
 }
 
 
@@ -141,35 +139,33 @@ double Zq1, Zq2, ZHx0, Zs, ZHimax;
 
 int Zipf(double q, double v)
 {
-   // rejection-inversion method of Hörmann and Derflinger (1996)
+    // rejection-inversion method of Hörmann and Derflinger (1996)
 
-   // Hörmann, W. and G. Derflinger, G. (1996) Rejection-inversion to generate variates from monotone discrete distributions. ACM Transactions on Modelling and Computer Simulation, 6(3), 169-184
+    // Hörmann, W. and G. Derflinger, G. (1996) Rejection-inversion to generate variates from monotone discrete distributions. ACM Transactions on Modelling and Computer Simulation, 6(3), 169-184
 
-   // produces random zipf number from distribution with following unnormalised probability function:
+    // produces random zipf number from distribution with following unnormalised probability function:
 
-   // p_k = (v + k)^(-q)  where k=0,1,... and q>1, v>0
+    // p_k = (v + k)^(-q)  where k=0,1,... and q>1, v>0
 
-   // at least twice as fast as method of Devroye Luc (1986) used in DAWG - see below
+    // at least twice as fast as method of Devroye Luc (1986) used in DAWG - see below
 
-   double U, X, K;
+    double U, X, K;
 
-   do {
-      U = mtrand1();
+    do {
+	U = mtrand1();
 
-      U = ZHimax + (U * (ZHx0 - ZHimax));
+	U = ZHimax + (U * (ZHx0 - ZHimax));
 
-      X = H1(U, Zq1, Zq2, v);
+	X = H1(U, Zq1, Zq2, v);
 
-      K = X + 0.5;
+	K = X + 0.5;
 
-      if (K - X <= Zs) {
-         return int(K + 1);
-      }
-
-      else if (U >= H(K + 0.5, Zq1, Zq2, v) - exp(-1 * log(v + K) * q)) {
-         return int(K + 1);
-      }
-   } while (true);
+	if (K - X <= Zs) {
+	    return int(K + 1);
+	} else if (U >= H(K + 0.5, Zq1, Zq2, v) - exp(-1 * log(v + K) * q))   {
+	    return int(K + 1);
+	}
+    } while (true);
 }
 
 
@@ -180,12 +176,12 @@ int Zipf(double q, double v)
 
 int oldZipf(double a)
 {
-   double b = pow(2.0, a - 1.0);
-   double x, t;
+    double b = pow(2.0, a - 1.0);
+    double x, t;
 
-   do {
-      x = floor(pow(mtrand1(), -1.0 / (a - 1.0)));
-      t = pow(1.0 + 1.0 / x, a - 1.0);
-   } while (mtrand1() * x * (t - 1.0) * b > t * (b - 1.0));
-   return (int)x;
+    do {
+	x = floor(pow(mtrand1(), -1.0 / (a - 1.0)));
+	t = pow(1.0 + 1.0 / x, a - 1.0);
+    } while (mtrand1() * x * (t - 1.0) * b > t * (b - 1.0));
+    return (int)x;
 }
