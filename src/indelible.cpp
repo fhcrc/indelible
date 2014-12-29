@@ -749,10 +749,7 @@ double returnNewSiteRate(int pos)
    // this function sets the site rates for evolution of the core sequence.
    // inserted bases will inherit the rate of the base  where the insertion occurred.
 
-   if (model_type == codon) {
-      //if(!sites) rate=1; else for(int gv1=0; gv1<Csitefreqs.size(); gv1++) if(mtrand1()<Csitefreqs.at(gv1)) rate=gv1;
-      //for(int i1a=0; i1a<((*m).codoncatfreqs).size(); i1a++) cout<<((*m).codoncatfreqs).at(i1a)<<" "; cout<<endl;
-
+   if (model_type == model::Type::codon) {
       rate = mtrand1();         //cout<<rate;
       for (int i1 = 0; i1 < ((*m).cumfreqs).size(); i1++) {
          if (rate < ((*m).cumfreqs).at(i1)) {
@@ -766,14 +763,9 @@ double returnNewSiteRate(int pos)
    }
 
    double multiplier = 1;
-   if (model_type == nucleotide) {
-      //cout<<"Q"<<endl;
+   if (model_type == model::Type::nucleotide) {
       int codonpos = pos % 3;
-      //cout<<"Q"<<endl;
       multiplier = ((*m).codonrates)[codonpos];
-
-      //cout<<"Q"<<endl;
-      //if(pos<50)	cout<<"multiplier "<<"  "<<pos<<"  "<<codonpos<<"  "<<multiplier<<endl;
    }
 
    if (codonrates) {
@@ -820,11 +812,9 @@ double returnNewSiteRate(int pos)
 }
 
 
-///////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double returnsitesubrate(double rate, int siteclass, int currentbase)
 {
-   if (model_type == codon) {
+   if (model_type == model::Type::codon) {
       return (((*m).myratesvec).at(siteclass)).at(currentbase);
    }
    else{
@@ -885,22 +875,14 @@ double returnsiterate(int& rateclass, bool core)
 }
 
 
-void SetSiteRates2(RATES& rates, string name, int repnumber, int mysize)
+void SetSiteRates2(RATES& rates, int repnumber, int mysize)
 {
    siteclassvec.clear();
    ratevec.clear();
    siteclassvec.reserve(rates.rootlength);
    ratevec.reserve(rates.rootlength);
 
-//	if(oldmethod)
-//	{
-//		if(type==3) for(int t1=0; t1<rates.rootlength; t1++) {siteclassvec.push_back(returnsiteclass()); ratevec.push_back(0);}
-
-//		else for(int t1=0; t1<rates.rootlength; t1++) {int myclass; ratevec.push_back(returnsiterate(myclass,true)); siteclassvec.push_back(0);}
-//	}
-//	else
-//	{
-   if (model_type == codon) {
+   if (model_type == model::Type::codon) {
       if (fixtrueproportions) {
          // this option was just for me to use in one of my papers.
          siteclassvec.push_back(0);
@@ -932,15 +914,6 @@ void SetSiteRates2(RATES& rates, string name, int repnumber, int mysize)
       }
    }
 
-//	}
-   //	}
-
-
-//	cout<<"SetSiteRates 2 works like this...."<<endl;
-//	for(int k=0; k<things.size(); k++) cout<<things.at(k)<<"  "<<counts.at(k)<<endl;
-
-
-//	for(int k=0; k<things.size(); k++) cout<<returnsitesubrate( k, 0)<<"\t"<<returnsitesubrate( k, 1)<<"\t"<<returnsitesubrate( k, 2)<<"\t"<<returnsitesubrate( k, 3)<<"\t"<<endl;
 }
 
 
@@ -984,7 +957,7 @@ void makeseq2(int length, vector<site>& myseq, double& sdiff, double timeleft)
             double rate      = -1;
             int    siteclass = -1;
 
-            if (model_type == codon) {
+            if (model_type == model::Type::codon) {
                siteclass = returnsiteclass();
             }
             else{
@@ -1064,12 +1037,12 @@ void fromprintseq(vector<string>& seq, vector<int>& myseq)
    vector<string> myletters, myletters2;
    int            mysize;
 
-   if (model_type == nucleotide) {
+   if (model_type == model::Type::nucleotide) {
       mysize     = 4;
       myletters  = myDUletters;
       myletters2 = myDLletters;
    }
-   else if (model_type == aminoacid) {
+   else if (model_type == model::Type::aminoacid) {
       mysize     = 20;
       myletters  = myAUletters;
       myletters2 = myALletters;
@@ -1546,7 +1519,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int>& inspos, vect
 
    vector<string> myletters, myletters2;
 
-   if (model_type == nucleotide) {
+   if (model_type == model::Type::nucleotide) {
       myletters = myDUletters;
       if (insertaslowercase) {
          myletters2 = myDLletters;
@@ -1556,7 +1529,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int>& inspos, vect
       }
    }
    else{
-      if (model_type == aminoacid) {
+      if (model_type == model::Type::aminoacid) {
          myletters = myAUletters;
          if (insertaslowercase) {
             myletters2 = myALletters;
@@ -1566,7 +1539,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int>& inspos, vect
          }
       }
       else{
-         if (model_type == codon) {
+         if (model_type == model::Type::codon) {
             if (printcodonsasDNA) {
                myletters = myCDUletters;
                if (insertaslowercase) {
@@ -1610,7 +1583,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int>& inspos, vect
 
       for (int j = 0; j < (*s).size(); j++) {
 #ifdef checkpinv
-         if (mode_type == codon) {
+         if (mode_type == model::Type::codon) {
             controlerrorprint2("[SIMULATION]", "", "", "Type should not be 3 when using checkpinv compiler option.", "");
          }
          if (((*s).at(j)).rate == 0) {
@@ -1644,7 +1617,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int>& inspos, vect
 
    for (int i = 1; i < tempintseq.size(); i++) {
 #ifdef checkpinv
-      if (model_type == codon) {
+      if (model_type == model::Type::codon) {
          controlerrorprint2("[SIMULATION]", "", "", "Type should not be 3 when using checkpinv compiler option.", "");
       }
       if (ratevec.at(i) != 0) {
@@ -1685,7 +1658,7 @@ void makeprintseqINT(int partition, int expectedcount, vector<int>& inspos, vect
 
          for (int j = 0; j < (*s).size(); j++) {
 #ifdef checkpinv
-            if (model_type == codon) {
+            if (model_type == model::Type::codon) {
                controlerrorprint2("[SIMULATION]", "", "", "Type should not be 3 when using checkpinv compiler option.", "");
             }
             if (((*s).at(j)).rate == 0) {
@@ -1735,7 +1708,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int>& inspos, vec
 
    vector<string> myletters, myletters2;
 
-   if (model_type == nucleotide) {
+   if (model_type == model::Type::nucleotide) {
       myletters = myDUletters;
       if (insertaslowercase) {
          myletters2 = myDLletters;
@@ -1745,7 +1718,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int>& inspos, vec
       }
    }
    else{
-      if (model_type == aminoacid) {
+      if (model_type == model::Type::aminoacid) {
          myletters = myAUletters;
          if (insertaslowercase) {
             myletters2 = myALletters;
@@ -1755,7 +1728,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int>& inspos, vec
          }
       }
       else{
-         if (model_type == codon) {
+         if (model_type == model::Type::codon) {
             if (printcodonsasDNA) {
                myletters = myCDUletters;
                if (insertaslowercase) {
@@ -1797,7 +1770,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int>& inspos, vec
 
       for (int j = 0; j < (*s).size(); j++) {
 #ifdef checkpinv
-         if (model_type == codon) {
+         if (model_type == model::Type::codon) {
             controlerrorprint2("[SIMULATION]", "", "", "Type should not be 3 when using checkpinv compiler option.", "");
          }
          if (((*s).at(j)).rate == 0) {
@@ -1834,7 +1807,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int>& inspos, vec
 
    for (int i = 1; i < tempintseq.size(); i++) {
 #ifdef checkpinv
-      if (model_type == codon) {
+      if (model_type == model::Type::codon) {
          controlerrorprint2("[SIMULATION]", "", "", "Type should not be 3 when using checkpinv compiler option.", "");
       }
       if (ratevec.at(i) != 0) {
@@ -1878,7 +1851,7 @@ void makeprintseqLEAF(int partition, int expectedcount, vector<int>& inspos, vec
 
          for (int j = 0; j < (*s).size(); j++) {
 #ifdef checkpinv
-            if (model_type == codon) {
+            if (model_type == model::Type::codon) {
                controlerrorprint2("[SIMULATION]", "", "", "Type should not be 3 when using checkpinv compiler option.", "");
             }
             if (((*s).at(j)).rate == 0) {
@@ -4735,7 +4708,7 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
    if (badcount != 0) {
       cout << "ERROR on branch with label " << label << " the goodcount is " << goodcount << " and the badcount is " << badcount << endl; //else cout<<"IT IS OK on branch with label "<<label<<endl;
    }
-   if ((model_type == nucleotide) && ((*m).modelnumber == 16)) {
+   if ((model_type == model::Type::nucleotide) && ((*m).modelnumber == 16)) {
       Pt = &matexp;
    }
    else{
@@ -4749,7 +4722,7 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
       // new method substitutions
       //////////////////////////////////////////////////////////////////////////////////////////////////
 
-      if (model_type != codon) {
+      if (model_type != model::Type::codon) {
          if ((*m).continuousgamma) {
             //type is 1 or 2 and it is continuous gamma
 
@@ -5101,7 +5074,7 @@ void evolvebranch(vector<vector<int> >& insPOS, /*vector<int> &oldinsPOSin,*/ RA
                }
             }
          }
-         else if ((model_type != codon) && (oldalpha != (*m).alpha)) {
+         else if ((model_type != model::Type::codon) && (oldalpha != (*m).alpha)) {
             mymods.push_back(mypos);
 
             for (int t1 = 0; t1 < rates.rootlength; t1++) {
@@ -5259,20 +5232,8 @@ void sorttreeout(vector<vector<int> >& insPOS, RATES& rates, vector<vector<inser
                  SUMS& sums)
 
 {
-   // this function simply splits the tree into branches from the root and sends them off to be evolved one by one
-   string fccc;
-
-   if (totalpartitions > 1) {
-      stringstream fc;
-      fc << partitionnumber + 1;
-      string fcc = fc.str();
-      fccc = "Partition " + fcc + "                         ";
-   }
-
-//	PrintProgress( blocknumber,  totalblock,  repnumber,  totalrep,  0, fccc);
-
-   //	PrintProgress3( blocknumber,  totalblock,  repnumber,  totalrep,  0, fccc);
-
+   // this function simply splits the tree into branches from the root and sends them off to be evolved
+   // one by one
    char c             = 'Q';
    int mybracketlevel = 0;
    string abranch;
@@ -5285,23 +5246,18 @@ void sorttreeout(vector<vector<int> >& insPOS, RATES& rates, vector<vector<inser
       // goes through guide tree and seperates into branches from root
       c = workingtree[yu1];
       if (((c == ',') && (mybracketlevel == 0)) || (yu1 == mylim)) {
-         ////
-
-
          // evolves a branch from root once parsing of that branch is complete
          evolvebranch(insPOS, rates, currentbranchnumber, currentbranchnumber, totalpartitions, partitionnumber, insINT,
                       0, sequencesINT, abranch, blocknumber, repnumber, totalblock, totalrep, sums);
 
          abranch = "";
-      }
-      else{
+      } else {
          abranch += c;
       }
 
       if (c == ')') {
          mybracketlevel--;
-      }
-      else if (c == '(') {
+      } else if (c == '(') {
          mybracketlevel++;
       }
    }
@@ -5462,7 +5418,7 @@ void printresultsout(int currentrep, string filenamestub, int ntaxa, int mylengt
     *
     */
 
-   if (printcodonsasDNA && (model_type == codon)) {
+   if (printcodonsasDNA && (model_type == model::Type::codon)) {
       Mlength *= 3;
    }
 
@@ -5523,7 +5479,7 @@ void printresultsout(int currentrep, string filenamestub, int ntaxa, int mylengt
    if (outputtype == 3) {
       // header for nexus file format
       (*results) << "#NEXUS" << endl << endl << "BEGIN DATA;" << endl << "   DIMENSIONS NTAX = " << ntaxa << "  NCHAR = " << fixed << setprecision(0) << Mlength << ";" << "   FORMAT DATATYPE = ";
-      if (model_type == aminoacid) {
+      if (model_type == model::Type::aminoacid) {
          (*results) << "PROTEIN";
       }
       else{
@@ -5909,7 +5865,7 @@ void printoutrates(int& sitecount, int partition, ofstream& ratesout, vector<int
 {
 //	ratesout<<"Site\tRate\tInserted?\tPartition"<<endl;
 
-   if (model_type != codon) {
+   if (model_type != model::Type::codon) {
       int i;
       //eternal link
       if (inspos.at(0) != -1) {
@@ -6638,7 +6594,7 @@ int main(int argc, char *argv[])
 
             // weareon=(*m).codonratestrue;						// one used for branch classes and
             // if(!weareon) weareon=(*m).codonratestrue;		// one used for models - not sure which
-            SetSiteRates2(rates, (*p).name, thisrep, rootlength);
+            SetSiteRates2(rates, thisrep, rootlength);
 
 
             // points to root sequence for this partition if defined by user rather than created in setuprootseq
@@ -6696,7 +6652,7 @@ int main(int argc, char *argv[])
 
 
             if (printrates) {
-               if (model_type != codon) {
+               if (model_type != model::Type::codon) {
                   if ((*m).continuousgamma && isitbranches) {
                      ratesout << endl << "This partition uses continuous gamma rate variation and a non-homogenous model." << endl;
                      ratesout << "The rates are not currently logged if alpha has changed on the tree. " << endl;
@@ -6856,13 +6812,13 @@ int main(int argc, char *argv[])
 
          vector<string> myletters;
 
-         if (model_type == nucleotide) {
+         if (model_type == model::Type::nucleotide) {
             myletters = myDUletters;
          }
-         else if (model_type == aminoacid) {
+         else if (model_type == model::Type::aminoacid) {
             myletters = myAUletters;
          }
-         else if (model_type == codon) {
+         else if (model_type == model::Type::codon) {
             myletters = myCDUletters;
          }
 
@@ -6936,13 +6892,13 @@ int main(int argc, char *argv[])
 
          vector<string> myletters;
 
-         if (model_type == nucleotide) {
+         if (model_type == model::Type::nucleotide) {
             myletters = myDUletters;
          }
-         else if (model_type == aminoacid) {
+         else if (model_type == model::Type::aminoacid) {
             myletters = myAUletters;
          }
-         else if (model_type == codon) {
+         else if (model_type == model::Type::codon) {
             myletters = myCDUletters;
          }
 
@@ -6957,7 +6913,7 @@ int main(int argc, char *argv[])
             iff.open((filename + "_part" + bb + endbit).c_str());
 
             int L = partitionlengths.at(px), R = partitionlengths.at(px + 1), partlength = R - L;
-            if (model_type == codon) {
+            if (model_type == model::Type::codon) {
                partlength *= 3;
             }
 

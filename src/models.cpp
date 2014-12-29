@@ -111,7 +111,7 @@ int f2(double x, int y)
 
 
 // int type;	// 1 for NUCLEOTIDE, 2 for AMINOACID, 4 for CODON
-ModelType model_type;
+model::Type model_type;
 
 extern bool controldebug;
 
@@ -253,7 +253,7 @@ int querystops(int geneticcode, vector<double>& basefreqs)
 
 
 
-model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodelnumber, int mygeneticcode,
+model::model(int mymodelpos, model::Type mytype, const string& myname, int mymodelnumber, int mygeneticcode,
              bool mycopiedmodel, double myinsertrate, double mydeleterate, double myalpha, double mypinv,
              int myngamcat, double mycodonrates[], const vector<double>& mybasefreqs, const vector<double>& myrootbasefreqs,
              const vector<double>& myinsertfreqs, vector<double>& myparams, const vector<double>& aamodel, const indelmodel& insertmodel,
@@ -374,7 +374,7 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
 
    medianORmean = 0;
 
-   if (type != 3) {
+   if (type != model::Type::codon) {
       // set up discrete gamma and/or pinv --> actual rates are picked in SetSiteRates in main skeleton file.
       if (alpha > 0) {
          if (ngamcat == 0) {
@@ -415,7 +415,7 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
    codonrates[1] = mycodonrates[1];
    codonrates[2] = mycodonrates[2];
 
-   if ((type == 1) && !copiedmodel) {
+   if ((type == model::Type::nucleotide) && !copiedmodel) {
       // for DNA
       if (mybasefreqs.empty()) {
          // if base frequencies are empty
@@ -447,10 +447,10 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
       }
    }
 
-   if ((type == 2) && !mybasefreqs.empty()) {
+   if ((type == model::Type::aminoacid) && !mybasefreqs.empty()) {
       basefreqs = mybasefreqs;                                  // this will force +F models
    }
-   if (type == 3) {
+   if (type == model::Type::codon) {
       if (mybasefreqs.empty()) {
          makeequalfreqs(type, basefreqs);                                       // fequal frequencies
       }
@@ -475,7 +475,7 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
    // these make the correct Q matrix for a given type and model number
 
    // make Qvec and Jvec for nucleotide models
-   if (type == 1) {
+   if (type == model::Type::nucleotide) {
       //	for(int y=0; y<Rrates.size(); y++)
       //	{
       Qvec = getDNA(name, myparams, basefreqs, modelnumber);
@@ -493,7 +493,7 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
    }
 
    // make Qvec and Jvec for amino acid models
-   if (type == 2) {
+   if (type == model::Type::aminoacid) {
       //	for(int y=0; y<Rrates.size(); y++)
       //	{
       Qvec = getAA(name, myparams, basefreqs, modelnumber, aamodel);
@@ -511,7 +511,7 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
       //	}
    }
 
-   if (type == 3) {
+   if (type == model::Type::codon) {
       /*
        * (*) Codon models for variable dN/dS ratios among sites
        * (com.nrate includes kappa & omega) (see also CDFdN_dS)
@@ -848,7 +848,7 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
    }
    else {
       rootbasefreqs = myrootbasefreqs;
-      if (type == 3) {
+      if (type == model::Type::codon) {
          testmyfreqs(rootbasefreqs, "[rootbasefreq]");
       }
    }
@@ -858,7 +858,7 @@ model::model(int mymodelpos, ModelType mytype, const string& myname, int mymodel
    }
    else {
       insertfreqs = myinsertfreqs;
-      if (type == 3) {
+      if (type == model::Type::codon) {
          testmyfreqs(insertfreqs, "[ibasefreq]");
       }
    }
@@ -910,10 +910,10 @@ void model::d(vector<vector<double> >& Q, double S)
 
    int i, j, s;
 
-   if (type == 2) {
+   if (type == model::Type::aminoacid) {
       s = 20;
    }
-   else if (type == 3) {
+   else if (type == model::Type::codon) {
       s = 64;
    }
    else{
@@ -973,22 +973,22 @@ vector<double> model::fx(const vector<double>& basefreqs, int which)
 
 
 
-void model::makeequalfreqs(const ModelType type, vector<double>& tbasefreqs)
+void model::makeequalfreqs(const model::Type type, vector<double>& tbasefreqs)
 {
    // makes equal stationary frequencies.
    tbasefreqs.clear();
 
-   if (type == nucleotide) {
+   if (type == model::Type::nucleotide) {
       for (int it = 0; it < 4; it++) {
          tbasefreqs.push_back(0.25);
       }
    }
-   else if (type == aminoacid) {
+   else if (type == model::Type::aminoacid) {
       for (int it = 0; it < 20; it++) {
          tbasefreqs.push_back(0.05);
       }
    }
-   else if (type == codon) {
+   else if (type == model::Type::codon) {
       // for CODON the genetic code and the relevant stop codons must be considered.
       vector<int> stops = getstops(geneticcode);
 

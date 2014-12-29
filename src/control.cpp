@@ -460,7 +460,7 @@ int branchclass::getbranchmodels(vector<string>& modelnames, vector<string>& tot
 
          int x = ((*k).cumfreqs).size();
 
-         if ((numcats != 1) && (x == 1) && (model_type != codon)) {
+         if ((numcats != 1) && (x == 1) && (model_type != model::Type::codon)) {
             if (numcats != 0) {
                totalmodels.push_back(totalmodels.at(found));
 
@@ -1278,15 +1278,15 @@ int dealwithmodel(vector<string>& block)
    else{
       int tempsize;
       switch (model_type) {
-      case nucleotide:
+      case model::Type::nucleotide:
          tempsize = 4;
          break;
 
-      case aminoacid:
+      case model::Type::aminoacid:
          tempsize = 20;
          break;
 
-      case codon:
+      case model::Type::codon:
          tempsize = 64;
 
       default:
@@ -1858,7 +1858,7 @@ int dealwithmodel(vector<string>& block)
                   if (lasttest == 6) {
                      // genetic code
 
-                     if (model_type != codon) {
+                     if (model_type != model::Type::codon) {
                         controlerrorprint2("[MODEL]", name, commands.at(lasttest), "This command only has effect in CODON simulations.", "");
                         {
                            if (breakonerror) {
@@ -1927,7 +1927,7 @@ int dealwithmodel(vector<string>& block)
                      ifstream ig1;
                      ig1.open(myin.c_str());
 
-                     if (model_type == aminoacid) {
+                     if (model_type == model::Type::aminoacid) {
                         if (!(ig1.good())) {
                            controlerrorprint2("[MODEL]", name, "[submodel]", myin + "\nis not a model name or number and no file of this name exists.\nFor protein models, the entry after a [submodel] command must be\nan integer or a filename.", "");
                            {
@@ -1986,7 +1986,7 @@ int dealwithmodel(vector<string>& block)
                            }
                         }
                      }
-                     else if (model_type == nucleotide) {
+                     else if (model_type == model::Type::nucleotide) {
                         controlerrorprint2("[MODEL]", name, "[submodel]", myin + " is not an integer model number.\nThe entry after a [submodel] command must be an integer.", "");
                         {
                            if (breakonerror) {
@@ -2001,16 +2001,16 @@ int dealwithmodel(vector<string>& block)
                      int    b          = 17;
                      string typestring = "NUCLEOTIDE";
                      string bnum       = "16";                                           //for type 1
-                     if (model_type == aminoacid) {
+                     if (model_type == model::Type::aminoacid) {
                         typestring = "AMINOACID";
                      }
-                     else if (model_type == codon) {
+                     else if (model_type == model::Type::codon) {
                         b          = 16;
                         bnum       = "15";
                         typestring = "CODON";
                      }
 
-                     if (model_type != codon) {
+                     if (model_type != model::Type::codon) {
                         if ((mymodel > -1) && (mymodel < b) && !AinB('.', myin)) {
                            modelnumber = mymodel;
                         }
@@ -2030,7 +2030,7 @@ int dealwithmodel(vector<string>& block)
                      }
                      int nstsize = tempvec.size();
 
-                     if (model_type == codon) {
+                     if (model_type == model::Type::codon) {
                         for (int hy = 0; hy < nstsize; hy++) {
                            params.push_back(atof((tempvec.at(hy)).c_str()));
                         }                                                                                                                   //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
@@ -2040,7 +2040,7 @@ int dealwithmodel(vector<string>& block)
                            params.push_back(atof((tempvec.at(hy)).c_str()));
                         }                                                                                                       //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
                      }
-                     if (model_type == aminoacid) {
+                     if (model_type == model::Type::aminoacid) {
                         if (nstsize > 1) {
                            controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Value for this command should be a single integer between 0 and " + bnum + "\nor a model/file name when type is set to AMINOACID.\nBut found " + tempvec.at(0) + " then " + tempvec.at(1) + ".", "");
                            {
@@ -2051,7 +2051,7 @@ int dealwithmodel(vector<string>& block)
                         }
                      }
 
-                     else if (model_type == nucleotide) {
+                     else if (model_type == model::Type::nucleotide) {
                         stringstream fr;
                         fr << nstsize - 1;
                         string fh = fr.str();
@@ -2197,7 +2197,7 @@ int dealwithmodel(vector<string>& block)
                         }
                      }
 
-                     else if (model_type == codon) {
+                     else if (model_type == model::Type::codon) {
                         ngamcat = 1;
                         //nstsize--;
                         stringstream fr;
@@ -2613,7 +2613,7 @@ int dealwithmodel(vector<string>& block)
                else if (lasttest == 8) {
                   // lasttest == 8 sets site specific rates for.   order of commands is --------> rates  pinv alpha ngamcat
 
-                  if (model_type == codon) {
+                  if (model_type == model::Type::codon) {
                      controlerrorprint2("[MODEL]", name, commands.at(lasttest), "This command has no effect in a CODON simulation.", "");
                      {
                         if (breakonerror) {
@@ -2685,21 +2685,21 @@ int dealwithmodel(vector<string>& block)
                   bool   errorprint = false;
                   string mytype, mysizes;
 
-                  if (model_type == codon) {
+                  if (model_type == model::Type::codon) {
                      if ((mysize != 4) && (mysize != 12) && (mysize != 64)) {
                         mytype     = "CODON";
                         mysizes    = "4, 12, or 64";
                         errorprint = true;
                      }
                   }
-                  else if (model_type == aminoacid) {
+                  else if (model_type == model::Type::aminoacid) {
                      if (mysize != 20) {
                         mytype     = "AMINOACID";
                         mysizes    = "20";
                         errorprint = true;
                      }
                   }
-                  else if (model_type == nucleotide) {
+                  else if (model_type == model::Type::nucleotide) {
                      if (mysize != 4) {
                         mytype     = "NUCLEOTIDE";
                         mysizes    = "4";
@@ -2734,7 +2734,7 @@ int dealwithmodel(vector<string>& block)
 
                      double scaler = 0, lastscaler, diff;
 
-                     if ((model_type == codon) && (mysize == 4)) {
+                     if ((model_type == model::Type::codon) && (mysize == 4)) {
                         // F1X4 frequencies
                         scaler = 0;
                         for (int gh1q = 0; gh1q < mysize; gh1q++) {
@@ -2760,7 +2760,7 @@ int dealwithmodel(vector<string>& block)
 
                         tempbases2 = tempbases;
                      }
-                     else if ((model_type == codon) && (mysize == 12)) {
+                     else if ((model_type == model::Type::codon) && (mysize == 12)) {
                         // F3X4 frequencies
                         scaler = 0;
                         for (int gh1a = 0; gh1a < 4; gh1a++) {
@@ -2819,7 +2819,7 @@ int dealwithmodel(vector<string>& block)
 
                         tempbases2 = tempbases;
                      }
-                     else if ((model_type == codon) && (mysize == 64)) {
+                     else if ((model_type == model::Type::codon) && (mysize == 64)) {
                         //Fcodon frequencies
                         scaler = 0;
                         for (int gh1s = 0; gh1s < mysize; gh1s++) {
@@ -2844,7 +2844,7 @@ int dealwithmodel(vector<string>& block)
                         tempbases2 = tempbases;
                      }
 
-                     if ((model_type == nucleotide) || (model_type == aminoacid)) {
+                     if ((model_type == model::Type::nucleotide) || (model_type == model::Type::aminoacid)) {
                         scaler = 0;
                         for (int gh1 = 0; gh1 < mysize; gh1++) {
                            scaler += tempbases2.at(gh1);
@@ -2968,9 +2968,9 @@ int dealwithsites(vector<string>& block)
          }
       }
 
-      if (model_type != nucleotide) {
+      if (model_type != model::Type::nucleotide) {
          string protcod;
-         if (model_type == aminoacid) {
+         if (model_type == model::Type::aminoacid) {
             protcod = "AMINOACID";
          }
          else{
@@ -4663,110 +4663,69 @@ int partitionclass::makerootseqints(vector<int>& rootseqint,
 				    const string& mbname,
 				    int geneticcode)
 {
-    int myrootlength = rootseqtxt.size();
+    // convert incoming sequence to upper case.
+    // This is not even close to unicode-ready!
+    string seq(rootseqtxt);
+    std::transform(seq.begin(), seq.end(), seq.begin(), ::toupper);
     
     if (rootseqtxt == "CREATE") {
 	// CREATION OF ROOT SEQUENCE NOW DONE IN SETUPROOT FUNCTION IN MAIN SKELETON FILE
     }
     else {
-	if (model_type == aminoacid) {
-	    string test = "ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
-	    if (!allAinB(rootseqtxt, test)) {
-		controlerrorprint2("[PARTITIONS]", name, "", "AMINOACID root sequence in file can only contain following letters:\nARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv", "");
-		{
-		    if (breakonerror) {
-			return -1;
-		    }
-		}
-	    }
-
-	    int size = 20;
-
-	    for (int fd0 = 0; fd0 < myrootlength; fd0++) {
-		char c     = rootseqtxt[fd0];
-		bool error = true;
-
-		for (int fd1 = 0; fd1 < size; fd1++) {
-		    if ((c == test[fd1]) || (c == test[fd1 + size])) {
-			error = false;
-			rootseqint.push_back(fd1);
-			break;
-		    }
-		}
-
-		if (error) {
-		    controlerrorprint2("[PARTITIONS]", name, "", "INTERNAL ERROR when making NUCLEOTIDE root sequence.", "");
-		    {
-			if (breakonerror) {
-			    return -1;
-			}
-		    }
-		}
-	    }
+	const string alphabet = (model_type == model::Type::aminoacid) ? "ARNDCQEGHILKMFPSTWYV" : "TCAG";
+	if (!allAinB(rootseqtxt, alphabet)) {
+	    stringstream msg;
+	    msg << "Root sequence can only contain letters from\n" <<
+		"\"" << alphabet << "\"";
+	    controlerrorprint2("[PARTITIONS]", name, "", msg.str(), "");
+	    return -1;
 	}
-	else{
-	    string alphabet = "TCAGtcag";
-	    const string bit = (model_type == nucleotide) ? "NUCLEOTIDE" : "CODON";
-	    
-	    if (!allAinB(rootseqtxt, alphabet)) {
-		controlerrorprint2("[PARTITIONS]", name, "", bit + " root sequence in file can only contain following letters:\nTCAGtcag", "");
-		{
-		    if (breakonerror) {
-			return -1;
-		    }
-		}
+
+	if (model_type == model::Type::codon) {
+	    if (seq.size() % 3 != 0) {
+		stringstream rd;
+		rd << seq.size();
+		string rdd = rd.str();
+		controlerrorprint2("[PARTITIONS]", name, "", "CODON root sequence length is " + rdd + " nucleotides in the file\nbut must be a multiple of 3.", "");
+		return -1;
 	    }
 
 
+	    vector<int> notallowed = getstops(geneticcode);
+	    int notsize = notallowed.size();
 
-	    int size = 4;
-	    if (model_type == nucleotide) {
-		// // convert string of nucleotide letters to vector of integer indicies.
-		for (string::size_type i = 0; i < rootseqtxt.size(); ++i) {
-		    size_t p = alphabet.find(toupper(rootseqtxt[i]));
-		    assert(p != string::npos);
-		    rootseqint.push_back(p);
+	    for (string::size_type i = 0; i < seq.size(); i += 3) {
+		unsigned int tot = 0;
+		for (string::size_type j = i; j < i+3; ++j) {
+		    size_t p = alphabet.find(seq[j]);
+		    tot = (tot << 2) & p;
 		}
-	    }
-	    else {
-		if (myrootlength % 3 != 0) {
-		    stringstream rd;
-		    rd << myrootlength;
-		    string rdd = rd.str();
-		    controlerrorprint2("[PARTITIONS]", name, "", "CODON root sequence length is " + rdd + " nucleotides in the file\nbut must be a multiple of 3.", "");
+		    
+		std::vector<int>::iterator it;
+		it = find (notallowed.begin(), notallowed.end(), tot);
+		if (it != notallowed.end()) {
+		    stringstream msg;
+		    msg << "Root sequence file: " << rootfilename << "\n" <<
+			"This root sequence contains the codon " << rootseqtxt.substr(i,3) <<
+			" at position " << i / 3 + 1 << "\nBut " << mbstype <<
+			" class " << mbname << " uses genetic code " << geneticcode <<
+			".\nUnder this genetic code " << rootseqtxt.substr(i,3) <<
+			" is a stop codon and is not allowed.";
+		    controlerrorprint2("[PARTITIONS]", name, "", msg.str(), "");
 		    return -1;
 		}
-
-
-		vector<int> notallowed = getstops(geneticcode);
-		int notsize = notallowed.size();
-
-		for (string::size_type i = 0; i < rootseqtxt.size(); i += 3) {
-		    int tot = 0;
-		    for (string::size_type j = i; j < i+3; ++j) {
-			size_t p = alphabet.find(toupper(rootseqtxt[j]));
-			tot = (tot << 2) & p;
-		    }
-		    
-		    std::vector<int>::iterator it;
-		    it = find (notallowed.begin(), notallowed.end(), tot);
-		    if (it != notallowed.end()) {
-			stringstream msg;
-			msg << "Root sequence file: " << rootfilename << "\n" <<
-			    "This root sequence contains the codon " << rootseqtxt.substr(i,3) <<
-			    " at position " << i / 3 + 1 << "\nBut " << mbstype <<
-			    " class " << mbname << " uses genetic code " << geneticcode <<
-			    ".\nUnder this genetic code " << rootseqtxt.substr(i,3) <<
-			    " is a stop codon and is not allowed.";
-			controlerrorprint2("[PARTITIONS]", name, "", msg.str(), "");
-			return -1;
-		    }
       
-		    rootseqint.push_back(tot);
-		}
-		
-	    } // end of type=3 else in type1/type3 else
-	}    // end of type1/type3 else
+		rootseqint.push_back(tot);
+	    }
+	    
+	} else {
+	    // convert string of nucleotide letters to vector of integer indicies.
+	    for (string::size_type i = 0; i < seq.size(); ++i) {
+		size_t p = alphabet.find(seq[i]);
+		assert(p != string::npos);
+		rootseqint.push_back(p);
+	    }
+	}
     }
 
     return 0;
@@ -5124,7 +5083,7 @@ int parse_partition_block(vector<string>& block)
             }
 
             string alphabet = "TCAGtcag";
-            if (model_type == aminoacid) {
+            if (model_type == model::Type::aminoacid) {
                alphabet = "ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv";
             }
             char c = '\n';
@@ -5134,10 +5093,10 @@ int parse_partition_block(vector<string>& block)
                   rootseqtxt += c;
                } else if (!AinB(c, "\n\r\t ")) {
 		   string bit = "NUCLEOTIDE";
-		   if (model_type == aminoacid) {
+		   if (model_type == model::Type::aminoacid) {
 		       bit = "AMINOACID";
 		   }
-		   if (model_type == codon) {
+		   if (model_type == model::Type::codon) {
 		       bit = "CODON";
 		   }
 
@@ -5185,7 +5144,9 @@ int parse_partition_block(vector<string>& block)
       }
    }
 
-   totalpartitions.push_back(partitionclass(name, rootlengthvec, rootseqtxtvec, rootfilenamevec, mbsposvec, mbstypevec, mbnamevec, rootmodelpos, geneticcodevec, treeposvec, treenamevec, t1, overallrandom));
+   totalpartitions.push_back(partitionclass(name, rootlengthvec, rootseqtxtvec, rootfilenamevec, mbsposvec,
+					    mbstypevec, mbnamevec, rootmodelpos, geneticcodevec, treeposvec,
+					    treenamevec, t1, overallrandom));
 //	totalpartitions.push_back(partitionclass(treeposvec,treenamevec,rootlengthvec,mbnamevec,mbstypevec,mbsposvec,rootseqtxtvec));
 
 
@@ -5475,7 +5436,7 @@ int parse_control_file(const std::string & masterfilename)
    // BUT it doesn't put it back in if it is already there! ---> that means I can use my mountaind of old "validation" control files without having to amend them.
 
    // CSW - model_type is used before set
-   if (model_type == 3) {
+   if (model_type == model::Type::codon) {
       bool weareonbaby = false;
 
       for (int sd = 0; sd < sv.size() - 1; sd++) {
@@ -5514,13 +5475,13 @@ int parse_control_file(const std::string & masterfilename)
       return -1;
    }
    else if (sv.at(1) == "NUCLEOTIDE") {
-      model_type = nucleotide;
+      model_type = model::Type::nucleotide;
    }
    else if (sv.at(1) == "AMINOACID") {
-      model_type = aminoacid;
+      model_type = model::Type::aminoacid;
    }
    else if (sv.at(1) == "CODON") {
-      model_type = codon;
+      model_type = model::Type::codon;
    }
    else {
       isthereanerror = -1;
@@ -5547,21 +5508,21 @@ int parse_control_file(const std::string & masterfilename)
    string         myname, mybit = sv.at(1), optionstring;
 
    switch (model_type) {
-   case codon:
+   case model::Type::codon:
       for (int pg = 0; pg < 16; pg++) {
          replacenames.push_back(codonmodelnames[pg]);
       }
       optionstring = option3;
       break;
 
-   case aminoacid:
+   case model::Type::aminoacid:
       for (int pg = 0; pg < 17; pg++) {
          replacenames.push_back(aminoacidmodelnames[pg]);
       }
       optionstring = option2;
       break;
 
-   case nucleotide:
+   case model::Type::nucleotide:
       for (int pg = 0; pg < 17; pg++) {
          replacenames.push_back(nucleotidemodelnames[pg]);
       }
@@ -5593,7 +5554,7 @@ int parse_control_file(const std::string & masterfilename)
             }
          }
 
-         if ((model_type == aminoacid) && error) {
+         if ((model_type == model::Type::aminoacid) && error) {
             ifstream ig1;
             ig1.open(test.c_str());
 
@@ -5611,7 +5572,7 @@ int parse_control_file(const std::string & masterfilename)
 
          if (error) {
             string mystring = "\nThere is no " + mybit + " substitution model named: " + test + ".\n\nYour options are:\n\n" + optionstring + "\n\nor the numerical counterparts. Please consult manual.";
-            if (model_type == aminoacid) {
+            if (model_type == model::Type::aminoacid) {
                mystring += "\nThere is also no file named " + mybit + " in the INDELible directory.";
             }
             controlerrorprint2("[MODEL]", myname, "[submodel]", mystring, "");

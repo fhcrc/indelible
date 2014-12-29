@@ -28,15 +28,15 @@ public:
    }
 };
 
-enum ModelType {
-   nucleotide=1, aminoacid=2, codon=3
-};
 
 
 class model
 {
    // this BIG class contains all details of substitution/indel model and all construtors etc
 public:
+    enum class Type {
+	nucleotide=1, aminoacid=2, codon=3
+	    };
 
    // parameters for indel model
    double q1, q2, Hx0, s, Himax;
@@ -77,7 +77,7 @@ public:
    double subrate;                                        // relative instantaneous rate of substitution (=1)
 
    int       modelpos;                                    // position in totalmodels
-   ModelType type;                                        // nucleotide=1, aminoacid=2, codon=3
+   Type	     type;                                        // nucleotide=1, aminoacid=2, codon=3
    int       error;
    int       rootlength;                                  // ?
    double    alpha;                                       // alpha for gamma models
@@ -113,7 +113,7 @@ public:
    std::vector<std::vector<std::vector<double> > > Jvecs; ///////   collection of Jvecs from different site classes
    std::vector<std::vector<std::vector<double> > > Qvecs; ///////   collection of Qvecs from different site classes
 
-   model(int mymodelpos, ModelType mytype, const std::string& myname, int mymodelnumber, int mygeneticode,
+   model(int mymodelpos, model::Type mytype, const std::string& myname, int mymodelnumber, int mygeneticode,
          bool mycopiedmodel, double myinsertrate, double mydeleterate, double myalpha, double mypinv,
          int myngamcat, double mycodonrates[], const std::vector<double>& mybasefreqs, const std::vector<double>& myrootbasefreqs,
          const std::vector<double>& myinsertfreqs, std::vector<double>& myparams, const std::vector<double>& aamodel, const indelmodel& insertmodel,
@@ -126,7 +126,7 @@ private:
    void d(std::vector<std::vector<double> >& Q, double S);
 
    std::vector<double> fx(const std::vector<double>& basefreqs, int which);
-   void makeequalfreqs(const ModelType type, std::vector<double>& tbasefreqs);
+   void makeequalfreqs(const model::Type type, std::vector<double>& tbasefreqs);
    void getJvec(double S, std::string name, std::vector<double>& myrates, std::vector<std::vector<double> > Qvec, std::vector<std::vector<double> >& Jvec, std::vector<double>& basefreqs);
 
    std::vector<std::vector<double> > getDNA(std::string name, std::vector<double> nstnums, std::vector<double>& basefreqs, int mymodel);
@@ -145,7 +145,7 @@ extern std::vector<int> allowedcodes(int gencode);
 
 extern std::vector<int> getstops(int geneticcode);
 
-extern ModelType model_type;
+extern model::Type model_type;
 
 extern const char GeneticCodeTable[][65];
 #endif  // _models__h_

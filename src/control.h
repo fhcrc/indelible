@@ -141,7 +141,6 @@ class partitionclass
    // this class stores the information for simulations that use different partitions
    // A partition may be a branch class, site class or model class.
 
-
 public:
    std::string name;
    int         ntaxa;

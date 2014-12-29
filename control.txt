@@ -27,15 +27,17 @@
 
 [MODEL]    modelname  	//  Evolutionary models are defined in [MODEL] blocks.
 [submodel] JC         	//  Here the substitution model is simply set as JC69.
-                      	//  No indel model has been given so no indels will occur. 
+  [indelmodel]   NB  0.4 1  //  Geometric indel length distribution (q=0.4, r=1)
+  [insertrate]   0.08       //  insertion rate = 0.08 relative to substitution rate of 1
+  [deleterate]   0.12       //  deletion rate = 0.12 relative to substitution rate of 1
   
 [TREE] treename  (A:0.1,B:0.1);        //  User trees are defined here
 
 [PARTITIONS] partitionname             //  [PARTITIONS] blocks say which models go with
-  [treename modelname 1000]            //  which trees and define the length of the
+  [treename modelname ../hiv_pol.seq]            //  which trees and define the length of the
                                        //  sequence generated at the root (1000 here).
 
-[EVOLVE] partitionname 100 outputname  //  This will generate 100 replicate datasets 
+[EVOLVE] partitionname 3 outputname  //  This will generate 100 replicate datasets 
                                        //  from the [PARTITIONS] block named above.
 
 // The true alignment will be output in a file named outputname_TRUE.phy
