@@ -81,7 +81,7 @@ string phylipextension = "phy";         // used for output file filename extensi
 string fastaextension  = "fas";         // used for output file filename extension
 string nexusextension  = "nex";         // used for output file filename extension
 
-int outputtype    = 2;                  // 1 for FASTA, 2 for PHYLIP, 3 for NEXUS
+Output outputtype    = Output::phylip;                  // 1 for FASTA, 2 for PHYLIP, 3 for NEXUS
 int guidetreetype = 0;                  // used for logfile
 
 
@@ -927,7 +927,7 @@ int dealwithsettings(vector<string>& block)
     enum class Command {
 	PRINTINDELSTATS, ANCESTRALPRINT, PHYLIP_EXT, NEXUS_EXT, FASTA_EXT, OUTPUT,
 	SEED, PRINT_RATES, INSERT_LC, PRINT_AA, FILEPER, MARK_DEL_INS, FIXPROP,
-	PRINT_ALL_RATES, BLOBALSEED
+	PRINT_ALL_RATES, GLOBALSEED
     };
 
     std::map<const string, Command> CmdMap = { { "[printindelstatistics]",    Command::PRINTINDELSTATS },
@@ -944,7 +944,7 @@ int dealwithsettings(vector<string>& block)
 					       { "[markdeletedinsertions]",   Command::MARK_DEL_INS    },
 					       { "[fixproportions]",          Command::FIXPROP         },
 					       { "[printallrates]",           Command::PRINT_ALL_RATES },
-					       { "[globalseed]",              Command::BLOBALSEED      } };
+					       { "[globalseed]",              Command::GLOBALSEED      } };
 
 
     int idum2;
@@ -1033,16 +1033,16 @@ int dealwithsettings(vector<string>& block)
 	    //myinclude.at(22)=true;
 
 	    if (s2 == "FASTA") {
-		outputtype         = 1;
+		outputtype         = Output::fasta;
 		phylipnametruncate = false;
 	    } else if (s2 == "PHYLIP")   {
-		outputtype         = 2;
+		outputtype         = Output::phylip;
 		phylipnametruncate = false;
 	    } else if (s2 == "PHYLIPT")   {
-		outputtype         = 2;
+		outputtype         = Output::phylip;
 		phylipnametruncate = true;
 	    } else if (s2 == "NEXUS")   {
-		outputtype         = 3;
+		outputtype         = Output::nexus;
 		phylipnametruncate = false;
 	    } else   {
 		controlerrorprint2("[SETTINGS]", "", scommands[commanderror], "Value must be FASTA, PHYLIP, PHYLIPT or NEXUS for this command.", "");
@@ -4466,7 +4466,7 @@ int partitionclass::makerootseqints(vector<int>&  rootseqint,
 		unsigned int tot = 0;
 		for (string::size_type j = i; j < i + 3; ++j) {
 		    size_t p = alphabet.find(seq[j]);
-		    tot = (tot << 2) & p;
+		    tot = (tot << 2) & (p);
 		}
 
 		auto it = find(notallowed.begin(), notallowed.end(), tot);
@@ -4487,7 +4487,7 @@ int partitionclass::makerootseqints(vector<int>&  rootseqint,
 	} else {
 	    // convert string of nucleotide letters to vector of integer indicies.
 	    for (string::size_type i = 0; i < seq.size(); ++i) {
-		size_t p = alphabet.find(seq[i]);
+		auto p = alphabet.find(seq[i]);
 		assert(p != string::npos);
 		rootseqint.push_back(p);
 	    }
