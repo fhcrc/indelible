@@ -222,93 +222,7 @@ public:
 	
     }
 
-    vector<double> ISsums1;                     //substitution rates for each particular site in inserted sites.
-    vector<double> ISsums10;                    //group of 10 cumulative sums of elements
-    vector<double> ISsums100;                   //group of 10 cumulative sums of sums10
-    vector<double> ISsums1000;                  //group of 10 cumulative sums of sums100
-    vector<double> ISsums10000;                 //group of 10 cumulative sums of sums1000
-    vector<double> ISsums100000;                //group of 10 cumulative sums of sums10000
-    vector<double> ISsums1000000;               //group of 10 cumulative sums of sums100000
-    vector<double> ISsums10000000;              //group of 10 cumulative sums of sums1000000
-    vector<double> ISsums100000000;             //group of 10 cumulative sums of sums10000000
-    vector<double> ISsums1000000000;            //group of 10 cumulative sums of sums100000000
-    vector<double> ISsums10000000000;           //group of 10 cumulative sums of sums1000000000
-    vector<double> ISsums;                      //group of as many cumulative sums of sums10000000000 as there are.
-
-    void print(const string& msg) const {
-	cerr << msg << endl;
-	cerr << "\tISsums1 cap=" << ISsums1.capacity() << " size="<< 				ISsums1.size()<<endl;
-	cerr << "\tISsums10 cap=" << ISsums10.capacity() << " size="<< 			ISsums10.size()<<endl;
-	cerr << "\tISsums100 cap=" << ISsums100.capacity() << " size="<<			ISsums100.size()<<endl;
-	cerr << "\tISsums1000 cap=" << ISsums1000.capacity() << " size="<< 			ISsums1000.size()<<endl;
-	cerr << "\tISsums10000 cap=" << ISsums10000.capacity() << " size="<< 			ISsums10000.size()<<endl;
-	cerr << "\tISsums100000 cap=" << ISsums100000.capacity() << " size="<<		ISsums100000.size()<<endl;
-	cerr << "\tISsums1000000 cap=" << ISsums1000000.capacity() << " size="<<		ISsums1000000.size()<<endl;
-	cerr << "\tISsums10000000 cap=" << ISsums10000000.capacity() << " size="<<		ISsums10000000.size()<<endl;
-	cerr << "\tISsums100000000 cap=" << ISsums100000000.capacity() << " size="<<		ISsums100000000.size()<<endl;
-	cerr << "\tISsums1000000000 cap=" << ISsums1000000000.capacity() << " size="<<	ISsums1000000000.size()<<endl;
-	cerr << "\tISsums10000000000 cap=" << ISsums10000000000.capacity() << " size="<<	ISsums10000000000.size()<<endl;
-	cerr << "\tISsums cap=" << ISsums.capacity() << " size="<< ISsums.size()<<endl;
-
-	for (auto const& level : CIlevels) {
-	    cerr << "\tcap=" << level.capacity() << " size="<<level.size()<<endl;
-	}
-    }
-
-    void detail(const string& msg) const {
-	cerr << msg << endl;
-	cerr << "\tISsums ";
-	for (int i = 0; i < ISsums.size(); i++) {
-	    cerr << ISsums.at(i) << ", ";
-	    if (i == 2)
-		break;
-	}
-	cerr << endl;
-
-	cerr << "\tISsums1 ";
-	for (int i = 0; i < ISsums1.size(); i++) {
-	    cerr << ISsums1.at(i) << ", ";
-	    if (i == 2)
-		break;
-	}
-	cerr << endl;
-
-	cerr << "\tISsums10 ";
-	for (int i = 0; i < ISsums10.size(); i++) {
-	    cerr << ISsums10.at(i) << ", ";
-	    if (i == 2)
-		break;
-	}
-	cerr << endl;
-	cerr << "\tISsums100 ";
-	for (int i = 0; i < ISsums100.size(); i++) {
-	    cerr << ISsums100.at(i) << ", ";
-	    if (i == 2)
-		break;
-	}
-	cerr << endl;
-	cerr << "\tISsums1000 ";
-	for (int i = 0; i < ISsums1000.size(); i++) {
-	    cerr << ISsums1000.at(i) << ", ";
-	    if (i == 2)
-		break;
-	}
-	cerr << endl;
-
-	for (auto rit = ISlevels.rbegin(); rit != ISlevels.rend(); rit++) {
-	    auto const & level = *rit;
-	    int i = 0;
-	    cerr << "\tlevel " << ISlevels.size() - (rit - ISlevels.rbegin()) << ": ";
-	    for (auto it = level.begin(); it != level.end(); it++) {
-		cerr << *it << ", ";
-		if (++i == 3)
-		    break;
-	    }
-	    cerr << endl;
-	}
-    }
-
-    void myclear()
+    void clear()
     {
 	// simply clears all vectors above in an instnce of SUMS.
 	// used when the model changes from branch to branch
@@ -316,19 +230,6 @@ public:
 	for (auto& level : CIlevels)	level.clear();
 	for (auto& level : CSlevels)	level.clear();
 	for (auto& level : ISlevels)	level.clear();
-
-	ISsums.clear();
-	ISsums1.clear();
-	ISsums10.clear();
-	ISsums100.clear();
-	ISsums1000.clear();
-	ISsums10000.clear();
-	ISsums100000.clear();
-	ISsums1000000.clear();
-	ISsums10000000.clear();
-	ISsums100000000.clear();
-	ISsums1000000000.clear();
-	ISsums10000000000.clear();
     }
 };
 
@@ -1786,14 +1687,13 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
     rates.coredeleterate = 0;
     rates.coresubrate    = 0;
 
-    sums.myclear();
+    sums.clear();
 
     (sums.IIlevels.at(0)).reserve(rates.rootlength);
     (sums.CIlevels.at(0)).reserve(rates.rootlength);
     (sums.CSlevels.at(0)).reserve(rates.rootlength);
     (sums.ISlevels.at(0)).reserve(rates.rootlength);
 
-    (sums.ISsums1).reserve(rates.rootlength);
 
     site *s;
     insert *ii;
@@ -1801,7 +1701,6 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 
     for (i = 0; i < rates.rootlength; i++) {
 	if (inspos.at(i) == -1) {
-	    (sums.ISsums1).push_back(0);
 	    (sums.ISlevels.at(0)).push_back(0);
 	    (sums.IIlevels.at(0)).push_back(0);
 	} else {
@@ -1834,8 +1733,6 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 
 	    (sums.IIlevels.at(0)).push_back((*ii).length);
 	    (sums.ISlevels.at(0)).push_back((*ii).subrate);
-	    (sums.ISsums1).push_back((*ii).subrate);
-
 
 	    //end of dealing with insertion information
 	}
@@ -1893,98 +1790,6 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
     for (auto y : *(sums.ISlevels.rbegin())) 
 	rates.inssubrate += y;
 
-    rates.inssubrate = 0;
-    size = (sums.ISsums1).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.IDsums1).at(i);			*/
-	z += (sums.ISsums1).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                                                     /*(sums.IDsums10).push_back(x); x=0;		  */
-	    (sums.ISsums10).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums10).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.IDsums10).at(i);			*/
-	z += (sums.ISsums10).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                                             /*(sums.IDsums100).push_back(x); x=0;		  */
-	    (sums.ISsums100).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums100).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.IDsums100).at(i);		*/
-	z += (sums.ISsums100).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                                     /*(sums.IDsums1000).push_back(x); x=0;		  */
-	    (sums.ISsums1000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums1000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                        /*x+=(sums.IDsums1000).at(i);		*/
-	z += (sums.ISsums1000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                                     /*(sums.IDsums10000).push_back(x); x=0;		  */
-	    (sums.ISsums10000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums10000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.IDsums10000).at(i);		*/
-	z += (sums.ISsums10000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                             /*(sums.IDsums100000).push_back(x); x=0;	  */
-	    (sums.ISsums100000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums100000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.IDsums100000).at(i);		*/
-	z += (sums.ISsums100000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                             /*(sums.IDsums1000000).push_back(x); x=0;	  */
-	    (sums.ISsums1000000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums1000000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.IDsums1000000).at(i);	*/
-	z += (sums.ISsums1000000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                             /*(sums.IDsums10000000).push_back(x); x=0;	  */
-	    (sums.ISsums10000000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums10000000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                    /*x+=(sums.IDsums10000000).at(i);	*/
-	z += (sums.ISsums10000000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                     /*(sums.IDsums100000000).push_back(x); x=0;	  */
-	    (sums.ISsums100000000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums100000000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                    /*x+=(sums.IDsums100000000).at(i);	*/
-	z += (sums.ISsums100000000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                                     /*(sums.IDsums1000000000).push_back(x); x=0;  */
-	    (sums.ISsums1000000000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums1000000000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                    /*x+=(sums.IDsums1000000000).at(i);	*/
-	z += (sums.ISsums1000000000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                             /*(sums.IDsums10000000000).push_back(x); x=0; */
-	    (sums.ISsums10000000000).push_back(z);
-	    z = 0;
-	}
-    }
-    size = (sums.ISsums10000000000).size() - 1;
-    for (i = 0; i < size + 1; i++) {                                    /*x+=(sums.IDsums10000000000).at(i);*/
-	z += (sums.ISsums10000000000).at(i);
-	if ((i % 10 == 9) || (i == size)) {                                                                                                                                                                             /*(sums.IDsums).push_back(x);               */
-	    (sums.ISsums).push_back(z); /*(rates.insdeleterate)+=x;  (rates.insinsertrate)+=y;*/ (rates.inslength) += y;
-	    (rates.inssubrate) += z;
-	    x = 0;
-	    y = 0;
-	    z = 0;
-	}
-    }
 
 
     // Accumulate CIsums according to log-level
@@ -2099,7 +1904,7 @@ int buildsumsnew(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
     rates.coredeleterate = 0;
     rates.coresubrate    = 0;   // not used in this method
 
-    sums.myclear();
+    sums.clear();
 
     (sums.IIlevels.at(0)).reserve(rates.rootlength);
     (sums.CIlevels.at(0)).reserve(rates.rootlength);
@@ -2275,21 +2080,12 @@ auto as_integer(Enumeration const value)
 //
 int findpos_ins_sub(Event event, vector<int>& updatepositions, double unirand, const SUMS& sum, double& S)
 {
-    // event 1 substitution in inserted sites
-    // in core sequence sites: 0 for substitution, 2 for insertion, 4 for deletion
-    // in inserted sites:      1 for substitution, 3 for insertion, 5 for deletion
-
-
-    int pos1 = -1, pos10 = -1, pos100 = -1, pos1000 = -1, pos10000 = -1, pos100000 = -1, pos1000000 = -1, pos10000000 = -1, pos100000000 = -1, pos1000000000 = -1, pos = -1;
-
-    S = 0;
-    double s = 0;
-    int i, j;
-
-// substitution in inserted sites
+    // substitution in inserted sites
     updatepositions.clear();
     S = 0;
-    j = 0;
+    int pos = -1;
+    double s = 0;
+    int j = 0;
     for (int loglevel = sum.ISlevels.size()-1; loglevel >= 0; loglevel--) {
 	auto const & level = sum.ISlevels.at(loglevel);
 	pos = -1;
@@ -2306,7 +2102,7 @@ int findpos_ins_sub(Event event, vector<int>& updatepositions, double unirand, c
 	}
 	if (pos == -1) {
 	    cout << "ERROR in findpos_ins_sub level " << loglevel << " at event " << as_integer(event) << endl;
-	    // return -1;
+	    return -1;
 	}
     }
 
@@ -2316,188 +2112,6 @@ int findpos_ins_sub(Event event, vector<int>& updatepositions, double unirand, c
 	assert(!(unirand - s - S > 0));
     }
 
-    int newpos = pos;
-
-    updatepositions.clear();
-    S = 0;
-    pos = -1;
-    
-    for (i = 0; i < (sum.ISsums).size(); i++) {
-	s = (sum.ISsums).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos1000000000 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos1000000000 == -1) {
-	cout << "1 ERROR in findpos at event " << as_integer(event) << "  unirand-S-s = " << setprecision(20) << unirand - S - s << "  " << unirand << "  " << S << "  " << s << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums1000000000).size(); i++) {
-	s = (sum.ISsums1000000000).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos100000000 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos100000000 == -1) {
-	cout << "2 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums100000000).size(); i++) {
-	s = (sum.ISsums100000000).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos10000000 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos10000000 == -1) {
-	cout << "3 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums10000000).size(); i++) {
-	s = (sum.ISsums10000000).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos1000000 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos1000000 == -1) {
-	cout << "4 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums1000000).size(); i++) {
-	s = (sum.ISsums1000000).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos100000 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos100000 == -1) {
-	cout << "5 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums100000).size(); i++) {
-	s = (sum.ISsums100000).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos10000 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos10000 == -1) {
-	cout << "6 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums10000).size(); i++) {
-	s = (sum.ISsums10000).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos1000 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos1000 == -1) {
-	cout << "7 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums1000).size(); i++) {
-	s = (sum.ISsums1000).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos100 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos100 == -1) {
-	cout << "8 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums100).size(); i++) {
-	s = (sum.ISsums100).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos10 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos10 == -1) {
-	cout << "9 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums10).size(); i++) {
-	s = (sum.ISsums10).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos1 = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos1 == -1) {
-	cout << "10 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-    for (i = j; i < (sum.ISsums1).size(); i++) {
-	s = (sum.ISsums1).at(i);
-	if (unirand <= s + S) {
-	    j = 10 * i;
-	    updatepositions.push_back(i);
-	    pos = i;
-	    break;
-	} else {
-	    S += s;
-	}
-    }
-    if (pos == -1) {
-	cout << "11 ERROR in findpos at event " << as_integer(event) << endl;
-	return -1;
-    }
-
-    //assert(newpos == pos);
-    //cout<<S<<"  "<<unirand<<"  "<<s+S<<"   WWWWWWWWWWWWWW"<<endl;
-
-    if ((S - unirand > 0) || (unirand - s - S > 0)) {
-	cout << "CHOOSING ERROR IN FINDPOS 1" << endl;
-    }
-
-//		int g;
-//		cout<<"CHECK 1: unirand is "; s=0; for(g=0; g<(sum.ISsums1).size(); g++) if(unirand<s+(sum.ISsums1).at(g)) break; else s+=(sum.ISsums1).at(g);
-//		cout<<unirand<<"  g is "<<g<<"  pos is "<<pos<<"  "<<s+(sum.ISsums1).at(g)<<endl;
     return pos;
 }
 
@@ -2707,18 +2321,6 @@ int updatesubsums1(vector<int> updatepositions, double sdiff, SUMS& sums)
 	level.at(updatepositions.at(i)) += sdiff;
 	i--;
     }
-
-    ((sums.ISsums).at(updatepositions.at(0)))           += sdiff;
-    ((sums.ISsums1000000000).at(updatepositions.at(1))) += sdiff;
-    ((sums.ISsums100000000).at(updatepositions.at(2)))  += sdiff;
-    ((sums.ISsums10000000).at(updatepositions.at(3)))   += sdiff;
-    ((sums.ISsums1000000).at(updatepositions.at(4)))    += sdiff;
-    ((sums.ISsums100000).at(updatepositions.at(5)))     += sdiff;
-    ((sums.ISsums10000).at(updatepositions.at(6)))      += sdiff;
-    ((sums.ISsums1000).at(updatepositions.at(7)))       += sdiff;
-    ((sums.ISsums100).at(updatepositions.at(8)))        += sdiff;
-    ((sums.ISsums10).at(updatepositions.at(9)))         += sdiff;
-    ((sums.ISsums1).at(updatepositions.at(10)))         += sdiff;
 
     return 0;
 }
@@ -3321,15 +2923,11 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
 		currentev = findpos_ins_sub(event, updatepositions, unirand, sums, dsumreached);
 
 		if (currentev == -1) {
+		    // I have never seen execution reach this point...-csw
+		    
 		    double yh = 0;
-		    for (int fg = 0; fg < sums.ISsums.size(); fg++) {
-			yh += (sums.ISsums).at(fg);
-		    }
-		    double new_yh = 0;
 		    for (auto fg : *(sums.ISlevels.rbegin())) 
-			new_yh += fg;
-		    assert(1==2);
-		    assert(yh==new_yh);
+			yh += fg;
 		    cout << endl << endl << " ERROR ERROR 0  yh total is " << yh << " as compared to " << rates.coresubrate << " rates and " << unirand << " unirand." << endl << "yh - rates " << yh - rates.inssubrate << " yh-unirand " << yh - unirand << " unirand - rates " << unirand - rates.inssubrate << endl;
 		}
 
