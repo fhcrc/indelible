@@ -1222,9 +1222,9 @@ int dealwithmodel(vector<string>& block)
 
 	case model::Type::codon:
 	    tempsize = 64;
-
+	    break;
 	default:
-	    cout << "tempsize and type error in dealwithmodel" << endl;
+	    cout << "Unrecognized modeltype in dealwithmodel() " << __FILE__ << ":" << __LINE__ << endl;
 	}
 	for (int jp = 0; jp < tempsize; jp++) {
 	    insertrates.push_back(0);
@@ -1260,11 +1260,10 @@ int dealwithmodel(vector<string>& block)
     vector<string> commands(commandsarray, commandsarray + 13);
     string         mymodelname;
 
-//	for(int i=0; i<block.size(); i++) cout<<"model "<<block.at(i)<<endl;
 
 
     string hg = block.at(0), hg1;
-//	if(hg[0]!='#' || hg[hg.size()-1]!='#') { controlerrorprint2("[MODEL]", "?", "", "First statement in a [MODEL] block must be a model name statement in the form #modelname#",""); {if(breakonerror) return -1;} }
+
     if (!allAinB(hg, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890,.;()-_")) {
 	controlerrorprint2("[MODEL]", hg, "", "First statement in a [MODEL] block must be a model name statement.\nThe name should only contain  ,.;()-_ and alpha-numeric characters.", hg);
 	{
@@ -1342,12 +1341,6 @@ int dealwithmodel(vector<string>& block)
 		insertrate  = (*m).insertrate;
 		deleterate  = (*m).deleterate;
 
-		//insertrates=(*m).insertrates;
-		//deleterates=(*m).deleterates;
-
-		//inlength=(*m).inlength;
-		//dellength=(*m).dellength;
-		//rootlength=(*m).rootlength;
 		alpha         = (*m).alpha;
 		pinv          = (*m).pinv;
 		ngamcat       = (*m).ngamcat;
@@ -1355,13 +1348,10 @@ int dealwithmodel(vector<string>& block)
 		codonrates[1] = (*m).codonrates[1];
 		codonrates[2] = (*m).codonrates[2];
 
-		//	vector<double> params;  // ??
-
 		rootbasefreqs = (*m).rootbasefreqs;
 		basefreqs     = (*m).basefreqs;
 		insertfreqs   = (*m).insertfreqs;
 		astart++;
-		//	vector<double> ratevec; // ??
 	    }
 	}
 
@@ -1382,8 +1372,7 @@ int dealwithmodel(vector<string>& block)
 		if (breakonerror) {
 		    return -1;
 		}
-	    } else   {//a1
-		    //			cout<<"H2 "<<hg<<" "<<mytest<<" "<<lasttest<<"  "<<blocksize<<"  "<<astart<<endl;
+	    } else {
 
 		if (i1 == blocksize) {
 		    tempvec.push_back(hg);
@@ -1612,7 +1601,10 @@ int dealwithmodel(vector<string>& block)
 				    noindelerror = false;
 				}
 			    } else   {
-				mM = 2147483647; // largest integer value possible. //mM=pow(10,12); //mM=~0-1; // largest known genome is 132 pg  (1pg is ~ 978 MB, so 132pg is ~ 129 GB, i.e. 10^12 is bigger than any genome!)
+				mM = 2147483647; // largest integer value possible. 
+						 // mM=pow(10,12); 
+						 // mM=~0-1; 
+						 // largest known genome is 132 pg  (1pg is ~ 978 MB, so 132pg is ~ 129 GB, i.e. 10^12 is bigger than any genome!)
 			    }
 			    if (!noindelerror) {
 				controlerrorprint2("[MODEL]", name, commands.at(lasttest), "Expecting 1 or 2 values after \"POW\" when using Zipfian Power Model.\nThis obligatory first value should be a decimal number a > 1.\nThe second optional value should be an integer M > 1.", "");
@@ -1651,12 +1643,11 @@ int dealwithmodel(vector<string>& block)
 				    }
 				}
 			    }
-			    //cout<<"BLAH  "<<blah<<endl;
+
 			    meand /= totald;
-			    //cout<<meand<<"  "<<totald<<endl;
-			} // end of Zipfian Distribution (Power Law)
-			// Lavalette Distribution
-			else if (myin == "LAV") {
+			    // end of Zipfian Distribution (Power Law)
+
+			} else if (myin == "LAV") { // Lavalette Distribution
 			    /*
 			     * Lavalette Distribution References
 			     *
@@ -1928,11 +1919,11 @@ int dealwithmodel(vector<string>& block)
 			    if (model_type == model::Type::codon) {
 				for (int hy = 0; hy < nstsize; hy++) {
 				    params.push_back(atof((tempvec.at(hy)).c_str()));
-				}                                                                                                           //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
+				}
 			    } else   {
 				for (int hy = 1; hy < nstsize; hy++) {
 				    params.push_back(atof((tempvec.at(hy)).c_str()));
-				}                                                                                               //cout<<"WER "<<atof((tempvec.at(hy)).c_str())<<endl;}
+				}
 			    }
 			    if (model_type == model::Type::aminoacid) {
 				if (nstsize > 1) {
@@ -2061,8 +2052,6 @@ int dealwithmodel(vector<string>& block)
 					}
 				    }
 				}
-				//	else if(mymodel==16 && nstsize!=3 && nstsize!=4)   {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as T92. \nExpecting 2 or 3 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
-				//	else if(mymodel==17 && nstsize!=12 && nstsize!=13) {controlerrorprint2("[MODEL]", name, commands.at(lasttest),  "NUCLEOTIDE substitution model set as UNREST. \nExpecting 11 or 12 substitution parameters.\nInstead found "+fh+" parameters after model number",""); {if(breakonerror) return -1;} }
 				else if ((mymodel == 16) && (nstsize != 12) && (nstsize != 13)) {
 				    controlerrorprint2("[MODEL]", name, commands.at(lasttest), "NUCLEOTIDE substitution model set as UNREST. \nExpecting 11 or 12 substitution parameters.\nInstead found " + fh + " parameters after model number", "");
 				    {
@@ -2429,8 +2418,6 @@ int dealwithmodel(vector<string>& block)
 		    }         // end of lasttest == 7 bracket
 		    else if (lasttest == 99) {//y1
 			// params
-
-///////////////////////////////////////////////
 
 			//  disabled bracket now
 		    } //y1
