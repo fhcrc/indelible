@@ -213,8 +213,13 @@ class SUMS
      */
 
 public:
+    vector< vector<int> > IIlevels;	//insertion rates for each particular site in inserted sites.
+    vector< vector<int> > CIlevels;	//insertion rates for each particular site in core sequence.
+    vector< vector<double> > CSlevels;  //substitution rates for each particular site in core sequence.
 
-    SUMS() : IIlevels(11, vector<int>()), CIlevels(11, vector<int>()) {
+
+
+    SUMS() : IIlevels(11), CIlevels(11), CSlevels(11) {
 	
     }
 
@@ -244,23 +249,20 @@ public:
     vector<double> ISsums10000000000;           //group of 10 cumulative sums of sums1000000000
     vector<double> ISsums;                      //group of as many cumulative sums of sums10000000000 as there are.
 
-    vector< vector<int> > IIlevels;
-    vector< vector<int> > CIlevels;
-
     void print(const string& msg) const {
 	cerr << msg << endl;
-	cerr << "\tISsums1 cap=" << ISsums1.capacity() << " size="<< 				ISsums1.size()<<endl;
-	cerr << "\tISsums10 cap=" << ISsums10.capacity() << " size="<< 			ISsums10.size()<<endl;
-	cerr << "\tISsums100 cap=" << ISsums100.capacity() << " size="<<			ISsums100.size()<<endl;
-	cerr << "\tISsums1000 cap=" << ISsums1000.capacity() << " size="<< 			ISsums1000.size()<<endl;
-	cerr << "\tISsums10000 cap=" << ISsums10000.capacity() << " size="<< 			ISsums10000.size()<<endl;
-	cerr << "\tISsums100000 cap=" << ISsums100000.capacity() << " size="<<		ISsums100000.size()<<endl;
-	cerr << "\tISsums1000000 cap=" << ISsums1000000.capacity() << " size="<<		ISsums1000000.size()<<endl;
-	cerr << "\tISsums10000000 cap=" << ISsums10000000.capacity() << " size="<<		ISsums10000000.size()<<endl;
-	cerr << "\tISsums100000000 cap=" << ISsums100000000.capacity() << " size="<<		ISsums100000000.size()<<endl;
-	cerr << "\tISsums1000000000 cap=" << ISsums1000000000.capacity() << " size="<<	ISsums1000000000.size()<<endl;
-	cerr << "\tISsums10000000000 cap=" << ISsums10000000000.capacity() << " size="<<	ISsums10000000000.size()<<endl;
-	cerr << "\tISsums cap=" << ISsums.capacity() << " size="<< ISsums.size()<<endl;
+	cerr << "\tCSsums1 cap=" << CSsums1.capacity() << " size="<< 				CSsums1.size()<<endl;
+	cerr << "\tCSsums10 cap=" << CSsums10.capacity() << " size="<< 			CSsums10.size()<<endl;
+	cerr << "\tCSsums100 cap=" << CSsums100.capacity() << " size="<<			CSsums100.size()<<endl;
+	cerr << "\tCSsums1000 cap=" << CSsums1000.capacity() << " size="<< 			CSsums1000.size()<<endl;
+	cerr << "\tCSsums10000 cap=" << CSsums10000.capacity() << " size="<< 			CSsums10000.size()<<endl;
+	cerr << "\tCSsums100000 cap=" << CSsums100000.capacity() << " size="<<		CSsums100000.size()<<endl;
+	cerr << "\tCSsums1000000 cap=" << CSsums1000000.capacity() << " size="<<		CSsums1000000.size()<<endl;
+	cerr << "\tCSsums10000000 cap=" << CSsums10000000.capacity() << " size="<<		CSsums10000000.size()<<endl;
+	cerr << "\tCSsums100000000 cap=" << CSsums100000000.capacity() << " size="<<		CSsums100000000.size()<<endl;
+	cerr << "\tCSsums1000000000 cap=" << CSsums1000000000.capacity() << " size="<<	CSsums1000000000.size()<<endl;
+	cerr << "\tCSsums10000000000 cap=" << CSsums10000000000.capacity() << " size="<<	CSsums10000000000.size()<<endl;
+	cerr << "\tCSsums cap=" << CSsums.capacity() << " size="<< CSsums.size()<<endl;
 
 	for (auto const& level : CIlevels) {
 	    cerr << "\tcap=" << level.capacity() << " size="<<level.size()<<endl;
@@ -269,34 +271,34 @@ public:
 
     void detail(const string& msg) const {
 	cerr << msg << endl;
-	cerr << "\tISsum ";
-	for (int i = 0; i < ISsums.size(); i++) {
-	    cerr << ISsums.at(i) << ", ";
+	cerr << "\tCSsum ";
+	for (int i = 0; i < CSsums.size(); i++) {
+	    cerr << CSsums.at(i) << ", ";
 	    if (i == 2)
 		break;
 	}
 	cerr << endl;
 
-	cerr << "\tISsums1 ";
-	for (int i = 0; i < ISsums1.size(); i++) {
-	    cerr << ISsums1.at(i) << ", ";
+	cerr << "\tCSsums1 ";
+	for (int i = 0; i < CSsums1.size(); i++) {
+	    cerr << CSsums1.at(i) << ", ";
 	    if (i == 2)
 		break;
 	}
 	cerr << endl;
 
-	cerr << "\tISsums10 ";
-	for (int i = 0; i < ISsums10.size(); i++) {
-	    cerr << ISsums10.at(i) << ", ";
+	cerr << "\tCSsums10 ";
+	for (int i = 0; i < CSsums10.size(); i++) {
+	    cerr << CSsums10.at(i) << ", ";
 	    if (i == 2)
 		break;
 	}
 	cerr << endl;
 
-	for (auto rit = CIlevels.rbegin(); rit != CIlevels.rend(); rit++) {
+	for (auto rit = CSlevels.rbegin(); rit != CSlevels.rend(); rit++) {
 	    auto const & level = *rit;
 	    int i = 0;
-	    cerr << "\tlevel " << CIlevels.size() - (rit - CIlevels.rbegin()) << ": ";
+	    cerr << "\tlevel " << CSlevels.size() - (rit - CSlevels.rbegin()) << ": ";
 	    for (auto it = level.begin(); it != level.end(); it++) {
 		cerr << *it << ", ";
 		if (++i == 3)
@@ -314,6 +316,9 @@ public:
 	    level.clear();
 	}
 	for (auto& level : CIlevels) {
+	    level.clear();
+	}
+	for (auto& level : CSlevels) {
 	    level.clear();
 	}
 
@@ -1804,6 +1809,7 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 
     (sums.IIlevels.at(0)).reserve(rates.rootlength);
     (sums.CIlevels.at(0)).reserve(rates.rootlength);
+    (sums.CSlevels.at(0)).reserve(rates.rootlength);
 
     (sums.ISsums1).reserve(rates.rootlength);
     (sums.CSsums1).reserve(rates.rootlength);
@@ -1854,14 +1860,17 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 	if (i == 0) {
 	    rates.coreinsertrate += (*m).insertrate;
 	    (sums.CIlevels.at(0)).push_back(1);
+	    (sums.CSlevels.at(0)).push_back(0);
 	    (sums.CSsums1).push_back(0);
 	} else {
 	    int test = fromseq.at(i);
 
 	    if (test == -1) {
 		(sums.CIlevels.at(0)).push_back(0);
+		(sums.CSlevels.at(0)).push_back(0);
 		(sums.CSsums1).push_back(0);
 	    } else {
+		(sums.CSlevels.at(0)).push_back(returnsitesubrate(ratevec.at(i), siteclassvec.at(i), test));
 		(sums.CSsums1).push_back(returnsitesubrate(ratevec.at(i), siteclassvec.at(i), test));
 
 
@@ -1994,6 +2003,29 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 	}
     }
 
+    // sum the last level to get to total core length
+    for (auto y : *(sums.CIlevels.rbegin())) 
+	rates.corelength += y;
+
+    // Accumulate CSsums according to log-level
+    for (int loglevel = 0; loglevel < sums.CSlevels.size()-1; loglevel++) {
+	auto const& level = sums.CSlevels.at(loglevel);
+	double y = 0;
+	int size = level.size();
+	for (int i = 0; i < size; i++) {
+	    y += level.at(i);
+	    if ((i % 10 == 9) || (i == size-1)) {
+		sums.CSlevels.at(loglevel+1).push_back(y);
+		y = 0;
+	    }
+	}
+    }
+
+    // sum the last level to get to total core subrate length
+    rates.coresubrate = 0;  // temporary during transition
+    for (auto y : *(sums.CSlevels.rbegin())) 
+	rates.coresubrate += y;
+
 
     size = (sums.CSsums1).size() - 1;
     for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.CDsums1).at(i);			*/
@@ -2075,6 +2107,7 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 	    z = 0;
 	}
     }
+    rates.coresubrate = 0;  // temporary during transition
     size = (sums.CSsums10000000000).size() - 1;
     for (i = 0; i < size + 1; i++) {                                    /*x+=(sums.CDsums10000000000).at(i);*/
 	z += (sums.CSsums10000000000).at(i);
@@ -2542,9 +2575,38 @@ int findpos_core_sub(Event event, vector<int>& updatepositions, double unirand, 
 
     int pos1 = -1, pos10 = -1, pos100 = -1, pos1000 = -1, pos10000 = -1, pos100000 = -1, pos1000000 = -1, pos10000000 = -1, pos100000000 = -1, pos1000000000 = -1, pos = -1;
 
+    int i, j;
+
+    j = 0;
+    S = 0;
+    pos = -1;
+    for (int loglevel = sum.CSlevels.size()-1; loglevel >= 0; loglevel--) {
+	auto const & level = sum.CSlevels.at(loglevel);
+	pos = -1;
+	for (int i = j; i < level.size(); i++) {
+	    double s = level.at(i);
+	    if (unirand <= s + S) {
+		j = 10 * i;
+		updatepositions.push_back(i);
+		pos = i;
+		break;
+	    } else {
+		S += s;
+	    }
+	}
+	if (pos == -1) {
+	    cout << "ERROR in findpos_ins_indel level " << loglevel << " at event " << as_integer(event) << endl;
+	    // return -1;
+	}
+    }
+
+    int newpos = pos;
+    updatepositions.clear();
     S = 0;
     double s = 0;
-    int i, j;
+    S = 0;
+    j = 0;
+    pos = -1;
 
     // substitution in core sequence
     for (i = 0; i < (sum.CSsums).size(); i++) {
@@ -2713,6 +2775,7 @@ int findpos_core_sub(Event event, vector<int>& updatepositions, double unirand, 
 	return -1;
     }
 
+    assert(newpos == pos);
     if ((S - unirand > 0) || (unirand - s - S > 0)) {
 	cout << "CHOOSING ERROR IN FINDPOS 0" << endl;
     }
@@ -2722,11 +2785,6 @@ int findpos_core_sub(Event event, vector<int>& updatepositions, double unirand, 
     //  - in this case it is possible to choose the "imaginary" eternal link position
     //  which we do not want to be possible!  this will not happend if unirand is non-zero.
 
-
-
-//		int g;
-//		cout<<"CHECK 0: unirand is "; s=0; for(g=0; g<(sum.CSsums1).size(); g++) if(unirand<s+(sum.CSsums1).at(g)) break; else s+=(sum.CSsums1).at(g);
-//		cout<<unirand<<"  g is "<<g<<"  pos is "<<pos<<"  "<<s+(sum.CSsums1).at(g)<<endl;
 
     return pos;
 }
@@ -2865,6 +2923,13 @@ Event chooseevent(RATES& rates)
 int updatesubsums0(vector<int> updatepositions, double sdiff, SUMS& sums)
 {
     // substitution in core sequence
+    assert(updatepositions.size() == sums.CSlevels.size());
+
+    int i = updatepositions.size()-1;
+    for (auto &level : sums.CSlevels) {
+	level.at(updatepositions.at(i)) += sdiff;
+	i--;
+    }
 
     ((sums.CSsums).at(updatepositions.at(0)))           += sdiff;
     ((sums.CSsums1000000000).at(updatepositions.at(1))) += sdiff;
@@ -2993,6 +3058,7 @@ void dodeletion(int inspos, SUMS& sums, RATES& rates, vector<int>& newseqINT,
 
 		if (oldmethod) {
 		    diffs = -((sums.CSsums1).at(currentev));
+		    diffs = -((sums.CSlevels.at(0)).at(currentev));
 
 		    csdiff += diffs;
 
@@ -3461,6 +3527,11 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
 		    for (int fg = 0; fg < sums.CSsums.size(); fg++) {
 			yh += (sums.CSsums).at(fg);
 		    }
+		    double new_yh = 0;
+		    for (auto fg : *(sums.CSlevels.rbegin()))
+			new_yh += fg;
+		    assert(new_yh == yh);
+		    assert(1==2);
 		    cout << endl << endl << " ERROR ERROR 0  yh total is " << yh << " as compared to " << rates.coresubrate << " rates and " << unirand << " unirand." << endl << "yh - rates " << yh - rates.coresubrate << " yh-unirand " << yh - unirand << " unirand - rates " << unirand - rates.coresubrate << endl;
 		}
 
