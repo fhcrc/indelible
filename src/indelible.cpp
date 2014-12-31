@@ -280,6 +280,20 @@ public:
 		break;
 	}
 	cerr << endl;
+	cerr << "\tISsums100 ";
+	for (int i = 0; i < ISsums100.size(); i++) {
+	    cerr << ISsums100.at(i) << ", ";
+	    if (i == 2)
+		break;
+	}
+	cerr << endl;
+	cerr << "\tISsums1000 ";
+	for (int i = 0; i < ISsums1000.size(); i++) {
+	    cerr << ISsums1000.at(i) << ", ";
+	    if (i == 2)
+		break;
+	}
+	cerr << endl;
 
 	for (auto rit = ISlevels.rbegin(); rit != ISlevels.rend(); rit++) {
 	    auto const & level = *rit;
@@ -1777,6 +1791,7 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
     (sums.IIlevels.at(0)).reserve(rates.rootlength);
     (sums.CIlevels.at(0)).reserve(rates.rootlength);
     (sums.CSlevels.at(0)).reserve(rates.rootlength);
+    (sums.ISlevels.at(0)).reserve(rates.rootlength);
 
     (sums.ISsums1).reserve(rates.rootlength);
 
@@ -1787,6 +1802,7 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
     for (i = 0; i < rates.rootlength; i++) {
 	if (inspos.at(i) == -1) {
 	    (sums.ISsums1).push_back(0);
+	    (sums.ISlevels.at(0)).push_back(0);
 	    (sums.IIlevels.at(0)).push_back(0);
 	} else {
 	    //deal with insertion information.
@@ -1817,6 +1833,7 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 	    rates.insdeleterate += (((*m).deleterate) * ((*ii).length));
 
 	    (sums.IIlevels.at(0)).push_back((*ii).length);
+	    (sums.ISlevels.at(0)).push_back((*ii).subrate);
 	    (sums.ISsums1).push_back((*ii).subrate);
 
 
@@ -1846,7 +1863,7 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 
     // Accumulate sums according to log-level
     for (int loglevel = 0; loglevel < sums.IIlevels.size()-1; loglevel++) {
-	vector<int>& level = sums.IIlevels.at(loglevel);
+	auto& level = sums.IIlevels.at(loglevel);
 	int y = 0;
 	int size = level.size();
 	for (int i = 0; i < size; i++) {
@@ -1858,6 +1875,25 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 	}
     }
 
+    // Accumulate sums according to log-level
+    for (int loglevel = 0; loglevel < sums.ISlevels.size()-1; loglevel++) {
+	auto& level = sums.ISlevels.at(loglevel);
+	double y = 0;
+	int size = level.size();
+	for (int i = 0; i < size; i++) {
+	    y += level.at(i);
+	    if ((i % 10 == 9) || (i == size-1)) {
+		sums.ISlevels.at(loglevel+1).push_back(y);
+		y = 0;
+	    }
+	}
+    }
+
+    // sum the last level to get to total core length
+    for (auto y : *(sums.ISlevels.rbegin())) 
+	rates.inssubrate += y;
+
+    rates.inssubrate = 0;
     size = (sums.ISsums1).size() - 1;
     for (i = 0; i < size + 1; i++) {                                            /*x+=(sums.IDsums1).at(i);			*/
 	z += (sums.ISsums1).at(i);
@@ -2243,7 +2279,6 @@ int findpos_ins_sub(Event event, vector<int>& updatepositions, double unirand, c
     // in core sequence sites: 0 for substitution, 2 for insertion, 4 for deletion
     // in inserted sites:      1 for substitution, 3 for insertion, 5 for deletion
 
-    updatepositions.clear();
 
     int pos1 = -1, pos10 = -1, pos100 = -1, pos1000 = -1, pos10000 = -1, pos100000 = -1, pos1000000 = -1, pos10000000 = -1, pos100000000 = -1, pos1000000000 = -1, pos = -1;
 
@@ -2252,7 +2287,41 @@ int findpos_ins_sub(Event event, vector<int>& updatepositions, double unirand, c
     int i, j;
 
 // substitution in inserted sites
+    updatepositions.clear();
+    S = 0;
+    j = 0;
+    for (int loglevel = sum.ISlevels.size()-1; loglevel >= 0; loglevel--) {
+	auto const & level = sum.ISlevels.at(loglevel);
+	pos = -1;
+	for (int i = j; i < level.size(); i++) {
+	    double s = level.at(i);
+	    if (unirand <= s + S) {
+		j = 10 * i;
+		updatepositions.push_back(i);
+		pos = i;
+		break;
+	    } else {
+		S += s;
+	    }
+	}
+	if (pos == -1) {
+	    cout << "ERROR in findpos_ins_sub level " << loglevel << " at event " << as_integer(event) << endl;
+	    // return -1;
+	}
+    }
 
+    {
+	double s = sum.ISlevels.begin()->at(pos);
+	assert(!(S - unirand > 0));
+	assert(!(unirand - s - S > 0));
+    }
+
+    int newpos = pos;
+
+    updatepositions.clear();
+    S = 0;
+    pos = -1;
+    
     for (i = 0; i < (sum.ISsums).size(); i++) {
 	s = (sum.ISsums).at(i);
 	if (unirand <= s + S) {
@@ -2419,6 +2488,7 @@ int findpos_ins_sub(Event event, vector<int>& updatepositions, double unirand, c
 	return -1;
     }
 
+    //assert(newpos == pos);
     //cout<<S<<"  "<<unirand<<"  "<<s+S<<"   WWWWWWWWWWWWWW"<<endl;
 
     if ((S - unirand > 0) || (unirand - s - S > 0)) {
@@ -2460,16 +2530,16 @@ int findpos_core_sub(Event event, vector<int>& updatepositions, double unirand, 
 	    }
 	}
 	if (pos == -1) {
-	    cout << "ERROR in findpos_ins_indel level " << loglevel << " at event " << as_integer(event) << endl;
+	    cout << "ERROR in findpos_core_sub level " << loglevel << " at event " << as_integer(event) << endl;
 	    // return -1;
 	}
     }
 
-    double s = sum.CSlevels.at(0).at(pos);
-    if ((S - unirand > 0) || (unirand - s - S > 0)) {
-	cout << "CHOOSING ERROR IN FINDPOS 0" << endl;
+    {
+	double s = sum.CSlevels.begin()->at(pos);
+	assert(!(S - unirand > 0));
+	assert(!(unirand - s - S > 0));
     }
-
     // not needed now as simply prevent random numbers that are "EXACTLY ZERO" to be used here for that reason.
     //if(pos==0) pos=1; // guards against pseudo-random values of unirand that are exactly zero to machine precision
     //  - in this case it is possible to choose the "imaginary" eternal link position
@@ -2508,7 +2578,7 @@ int findpos_core_indel(Event event, vector<int>& updatepositions, int mypos, con
 	    }
 	}
 	if (pos == -1) {
-	    cout << "ERROR in findpos_ins_indel level " << sum.CIlevels.rend() - rit << " at event " << as_integer(event) << endl;
+	    cout << "ERROR in findpos_core_indel level " << sum.CIlevels.rend() - rit << " at event " << as_integer(event) << endl;
 	    return -1;
 	}
     }
@@ -2630,6 +2700,13 @@ int updatesubsums0(vector<int> updatepositions, double sdiff, SUMS& sums)
 int updatesubsums1(vector<int> updatepositions, double sdiff, SUMS& sums)
 {
     // substitution in inserted sites
+    assert(updatepositions.size() == sums.ISlevels.size());
+
+    int i = updatepositions.size()-1;
+    for (auto &level : sums.ISlevels) {
+	level.at(updatepositions.at(i)) += sdiff;
+	i--;
+    }
 
     ((sums.ISsums).at(updatepositions.at(0)))           += sdiff;
     ((sums.ISsums1000000000).at(updatepositions.at(1))) += sdiff;
@@ -3248,6 +3325,11 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
 		    for (int fg = 0; fg < sums.ISsums.size(); fg++) {
 			yh += (sums.ISsums).at(fg);
 		    }
+		    double new_yh = 0;
+		    for (auto fg : *(sums.ISlevels.rbegin())) 
+			new_yh += fg;
+		    assert(1==2);
+		    assert(yh==new_yh);
 		    cout << endl << endl << " ERROR ERROR 0  yh total is " << yh << " as compared to " << rates.coresubrate << " rates and " << unirand << " unirand." << endl << "yh - rates " << yh - rates.inssubrate << " yh-unirand " << yh - unirand << " unirand - rates " << unirand - rates.inssubrate << endl;
 		}
 
