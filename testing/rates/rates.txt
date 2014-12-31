@@ -1,0 +1,67 @@
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                 //
+    //  INDELible V1.03 control file - rates.txt                                       //
+    //                                                                                 //
+    //      Adding proportion of invariable sites or gamma rate heterogeneity.         //
+    //                                                                                 //
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    /*
+      Nucleotide models are used as an example but the principle is exactly the 
+      same for amino-acid models. You just add the [rates] command to a model:
+    
+        [rates]  pinv  alpha  ngamcat
+    
+      This command has no effect in _CODON_ simulations.
+    
+      * _pinv_ is the proportion of invariable sites (0<=_pinv_<=1).
+      * _alpha_ is the shape parameter for the gamma distribution (_alpha_>0).
+      * If _alpha_=0 then there will be no gamma rate variation.
+    
+      * _ngamcat_ is the number of categories to use in the discrete gamma approximation.
+      * If _ngamcat_=0 then continuous gamma distribution will be used for rate variation.
+      * If the command [rates] is not specified all rates will be constant.
+    
+    */
+    
+    
+    [TYPE] NUCLEOTIDE 1	//  nucleotide simulation using algorithm from method 1
+    
+    
+    [MODEL] mymodel1  [submodel]  JC         //   JC69 with pinv=0.2 and no gamma
+                      [rates]     0.2 0 0       
+     									
+    [MODEL] mymodel2  [submodel]  JC         //   JC69 with no proportion invariable,
+                      [rates]     0 2 0      //   continuous gamma with alpha=2     
+    
+    [MODEL] mymodel3  [submodel]  JC         //   JC69 with no proportion invariable,
+                      [rates]     0 1 10     //   10 category discrete gamma with alpha=1
+                                                                        
+    [MODEL] mymodel4  [submodel]  JC         //   JC69 with pinv=0.2 
+                      [rates]     0.2 0.5 0  //   continuous gamma with alpha=0.5     
+    
+    [MODEL] mymodel5  [submodel]  JC         //   JC69 with pinv=0.1
+                      [rates]     0.1 1.5 5  //   5 category discrete gamma with alpha=1.5
+    
+    
+    [TREE] T1  (A:0.1,B:0.1);             
+    
+    
+    [PARTITIONS] Pname1  [T1 mymodel1 1000]   // tree T1, model mymodel1, root length 1000
+    [PARTITIONS] Pname2  [T1 mymodel2 1000]   // tree T1, model mymodel2, root length 1000
+    [PARTITIONS] Pname3  [T1 mymodel3 1000]   // tree T1, model mymodel3, root length 1000
+    [PARTITIONS] Pname4  [T1 mymodel4 1000]   // tree T1, model mymodel4, root length 1000
+    [PARTITIONS] Pname5  [T1 mymodel5 1000]   // tree T1, model mymodel5, root length 1000
+    
+    
+    
+     
+    [EVOLVE]     Pname1  10  outputname1     // 10 replicates generated from partition Pname1
+                 Pname2  10  outputname2     // 10 replicates generated from partition Pname2
+                 Pname3  10  outputname3     // 10 replicates generated from partition Pname3
+                 Pname4  10  outputname4     // 10 replicates generated from partition Pname4
+                 Pname5  10  outputname5     // 10 replicates generated from partition Pname5
+    
+    
+

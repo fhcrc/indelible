@@ -1,0 +1,117 @@
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                 //
+    //  INDELible V1.03 control file - indels.txt                                      //
+    //                                                                                 //
+    //      Adding indels to a nucleotide, amino-acid or codon substitution model      //
+    //                                                                                 //
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    
+    [TYPE] AMINOACID 2            //  amino-acid simulation using algorithm from method 2
+    
+[SETTINGS]
+	[globalseed]   1000  // set a seed for RNG
+
+    
+    [MODEL] mymodel1              // this is identical to mymodel2
+      [submodel]     WAG          
+      [insertmodel]  POW 1.7 500  // Power law insertion length distribution (a=1.7, M=500)
+      [deletemodel]  POW 1.7 500  // Power law deletion length distribution (a=1.7, M=500)
+      [insertrate]   0.1          // insertion rate = 0.1 relative to substitution rate of 1
+      [deleterate]   0.1          // deletion rate = 0.1 relative to substitution rate of 1
+    
+    
+    [MODEL] mymodel2              // this is identical to mymodel1
+      [submodel]     WAG          
+      [indelmodel]   POW  1.7 500 // Power law insertion/deletion length distribution (a=1.7)
+      [indelrate]    0.1          // insertion rate = deletion rate = 0.1
+                                  // relative to average substitution rate of 1.   
+     				
+    					
+    [MODEL] mymodel3              // insertion/deletion lengths and rates can be different.
+      [submodel]     WAG          
+      [insertmodel]  NB  0.2 4    // Pascal insertion length distribution (q=0.2, r=4)
+      [deletemodel]  LAV 1.8 500  // Lavalette deletion length distribution (a=1.8, M=500)
+      [insertrate]   0.1          // insertion rate = 0.1 relative to substitution rate of 1
+      [deleterate]   0.2          // deletion rate = 0.2 relative to substitution rate of 1
+    			
+    						
+    [MODEL] mymodel4              // insertion/deletion lengths and rates can be different.
+      [submodel]     JTT          
+      [insertmodel]  NB  0.4 1    // Geometric insertion length distribution (q=0.4, r=1)
+      [insertrate]   0.1          // insertion rate = 0.1 relative to substitution rate of 1
+                                  // deletion rate = 0 relative to substitution rate of 1
+    
+    
+    
+    [TREE] t1  (A:0.1,B:0.1);             
+    
+    
+    [PARTITIONS] Pname1 [t1 mymodel1 1000] // tree t1, model mymodel1, root length 1000
+    [PARTITIONS] Pname2 [t1 mymodel2 1000] // tree t1, model mymodel2, root length 1000
+    [PARTITIONS] Pname3 [t1 mymodel3 1000] // tree t1, model mymodel3, root length 1000
+    [PARTITIONS] Pname4 [t1 mymodel4 1000] // tree t1, model mymodel4, root length 1000
+    
+    [EVOLVE]     Pname1 10 outputname1     // 10 replicates generated from partition Pname1
+                 Pname2 10 outputname2     // 10 replicates generated from partition Pname2
+                 Pname3 10 outputname3     // 10 replicates generated from partition Pname3
+                 Pname4 10 outputname4     // 10 replicates generated from partition Pname4
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    /*
+       New commands that are relevant to insertions and deletions (indels) are:
+    
+       [insertrate] 
+       Sets the rate of insertion relative to an average substitution rate of 1.
+       
+       [deleterate] 
+       Sets the rate of insertion relative to an average substitution rate of 1.
+       
+       [indelrate] 
+       Sets the rate of insertion AND deletion to be equal. It is equivalent 
+       to specifying [insertrate] and [deleterate] to have the same value.
+       
+       If [insertrate] & [indelrate] are not specified then rate of insertion is zero.
+       If [deleterate] & [indelrate] are not specified then rate of deletion is zero.
+    
+       [insertmodel]
+       Works the same as [indelmodel] but only sets the insertion length distribution.
+    
+       [deletemodel]
+       Works the same as [indelmodel] but only sets the deletion length distribution.
+    
+       [indelmodel]
+       This sets the insertion and deletion length distributions at the same time. 
+       It is equivalent to specifying the commands [insertmodel] and [deletemodel] 
+       to have the same value.  Options for this command are:
+       
+       (1)  [indelmodel]  NB   q  r               //  Negative Binomial Distribution
+       (2a) [indelmodel]  POW  a                  //  Zipfian Distribution 
+       (2b) [indelmodel]  POW  a  M               //  Zipfian Distribution 
+       (3)  [indelmodel]  LAV  a  M               //  Lavalette Distribution
+       (4)  [indelmodel]  USER mylengthmodel.txt  //  User-Defined Distribution
+    
+       (1)  This specifies a Pascal (negative binomial) distribution where q is a 
+            decimal (0<=q<=1) and r is an integer (r>0).
+    
+       (2a) This specifies a Zipfian (power law) distribution where a is a decimal (a>1).
+    
+       (2b) This also specifies a Zipfian distribution where a is a decimal (a>1).
+            However with this format indels longer than length M are not permitted.
+            This format is highly recommended for small values of a because 
+            of the fat-tailed shape of the resulting distribution.
+    
+       (3)  This specifies a Lavalette distribution where a is a decimal (a>1) and M is 
+            an integer (M>1) representing the maximum indel length.
+    
+       (4)  This specifies a user-defined indel length model. The file mylengthmodel.txt 
+            should be in the same directory as the INDELible executable and contain a 
+            list of relative frequencies (in order of increasing indel length) 
+            separated by white space, like [this](http://abacus.gene.ucl.ac.uk/software/indelible/tutorial/mylengthmodel.txt).
+    */
+    
+

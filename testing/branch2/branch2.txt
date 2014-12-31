@@ -1,0 +1,96 @@
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                 //
+    //  INDELible V1.03 control file - branch2.txt                                     //
+    //                                                                                 //
+    //      Using models that change across the tree to implement codon branch models  //
+    //                                                                                 //
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+      /* 
+         Any aspect of a codon model can change over different branches, including:
+         kappa, omega, stationary frequencies, indel rates and length distributions.
+         However, the number of site classes and the genetic code canNOT change.
+         The example below is arbitrary and not meant to be biologically realistic!
+      */
+    
+    [TYPE] CODON 1                    //  codon simulation using algorithm from method 1
+    
+    [MODEL] mA    
+      [submodel]    3.0 1.0  // kappa=3.0, omega=1.0, frequencies equal, no insertions
+      [deletemodel] NB 0.2 4 // Pascal deletion length distribution (q=0.2, r=4)
+      [deleterate]  0.13     // rate of deletion compared to substitution rate of 1
+    
+    [MODEL] mB    
+      [submodel]    1.0 3.0       // kappa=1.0, omega=3.0, frequencies equal, no deletions
+      [insertmodel] POW 1.8 500   // Power-Law insertion length distribution (a=1.8, M=500)
+      [insertrate]  0.08          // rate of insertion compared to substitution rate of 1
+    
+    [MODEL] mAB    
+      [submodel]    2.0 2.0  // kappa=2.0, omega=2.0, frequencies different, no indels
+      [statefreq]  
+        0.016133 0.014626 0.012261 0.019123    //  TTT  TTC  TTA  TTG
+        0.008365 0.007583 0.006357 0.009915    //  TCT  TCC  TCA  TCG 
+        0.013290 0.012048 0        0           //  TAT  TAC  TAA  TAG
+        0.009947 0.009018 0        0.011790    //  TGT  TGC  TGA  TGG
+        0.019297 0.017494 0.014665 0.022873    //  CTT  CTC  CTA  CTG 
+        0.010005 0.009070 0.007604 0.011859    //  CCT  CCC  CCA  CCG 
+        0.015896 0.014410 0.012080 0.018841    //  CAT  CAC  CAA  CAG 
+        0.011898 0.010786 0.009042 0.014102    //  CGT  CGC  CGA  CGG 
+        0.030728 0.027857 0.023353 0.036422    //  ATT  ATC  ATA  ATG  
+        0.015932 0.014443 0.012108 0.018884    //  ACT  ACC  ACA  ACG  
+        0.025312 0.022947 0.019236 0.030002    //  AAT  AAC  AAA  AAG  
+        0.018945 0.017175 0.014398 0.022456    //  AGT  AGC  AGA  AGG 
+        0.024518 0.022227 0.018633 0.029061    //  GTT  GTC  GTA  GTG 
+        0.012712 0.011524 0.009661 0.015068    //  GCT  GCC  GCA  GCG  
+        0.020196 0.018309 0.015349 0.023938    //  GAT  GAC  GAA  GAG  
+        0.015117 0.013704 0.011488 0.017919    //  GGT  GGC  GGA  GGG
+                   
+    
+    [MODEL] mC    
+      [insertrate]  0.15         // rate of insertion compared to substitution rate of 1
+      [submodel]    2.5 0.5      // kappa=2.5, omega=0.5, frequencies equal
+      [indelmodel]  POW 2.2 500  // Power Law insertion AND deletion distribution (a=2.2)
+      [deleterate]  0.05         // rate of deletion compared to substitution rate of 1
+    
+    [MODEL] mD    
+      [insertmodel] POW 1.9 500  // Power-Law insertion length distribution (a=1.9, M=500)
+      [deletemodel] POW 1.7 600  // Power-Law deletion length distribution (a=1.7, M=600)
+      [submodel]    2.5 1.5      // kappa=2.5, omega=1.5, frequencies equal
+      [indelrate]   0.1          // rate of insertion AND deletion compared to 
+                                 // substitution rate of 1
+    
+    [MODEL] mCD   
+      [submodel]    2.5 1.0      // kappa=2.5, omega=1.0, frequencies different, no indels
+      [insertmodel] POW 1.9 400  // Power-Law insertion length distribution (a=1.9, M=400)
+      [insertrate]  0.03         // rate of insertion compared to substitution rate of 1
+      [deletemodel] POW 1.7 700  // Power-Law deletion length distribution (a=1.7, M=700)
+      [deleterate]  0.17         // rate of deletion compared to substitution rate of 1
+    
+    [MODEL] mROOT            // Whichever model is defined in the root, that model is only
+      [submodel]    0.0 1.0  // used in generation of the root sequence and setting
+                             // up the number of site classes across the tree.
+    
+    /*
+      In the same way that lengths of branches are listed after a : symbol in a [TREE]
+      block, model names on branches are listed after a # symbol in a [BRANCHES] block. 
+      N.B. The structure of the tree & order of taxa is the same (see notes at end of file).
+    */
+    
+    [TREE]     t1 ( (A:1.0, B:1.0):1.0,(C:1.0, D:1.0):1.0);  
+    
+    [BRANCHES] b1 ( (A #mA, B#mB) #mAB,(C #mC, D #mD) #mCD)#mROOT;  
+    
+              
+      /* [BRANCHES] blocks are included in [PARTITIONS] blocks in the same way as models */
+    
+    [PARTITIONS] Pname  [t1 b1 1000]    // tree t1, branchclass b1, root length 1000
+    
+    [EVOLVE]     Pname  10  outputname  // 10 replicates generated from partition Pname
+    
+    /////////////////////////////////////////////////////////////////////////////////////
+    /*
+        See extra relevant notes at the end of the file branch.txt [here](http://abacus.gene.ucl.ac.uk/software/indelible/tutorial/branch.shtml)
+    */
+    
+

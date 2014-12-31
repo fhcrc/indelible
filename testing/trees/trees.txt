@@ -1,0 +1,187 @@
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                 //
+    //  INDELible V1.03 control file - trees.txt                                       //
+    //                                                                                 //
+    //      How to define user trees and how to generate random trees...               //
+    //                                                                                 //
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    [TYPE] NUCLEOTIDE 1	//  nucleotide simulation using algorithm from method 1
+    
+    
+    [MODEL] mymodel  [submodel]  JC       
+    
+    
+      //  You will have already come across user-defined trees in the other examples. 
+      //  The following three trees are identical - "white space" of any kind is ignored.
+    
+    [TREE] t1 ((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);
+    
+    [TREE] t2 ( (A:0.1, B:0.1):0.1, (C:0.1, D:0.1):0.1 );
+    
+    [TREE] t3 
+        (             // trees can span any number of lines
+          (           // and include any amount of whitespace
+            A:0.1,    // including new lines.
+            B:0.1    
+          ):0.1 ,     // comments within the tree will be ignored.
+         (C:0.1,D:0.1):0.1); 
+    
+      //  But any tree can also be rescaled to be a certain tree length.
+      //  For example the two following trees are identical.
+    
+    [TREE] T1 ((A:0.1,B:0.2):0.3,(C:0.4,D:0.5):0.6);
+    [treelength] 4.2
+    
+    [TREE] T2 ((A:0.2,B:0.4):0.6,(C:0.8,D:1.0):1.2);
+    
+      
+       //  Random rooted & unrooted trees can also be created by INDELible. 
+       //  A different tree will be generated for each replicate.
+       //  Explanation of these commands follow the examples...
+    
+    [TREE] tree1
+      [unrooted] 10 2.4 1.1 0.2566 0.34  // ntaxa birth death sample mut
+    
+    [TREE] tree2
+      [unrooted] 10 2.4 1.1 0.2566 0.34  // ntaxa birth death sample mut
+      [seed] 2381242                     
+     
+    [TREE] tree3
+      [rooted] 15 6.7 2.5 0.234 0.31     // ntaxa birth death sample mut
+      [treedepth] 0.4
+    
+    [TREE] tree4
+      [rooted] 15 6.7 2.5 0.234 0.31     // ntaxa birth death sample mut
+      [treelength] 8
+    
+    /*
+      * Random trees always have taxa names that are numbers. 
+        e.g. (1:0.1,2:0.1,(3:0.1,4:0.1):0.1);
+    
+      * tree1 and tree2 will be unrooted random trees.
+      * tree3 and tree4 will be rooted random trees. 
+    
+      * Every time that INDELible is run tree2 will produce the same sequence 
+        of random trees, until the number after the [seed] command is changed. 
+      * The others (tree1, tree3 and tree4) will always produce different trees.
+      * Please note that the [seed] command overrules the [randomseed] 
+        command from a [SETTINGS] block, for a random tree.
+    
+      * tree4 will produce random trees that are always rescaled to have a tree 
+        length of 8, and tree3 will produce random trees that are always rescaled 
+        to have a depth (root to tip) of 0.4, whilst the other two (tree1 and 
+        tree2) will always produce random trees with different tree lengths/depths.
+    
+      * The numbers that come after the [unrooted] and [rooted] commands are 
+        the same in both cases.  The first number is the number of taxa 
+        (10 for tree1 and tree2, 15 for tree3 and tree4).
+      * The next  four are the parameters used in the birth-death process to 
+        create the random trees. In order, from left to right, these are the 
+        birth-rate, death-rate, sampling fraction and mutation rate. 
+        Further details on these parameters can be found in this paper: 
+        [http://abacus.gene.ucl.ac.uk/ziheng/pdf/1997YangRannalaMBEv14p717.pdf](http://abacus.gene.ucl.ac.uk/ziheng/pdf/1997YangRannalaMBEv14p717.pdf)
+    
+      * Trees (random or user) that are used during the simulation will be output 
+        by INDELible in a file [like this](trees.txt).
+    
+      * One last point to remember about random trees is that they CANNOT be 
+        used when you want the evolutionary model to be permitted to change 
+        over the tree. i.e. they CANNOT be used with [BRANCHES] blocks.
+       
+    */
+    
+    
+       //  For a given topology INDELible can also create branch lengths. 
+       //  This is done by using the command [branchlengths]
+       //  Further explanation of the four examples is given below
+    
+    
+    
+    [TREE] EQUAL-TREE
+      // No branch lengths need to be provided  
+      ((((A,B),(C,D)),((E,F),(G,H))),(((I,J),(K,L)),((M,N),(O,P))));
+           
+      [branchlengths] EQUAL // All branch lengths will be equal
+      [treedepth] 0.1       // Root-to-longest-tip distance of 0.1
+    
+    [TREE] EQUAL-TREE2
+      // If branch lengths are provided, they are ignored
+      ((((A:0.2,B:0.1):0.4,(C:0.3,D:0.1):0.6):0.1,
+      ((E:0.1,F:0.1):0.1,(G:0.2,H:0.1):0.1):0.3):0.1,
+      (((I:0.1,J:0.6):0.1,(K:0.1,L:0.1):0.1):0.1,
+      ((M:0.4,N:0.1):0.1,(O:0.6,P:0.1):0.1):0.1):0.1); 
+    
+      [branchlengths] EQUAL // Again, all branch lengths will be equal
+      [treedepth] 0.1       // Root-to-longest-tip distance of 0.1
+     
+    [TREE] ULTRAMETRIC-TREE
+      // No branch lengths need to be provided  
+      ((((A,B),(C,D)),((E,F),(G,H))),(((I,J),(K,L)),((M,N),(O,P))));
+    
+      [branchlengths] ULTRAMETRIC // All branch lengths will be equal
+      [treedepth] 0.1             // Root-to-longest-tip distance of 0.1
+    
+    [TREE] NON-ULTRAMETRIC-TREE
+      // No branch lengths need to be provided  
+      ((((A,B),(C,D)),((E,F),(G,H))),(((I,J),(K,L)),((M,N),(O,P))));
+    
+      [branchlengths] NON-ULTRAMETRIC // All branch lengths will be equal
+      [maxdistance] 0.2               // Maximum pairwise distance of 0.2
+    
+    
+      
+    /*
+      * [treedepth] 0.1 rescales the tree to have a maximum root-to-tip distance of 0.1
+      * After using the [branchlengths] command you should use [treelength] or 
+        [treedepth], or [maxdistance] to rescale your tree.
+    
+      * [branchlengths] EQUAL will make every branch on the tree equal to 0.1.
+      * [branchlengths] NON-ULTRAMETRIC gives every branch a random length between 0 and 1.
+      * [branchlengths] ULTRAMETRIC gives every branch a random length between 0 and 1, 
+        but will also extend the terminal branches so that the root-to-tip distance is 
+        the same for every tip.
+    
+      * If the [branchlengths] command is used then the tree toplogy can be specified 
+        with or without branch lengths. It does not matter. Any branch lengths will be ignored.
+        i.e. the trees EQUAL-TREE and EQUAL-TREE2 will be identical.
+    
+      * Examples of the trees produced above can be seen [here](random_branch_length_trees.JPG).
+      
+      * All trees in the image are rescaled to have a maximum tree-depth of 0.1. 
+        This means that the root-to-tip distance for taxon G is equal to 0.1 in all 3 trees.
+    
+      * N.B. For ultrametric trees [maxdistance] 0.2 is equivalent to [treedepth] 0.1
+        For the non-ultrametric tree they are not the same.
+        [maxdistance] 0.2 on the non-ultrametric tree scales the tree such that the sum of 
+        the branch lengths in between (in [this](random_branch_length_trees.JPG) case) taxons G and N would be 0.2
+    
+    */
+    
+    
+    [PARTITIONS] Pname1  [t1 mymodel 1000]   // tree t1, model mymodel, root length 1000
+    [PARTITIONS] Pname2  [t2 mymodel 1000]   // tree t2, model mymodel, root length 1000
+    [PARTITIONS] Pname3  [t3 mymodel 1000]   // tree t3, model mymodel, root length 1000
+    [PARTITIONS] Pname4  [T1 mymodel 1000]   // tree T1, model mymodel, root length 1000
+    [PARTITIONS] Pname5  [T2 mymodel 1000]   // tree T2, model mymodel, root length 1000
+    
+    
+     
+    [EVOLVE]     Pname1  10  outputname1     // 10 replicates generated from partition Pname1
+                 Pname2  10  outputname2     // 10 replicates generated from partition Pname2
+                 Pname3  10  outputname3     // 10 replicates generated from partition Pname3
+                 Pname4  10  outputname4     // 10 replicates generated from partition Pname4
+                 Pname5  10  outputname5     // 10 replicates generated from partition Pname5
+    
+    
+
+  
+
+* * *
+
+  
+Please click [here](http://abacus.gene.ucl.ac.uk/software/indelible/tutorial/)
+to return to the tutorial menu page for more examples.
+

@@ -1,0 +1,119 @@
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //                                                                                 //
+    //  INDELible V1.03 control file - settings.txt                                    //
+    //                                                                                 //
+    //      How to include paup blocks, set seeds for the random number generator,     //
+    //      change the output format for generated data, or how to print "reports"     //
+    //                                                                                 //
+    /////////////////////////////////////////////////////////////////////////////////////
+    
+    [TYPE] NUCLEOTIDE 2	//  nucleotide simulation using algorithm from method 2
+    
+      //
+      // * If a command is not specified in the [SETTINGS] block then it will have the 
+      //   default value shown below. The only exception to this is [randomseed] whose 
+      //   value will be randomly chosen if not specified.
+      // * If no [SETTINGS] block is specified all commands will have these default values.
+      // * More information on each of the commands can be found at the end of the file.
+      //
+    
+    
+    [SETTINGS]    
+      [ancestralprint]           FALSE     // NEW, SAME or FALSE
+      [output]                   PHYLIP    // FASTA, NEXUS, PHYLIP or PHYLIPT
+      [phylipextension]          phy       // any alpha-numeric string
+      [nexusextension]           nex       // any alpha-numeric string
+      [fastaextension]           fas       // any alpha-numeric string
+      [randomseed]               1568746   // any integer
+      [printrates]               FALSE     // FALSE or TRUE
+      [insertaslowercase]        TRUE      // FALSE or TRUE
+      [markdeletedinsertions]    FALSE     // FALSE or TRUE 
+      [printcodonsasaminoacids]  FALSE     // FALSE or TRUE
+      [fileperrep]               FALSE     // FALSE or TRUE
+    
+    
+    [MODEL] mymodel  [submodel]  JC       
+    
+    
+    [TREE] t1 ((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);
+    
+    
+    [PARTITIONS] Pname  [t1 mymodel 1000]   // tree t1, model mymodel, root length 1000
+    
+     
+    [EVOLVE]     Pname  10  filename        // 10 replicates generated from partition Pname
+    
+    /*
+      [ancestralprint]
+      * _NEW_ will print ancestral sequences in a separate file to leaf sequences.
+      * _SAME_ prints ancestral sequences in the same file as the leaf sequences.
+      * _FALSE_ will not print any ancestral sequences.
+      * It should be noted that if you used different guide trees for different partitions 
+        in a partitioned (multi-gene) analysis then only the root sequence will be printed 
+        in the SAME/NEW file specified in this command.
+    
+      [output]
+      * Unaligned sequences are always output in FASTA format as e.g. filename.fas
+      * This command sets the output type for the true alignment and prints it to a file 
+        named e.g. filename_TRUE.phy
+      * _FASTA_, _NEXUS_, _PHYLIP_ will print out sequences to file in either 
+        fasta, nexus, or phylip format respectively. 
+      * FASTA is used by NCBI and accepted by most sequence alignment programs.  
+        NEXUS is used by e.g. MacClade, Mesquite, ModelTest, MrBayes and PAUP*.  
+        PHYLIP is used by PHYLIP and PAML.
+      * _PHYLIPT_ gives PHYLIP format with filenames truncated to 8 characters. 
+    
+      [phylipextension]
+      * This command sets the file extension for true alignments in phylip format so they 
+        are e.g. filename.phy or whatever you choose them to be.
+    
+      [nexusextension]
+      * This command sets the file extension for true alignments in nexus format so they 
+        are e.g. filename.nex or whatever you choose them to be.
+    
+      [fastaextension]
+      * This command sets the file extension for fasta formatted output files so they 
+        are e.g. filename.fas or whatever you choose them to be.
+    
+      [randomseed]
+      * This must be an integer value and is used to seed the random number generator.
+      * Running simulations with the same random seed value (and the same control file) 
+        will produce identical datasets.
+     
+      [printrates]
+      * _TRUE_ will print out a detailed output file for each replicate of each block 
+        that lists what the site-classes or relative rates of substitution are.
+      * _FALSE_ will not print any rates information.
+      * Follow these links for examples of the output for [NUCLEOTIDE / AMINOACID](nucleotide_RATES.txt) simulations, 
+        or for [CODON](codon_RATES.txt) simulations. 
+      
+      [markdeletedinsertions]
+      * _TRUE_ will output inserted bases/residues that have been subsequently been 
+        deleted as * rather than - for easy identification.
+      * _FALSE_ leave everything as -.
+      
+      [insertaslowercase]
+      * _TRUE_ will output inserted bases/residues as lower case letters for easy identification.
+      * _FALSE_ will output all bases/residues as upper case letters.
+      
+      [printcodonsasaminoacids]
+      * _TRUE_ will output codon datasets as amino-acids - how they are translated will 
+        depend on the genetic code specified in the model.
+      * _FALSE_ will print codons as nucleotide triplets.
+    
+      [fileperrep]
+      * _TRUE_ will output each replicate dataset in a separate file.
+        Unaligned sequences will go in e.g. filename_1.fas, filename_2.fas, etc
+        The true alignment will go in e.g. filename_TRUE_1.phy, filename_TRUE_2.phy, etc
+      * _FALSE_ will print all replicates in a single file.
+        Unaligned sequences for each dataset will all go in e.g. filename.fas    
+        All the true alignments will go in e.g. filename_TRUE.phy
+      * If a file called paupstart.txt (or paupend.txt) exists in the same directory as 
+        INDELible then it will be copied to the beginning (or end) of each file. 
+      * If a file called paupmiddle.txt exists in the same directory as INDELible then it 
+        will be copied to e.g. filename_TRUE.phy after each replicate datset.
+      * These features are useful if you want to include PAUP or MrBayes blocks in your files.
+    */
+    
+
