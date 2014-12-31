@@ -32,6 +32,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>  //???
+#include <assert.h>
 
 #include "randoms.h"
 #include "paml.h"
@@ -566,7 +567,6 @@ model::model(int mymodelpos, model::Type mytype, const string& myname, int mymod
 		getJvec(0, name, myrates, Qvec, Jvec, basefreqs);
 		Jvecs.push_back(Jvec);
 	    } else if (modelnumber == 1)   {
-		//cout<<myparams.at(1)<<" 1 1 "<<endl;
 		double p0 = myparams.at(1), p1 = 1 - p0;
 
 		cumfreqs.push_back(p0);
@@ -786,8 +786,7 @@ model::model(int mymodelpos, model::Type mytype, const string& myname, int mymod
 	}     //end of solitary else bracket
 
 
-	//make cumfreqs cumulative;
-	double         mysum = 0;
+	// make cumfreqs cumulative;
 	vector<double> blah  = cumfreqs;
 
 	numberofsiteclasses = cumfreqs.size();
@@ -1226,36 +1225,13 @@ vector<vector<double> > model::getDNA(string name, vector<double> nstnums, vecto
 	}
     }
 
-
-
     // set entries of Q matrix.
-    vector<double> row;
     myQvec.clear();
-    row.clear();
-    row.push_back(0);
-    row.push_back(a);
-    row.push_back(b);
-    row.push_back(c);
-    myQvec.push_back(row);
-    row.clear();
-    row.push_back(a1);
-    row.push_back(0);
-    row.push_back(d);
-    row.push_back(e);
-    myQvec.push_back(row);
-    row.clear();
-    row.push_back(b1);
-    row.push_back(d1);
-    row.push_back(0);
-    row.push_back(f);
-    myQvec.push_back(row);
-    row.clear();
-    row.push_back(c1);
-    row.push_back(e1);
-    row.push_back(f1);
-    row.push_back(0);
-    myQvec.push_back(row);
-
+    myQvec.push_back({0,  a,  b,  c});
+    myQvec.push_back({a1, 0,  d,  e});
+    myQvec.push_back({b1, d1, 0,  f});
+    myQvec.push_back({c1, e1, f1, 0});
+	
     double sum = 0.0;
     int    i, j;
 
@@ -1303,7 +1279,7 @@ vector<vector<double> > model::getDNA(string name, vector<double> nstnums, vecto
 	    sum += (myQvec.at(i)).at(j);
 	}
 	(myQvec.at(i)).at(i) = -sum;
-    }                                                                                                           //cout<<-sum<<endl;}
+    }
 
     return myQvec;
 }
@@ -1326,9 +1302,6 @@ vector<vector<double> > model::getAA(string name, vector<double> params, vector<
     /* 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 */
     /* A R N D C Q E G H I L  K  M  F  P  S  T  W  Y  V  */
 
-    bool rootTOmodelOVERRIDE = false;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if (aamodel.size() != 0) {
 	// USER MODEL

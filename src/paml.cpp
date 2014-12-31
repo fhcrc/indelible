@@ -1229,7 +1229,7 @@ double CDFNormal(double x)
 //      Computer J. 12: 197-198.
 
     int    invers = 0;
-    double p, limit = 10, t = 1.28, y = x * x / 2;
+    double p, limit = 10, y = x * x / 2;
 
     if (x < 0) {
 	invers = 1;
@@ -2459,16 +2459,17 @@ int DiscreteNSsites(double par[], int ngamcat, int model, vector<double>& output
     com.NSsites = model;
 
     int status = 0, j, off, K = com.ncatG - (com.NSsites == NSbetaw || com.NSsites == NS02normal);
-    //cout<<"KKKKKKKKKKKKKKKKKKK   "<<K<<"  "<<model<<endl;
+    int UseK1K2 = 0;
     double xb[2] = { 1e-7, 99 }; /* bounds for omega.  */
-    int    K1    = 6, K2 = 4, UseK1K2 = 0;
-    double p01   = 0, p, w0, lnbeta;
+    double w0, p, lnbeta;
 
     if ((com.NSsites == NSbeta) || (com.NSsites == NSbetaw)) {
 	xb[1] = 1;
     }
 
 #ifdef NSSITES_K1_K2_CLASSES
+    int    K1    = 6, K2 = 4;
+    double p01   = 0;
     if (((com.NSsites == NSgamma) || (com.NSsites == NS2gamma) || (com.NSsites >= NSbetagamma))) {
 	K2      = max2(K2, K / 3);
 	K1      = K - K2;

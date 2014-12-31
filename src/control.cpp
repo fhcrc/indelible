@@ -974,8 +974,6 @@ int dealwithsettings(vector<string>& block)
 	} else   {
 	    auto it = CmdMap.find(s1);
 
-	    Command tmp = it->second;
-
 	    commanderror = checkthere(s1, commands);
 	}
 
@@ -1418,7 +1416,6 @@ int dealwithmodel(vector<string>& block)
 			double mq, ma, mb;
 
 			double entryd   = 0, totald = 0, meand = 0;
-			int    thecount = 0;
 
 			vector<double> usermodel;
 
@@ -3061,7 +3058,7 @@ int dealwithbranches(vector<string>& block, bool iscodefixed)
 	}
     }
 
-    int mybracketleft = 0, mybracketright = 0, taxaon = 0, lengthon = 0, rootbranches = 0, bracketlevel = 0;
+    int mybracketleft = 0, mybracketright = 0, rootbranches = 0, bracketlevel = 0;
 
     for (int fg1 = 0; fg1 < size; fg1++) {
 	c = tree[fg1];
@@ -3098,8 +3095,6 @@ int dealwithbranches(vector<string>& block, bool iscodefixed)
 	}
     }
 
-    bool myerror = true;
-    //cout<<"W"<<tree<<"W"<<endl;
     int hashcount = 0;
     for (int yg = 0; yg < size; yg++) {
 	c = tree[yg];
@@ -3424,7 +3419,7 @@ double Tree::correctlastdepth(double maxdepth, string originaltree, double depth
 string Tree::randomise_ultrametric(string originaltree)
 {
     vector<string> onestochange, whattochangeto;
-    double         diff, depthsofar = 0;
+    double         depthsofar = 0;
     double         maxdepth = getmaxtreedepth(originaltree);
 
     string tree;
@@ -4087,12 +4082,7 @@ int dealwithtrees(vector<string>& block)
 			    }
 			    rawvalue3 += ';';
 
-			    //	cout<<rawvalue<<endl;
 			    rawvalue = rawvalue3;
-			    //	cout<<rawvalue2<<endl;
-			    //	cout<<rawvalue3<<endl;
-			    //	cout<<rawvalue4<<endl;
-			    //    cout<<rawvalue<<endl;
 			    size = rawvalue.size();
 			}
 
@@ -4166,7 +4156,6 @@ int dealwithtrees(vector<string>& block)
 			    lasterror += c1;
 
 			    if ((c1 == ')') || (c1 == '(') || (c1 == ',') && ((taxaon == 2) || (lengthon == 1))) {
-				//if(taxaon==1 )	{treeerror=true; controlerrorprint(blocknumber, "There is no branch length in this taxon in the guide tree.",linecount,lasterror); if(breakonerror==1) {breakonerror=2; break;}}
 				if (taxaon == 2) {
 				    taxaon = 3;
 				    taxacount++;
@@ -4196,7 +4185,6 @@ int dealwithtrees(vector<string>& block)
 					}
 				    }
 				}
-				//	if(zerowarn==0 && currentlength!="") {treeerror=true; controlerrorprint2("[TREE]", name, commands.at(lasttest), "This guide tree contains a zero branch length.  This is not necessary.\nPolytomies (of any order) are allowed at root (or any node) of guide tree.",""); {if(breakonerror) return -1;}  }
 			    }
 
 			    if ((lengthon == 1) || (taxaon == 2)) {
@@ -4460,7 +4448,6 @@ int partitionclass::makerootseqints(vector<int>&  rootseqint,
 
 
 	    vector<int> notallowed = getstops(geneticcode);
-	    int         notsize    = notallowed.size();
 
 	    for (string::size_type i = 0; i < seq.size(); i += 3) {
 		unsigned int tot = 0;
@@ -5014,8 +5001,7 @@ int parse_control_file(const std::string& masterfilename)
     int      isthereanerror = 0;
     ifstream if1;
 
-    // if1.open(masterfilename.c_str());
-    if1.open(masterfilename.c_str());
+    if1.open(masterfilename);
     if (!if1.good()) {
 	controlerrorprint2("CONTROL FILE", "", "",
 			   "There is no control file. "
@@ -5024,8 +5010,7 @@ int parse_control_file(const std::string& masterfilename)
 	return -1;
     }
 
-    char           c1            = 'q', c2 = 'q';
-    bool           notwhitespace = true;
+    char           c1 = 'q';
     string         s, newfilename = masterfilename;
     vector<string> sv;
 
@@ -5199,14 +5184,6 @@ int parse_control_file(const std::string& masterfilename)
 	}
     }
 
-
-    bool settingsblock    = false,
-	 modelblock       = false,
-	 sitesblock       = false,
-	 branchesblock    = false,
-	 partitionsblock  = false,
-	 evolveblock      = false,
-	 doneanymodelsyet = false;
 
     string         lastbit;
     vector<string> block;

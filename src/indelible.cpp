@@ -33,8 +33,6 @@
 
 //#define printoverrideok  // this allows the use of the same filename for different blocks
 
-//if(globalthisrep==6877+1 || globalthisrep==5775+1)
-
 //#define inheritancycheck	// used to check if inheritancy of insertions is correct, needs
 // a guide tree with a max. of 5 branches depth root to tip
 
@@ -44,7 +42,7 @@ int fixedsize = 3;                      // fixed size of indels if inheritancy c
 
 //#define splittree			// used to split 24 taxa dataset into 3 x 8 taxa datasets t o see if subtrees evolve properly with different models
 
-#define printmaxindelsize	// just prints out the new maximum indel length as it changes
+// #define printmaxindelsize	// just prints out the new maximum indel length as it changes
 // for picking up bugs that steal lots of memory etc here
 
 // then if there is an error - it can be repeated and tracked.
@@ -457,7 +455,6 @@ double alpha;                           // alpha value for gamma rate distributi
 //	double (*m).instodel;			// ratio of insertions to deletions e.g. 0.48 will give 48 insertions to every 52 deletions on average.
 //	double (*m).indeltosub;			// ratio of indels to substitutions, e.g. 0.01 gives 1 insertion/deletion event for every 99 substitutions on average
 //	double georate;				// rate parameter for the geometric distribution controlling indel lengths
-double currenttreelength;               // amount of treelength in a given repetition that has been completed
 double treelength;                      // total treelength to be evolved in a given repetition, used with currenttreelength to calculate percentage complete.
 
 string filenamestub;                    // this is a unique file name for every block appended with the repetition number for the output files
@@ -1675,8 +1672,7 @@ void sumrates(RATES& rates)
 
 int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>& fromins, vector<int>& inspos)
 {
-    int i, j, y = 0, size = rates.rootlength - 1, lastinslength = rates.inslength, lastcorelength = rates.corelength;
-    double x = 0, z = 0;
+    int i, j, lastinslength = rates.inslength;
 
     rates.insinsertrate  = 0;
     rates.insdeleterate  = 0;
@@ -1892,8 +1888,7 @@ int buildsumsold(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 
 int buildsumsnew(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>& fromins, vector<int>& inspos)
 {
-    int size = rates.rootlength - 1, lastinslength = rates.inslength, lastcorelength = rates.corelength;
-    double x = 0;
+    int lastinslength = rates.inslength;
 
     rates.insinsertrate  = 0;
     rates.insdeleterate  = 0;
@@ -2052,11 +2047,6 @@ int buildsumsnew(RATES& rates, SUMS& sums, vector<int>& fromseq, vector<insert>&
 	cout << "ERROR in total inserted sites length in buildsums " << endl << "lastinslength was " << lastinslength << "  and rates.inslength was " << rates.inslength << endl;
     }
 
-//	double dd; dd=lastcorelength - rates.corelength; if(dd<0) dd=-dd;
-//	if(dd>0.0001) cout<<"ERROR in total core sequence length in buildsums "<<endl<<"lastcorelength was "<<lastcorelength<<"  and rates.corelength was "<<rates.corelength<<endl;
-
-    //if(lastcorelength != rates.corelength-1) cout<<"ERROR in total core sequence length in buildsums "<<endl<<"lastcorelength was "<<lastcorelength<<"  and rates.corelength was "<<rates.corelength<<endl;
-
     (rates.coredeleterate) += (((*m).deleterate) * (((*m).delmeansize) - 1));
 
     sumrates(rates);
@@ -2084,7 +2074,6 @@ int findpos_ins_sub(Event event, vector<int>& updatepositions, double unirand, c
     updatepositions.clear();
     S = 0;
     int pos = -1;
-    double s = 0;
     int j = 0;
     for (int loglevel = sum.ISlevels.size()-1; loglevel >= 0; loglevel--) {
 	auto const & level = sum.ISlevels.at(loglevel);
@@ -2171,7 +2160,7 @@ int findpos_core_indel(Event event, vector<int>& updatepositions, int mypos, con
     // in core sequence sites: 0 for substitution, 2 for insertion, 4 for deletion
     // in inserted sites:      1 for substitution, 3 for insertion, 5 for deletion
 
-    int j = 0, si = 0;
+    int j = 0;
     int pos = -1;
 
     updatepositions.clear();
@@ -2208,15 +2197,11 @@ int findpos_ins_indel(Event event, vector<int>& updatepositions, int mypos, SUMS
     //event numbers	// in core sequence sites: 0 for substitution, 2 for insertion, 4 for deletion
     // in inserted sites:                          1 for substitution, 3 for insertion, 5 for deletion
 
-    updatepositions.clear();
-
-    SI = 0;
-
-    int i, j, si = 0;
-
-    j = 0;
-    SI = 0;
+    int j = 0;
     int pos = -1;
+
+    SI = 0;
+    updatepositions.clear();
     for (int loglevel = sum.IIlevels.size()-1; loglevel >= 0; loglevel--) {
 	auto const & level = sum.IIlevels.at(loglevel);
 	pos = -1;
@@ -2242,11 +2227,10 @@ int findpos_ins_indel(Event event, vector<int>& updatepositions, int mypos, SUMS
 
 
 // Randomly select and event according to probabilities in `rates`
-
+// in core sequence sites: 0 for substitution, 2 for insertion, 4 for deletion
+// in inserted sites:      1 for substitution, 3 for insertion, 5 for deletion
 Event chooseevent(RATES& rates)
 {
-    int event = -1;     // in core sequence sites: 0 for substitution, 2 for insertion, 4 for deletion
-    			// in inserted sites:      1 for substitution, 3 for insertion, 5 for deletion
     double rand = 1;
 
     while (rand == 1 || rand == 0) {
@@ -2576,7 +2560,7 @@ void doinsertion(double timeleft, int inspos, SUMS& sums, RATES& rates, vector<i
     vector<site> *ss;
     vector<insert> *ivec;
 
-    double ddiff = 0, sdiff = 0;
+    double sdiff = 0;
 
 
     (rates.insinsertrate) += (indellength * ((*m).insertrate));
@@ -2705,7 +2689,6 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
 
     int currentbase;
     Event event;
-    double testlength = currenttime - 0.01;
 
     int goodcount = 0, badcount = 0;
 
@@ -2748,7 +2731,6 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
 #endif
 
 
-		int takeoff = 0;
 		int inspos  = -1;
 
 		if (event == Event::core_ins) {  // insertion into core sites
@@ -2937,8 +2919,6 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
 
 		int templength = (*ss).size();
 
-		double odsumreached = dsumreached;
-
 		for (j = 0; j < templength; j++) {
 		    s = &((*ss).at(j));
 
@@ -2966,7 +2946,7 @@ void func(int branchID, double branchlength, RATES& rates, vector<int>& newseqIN
 
 			((*ii).subrate) += sdiff;
 			(rates.inssubrate) += sdiff;
-			(rates.totalrate) += sdiff;                   //+idiff+ddiff;
+			(rates.totalrate) += sdiff;                   
 
 			break;
 		    }
@@ -3202,33 +3182,20 @@ void evolvebranch(vector<vector<int> >& insPOS, /*vector<int> &oldinsPOSin,*/ RA
     // if the branch is a tip it simply evolves the terminal branch length
     // if the branch is internal it evolves to the next node and recursively calls itself on the daughter branches
 
-    int mymode = 0, ev = 0, label, newID = 0;
-
-
-
-    int skip     = 0;
-    int myadjust = 0;
+    int mymode = 0, label, newID = 0;
 
     double length;
 
     vector<string> mynewbits;
 
     if (mystring[0] != '(') {
-	mymode = -1;                                                                            // this means it is not a terminal branch e.g. (1:0.1,2:0.2):0.3 instead of A:0.1
+	mymode = -1;	// this means it is not a terminal branch e.g. (1:0.1,2:0.2):0.3 instead of A:0.1
     }
     if (mymode == -1) {
 	getlabelstring(label, length, mystring);                        // in this case the length would be 0.1 and the label would be "1"
     } else {
 	getmynewbits(label, length, mystring, mynewbits);               // in this case the length would be 0.3 and mynewbits would contain "1:0.1" and "2:0.2"
     }
-    int siteclass = -1;
-
-
-    // calculating tree length percent remaining to be evolved
-    currenttreelength -= length;
-
-    int percent = int(100 * (treelength - currenttreelength) / treelength);
-
 
 #ifdef INDELLOG
     indellog << "*********************************************************************************" << endl;
@@ -3236,36 +3203,19 @@ void evolvebranch(vector<vector<int> >& insPOS, /*vector<int> &oldinsPOSin,*/ RA
     indellog << "*********************************************************************************" << endl;
 #endif
 
-
     sequencesINT.at(label) = sequencesINT.at(parentlabel);
 
     insINT.at(label) = insINT.at(parentlabel);
 
     insPOS.at(label) = insPOS.at(parentlabel);
 
-    /*
-     * sequencesINT.at(label)=oldseqIN;
-     *
-     * insINT.at(label)=oldinsIN;
-     *
-     * insPOS.at(label)=oldinsPOSin;
-     */
-
-    //if(isitbranches) b=&(totalbranches.at( ((*p).mbsposvec).at(partitionnumber) ));
-
-    //cout<<"LABEL "<<label<<"    PARENTLABEL "<<parentlabel<<endl;
-
-
-
     if (isitbranches) {
 	//branches model OR  sites-branches model
 
 	int oldoldpos = ((*b).modelpositions).at(branchID);
 
-
 	branchID++;
 	newID = branchID;
-
 
 	double oldalpha         = (*m).alpha;
 	bool oldcontinuousgamma = (*m).continuousgamma;
@@ -3413,8 +3363,6 @@ int settreeup(int partitionnumber, string& originaltree, string& nonamestree, st
     origtreewithnodes = nonamestree = nonamestreewithnodes = "";
     int error   = 0;
     int printon = 0;
-
-    int bracketright = 0, bracketleft = 0;
 
     originaltree = nowhitespace(originaltree);
 
@@ -4119,38 +4067,38 @@ void printoutrates(int& sitecount, int partition, ofstream& ratesout, vector<int
     }
 }
 
-
 void usage(const char *program_name)
 {
-    cerr << "Usage:  " << program_name << " options [ inputfile ... ]\n";
-    cerr << "  -h  --help             Display this usage information.\n";
-    cerr << "  -s  --seed <value>     integer that seed should start from.\n";
-    cerr << "  -v  --verbose          Print verbose messages.\n";
-    cerr << "  -V  --version          Print version number and exit.\n";
+    cerr << "Usage:  " << program_name << " options [ inputfile ... ]" << endl;
+    cerr << "  -h  --help             Display this usage information." << endl;
+    cerr << "  -s  --seed <value>     integer that seed should start from." << endl;
+    cerr << "  -q  --quiet            Be less chatty." << endl;
+    cerr << "  -v  --verbose          Print verbose messages." << endl;
+    cerr << "  -V  --version          Print version number and exit." << endl;
 }
 
 
 /////////////////////////////////////   MAIN PROGRAM
 int verbose = 0;
+int quiet = 0;
 
 int main(int argc, char *argv[])
 {
     // parse options
     int c;
-    int this_option_optind = optind ? optind : 1;
     int option_index       = 0;
     static struct option long_options[] = {
 	{ "help",    no_argument,       0, 'h' },
 	{ "seed",    required_argument, 0, 's' },
 	{ "verbose", no_argument,       0, 'v' },
+	{ "quiet",   no_argument,       0, 'q' },
 	{ "version", no_argument,       0, 'V' },
 	{         0,                 0, 0,   0 }
     };
 
-    int seed = 0;
     string masterfilename;
 
-    while ((c = getopt_long(argc, argv, "s:vh",
+    while ((c = getopt_long(argc, argv, "s:vqh",
 			    long_options, &option_index)) != -1) {
 	switch (c) {
 	case 'h': // help message
@@ -4163,6 +4111,10 @@ int main(int argc, char *argv[])
 
 	case 'v':
 	    verbose++;
+	    break;
+
+	case 'q':
+	    quiet++;
 	    break;
 
 	case 'V':
@@ -4413,9 +4365,6 @@ int main(int argc, char *argv[])
 
 		originaltree = (*treeC).tree;
 
-		// set tree length for percentage done calculations ------> not used any more.
-		currenttreelength = treelength = (*treeC).treelength;
-
 		// sorts out guide tree, adding node labels for navigation and storage
 		startnodelabel = 0;
 		int error = settreeup(partitionnumber, originaltree, nonamestree, origtreewithnodes, nonamestreewithnodes, startnodelabel, taxanames, ntaxa);
@@ -4491,8 +4440,6 @@ int main(int argc, char *argv[])
 
 		// set up site classes for codon site-models and relative rates for gamma/pinv distributions
 
-		// weareon=(*m).codonratestrue;						// one used for branch classes and
-		// if(!weareon) weareon=(*m).codonratestrue;		// one used for models - not sure which
 		SetSiteRates2(rates, thisrep, rootlength);
 
 
@@ -4814,7 +4761,7 @@ int main(int argc, char *argv[])
 
 	endofblock = clock();
 	(*LOG) << endl;
-	cout << "  * Block " << blocknumber << " completed.   Time taken: " << (double)(endofblock - startofblock) / CLOCKS_PER_SEC << " seconds." << endl;
+	if (!quiet) cout << "  * Block " << blocknumber << " completed.   Time taken: " << (double)(endofblock - startofblock) / CLOCKS_PER_SEC << " seconds." << endl;
 	(*LOG) << "  * Block " << blocknumber << " was completed in " << (double)(endofblock - startofblock) / CLOCKS_PER_SEC << " seconds." << endl;
 
 
@@ -4832,9 +4779,9 @@ int main(int argc, char *argv[])
     timeinfo = localtime(&endtime);
 
     if (numberofevolveblocks > 1) {
-	cout << "  * All blocks complete. Time taken: " << (double)(finish - start) / CLOCKS_PER_SEC << " seconds." << endl << endl;
+	if (!quiet) cout << "  * All blocks complete. Time taken: " << (double)(finish - start) / CLOCKS_PER_SEC << " seconds." << endl << endl;
     }
-    cout << "\n\n *** SIMULATION COMPLETED - PLEASE CONSULT OUTPUT FILES ***                                                                     " << endl;
+    if (!quiet) cout << endl << endl<< "*** SIMULATION COMPLETED - PLEASE CONSULT OUTPUT FILES ***" << endl;
 
 
     (*LOG) << "  * Simulation completed. Whole batch took: " << (double)(finish - start) / CLOCKS_PER_SEC << " seconds." << endl << endl;
@@ -4843,7 +4790,7 @@ int main(int argc, char *argv[])
 
     (*LOG) << endl << "********************************************************************************" << endl << endl;
 
-    cout << endl << endl << " INDELible V" << VersionNumber << " Simulations completed at: " << asctime(timeinfo) << endl << endl;
+    if (!quiet) cout << endl << endl << " INDELible V" << VersionNumber << " Simulations completed at: " << asctime(timeinfo) << endl << endl;
 
 
     (*LOG) << endl << " Original Control File " << endl;
